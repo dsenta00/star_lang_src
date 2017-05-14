@@ -22,7 +22,7 @@ public:
   T get_pointer();
   uintptr_t get_address() const;
   template <typename T>
-  T get_element();
+  T & get_element();
   void allign(memory *adjacent_memory);
   uint32_t get_size();
   bool operator < (const memory& mem) const;

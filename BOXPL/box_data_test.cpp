@@ -259,6 +259,10 @@ box_data_test_float()
   BOX_ERROR_CLEAR;
 
   string_data = "35 Grupa Zana rules!";
+  ASSERT_TRUE(strcmp((const char *)string_data.get_address(),
+                     "35 Grupa Zana rules!") == 0,
+              "string should be \"35 Grupa Zana rules!\" (%s)",
+              (const char *)string_data.get_address());
 
   ASSERT_VIRTUAL_MEMORY(sizeof(float) +
                         sizeof("65.000000") +
@@ -267,7 +271,7 @@ box_data_test_float()
                         sizeof("35 Grupa Zana rules!"));
 
   ASSERT_FALSE(float_data == string_data,
-               "float_data and string_data should not be equal");
+               "float_data and string_data should be equal");
   ASSERT_OK;
 
   ASSERT_TRUE(float_data != string_data,

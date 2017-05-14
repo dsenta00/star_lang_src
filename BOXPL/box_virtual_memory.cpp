@@ -1,6 +1,5 @@
 #include "box_virtual_memory.h"
 #include "box_monitor.h"
-#include "box_utils.h"
 #include <limits.h>
 
 /**
@@ -50,7 +49,8 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
     max_allocated_bytes = capacity;
   }
 
-  memory_chunk_list.push_front(new memory_chunk(max_allocated_bytes));
+  memory_chunk *new_memory_chunk = new memory_chunk(max_allocated_bytes);
+  memory_chunks.push_front(new_memory_chunk);
 }
 
 /**
@@ -76,8 +76,7 @@ box_virtual_memory::reserve(uint32_t size)
 {
   memory_chunk *chunk;
 
-  chunk = list_find<memory_chunk *>(memory_chunk_list,
-                                    [&] (memory_chunk *chunk)
+  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
   {
     return chunk->can_reserve(size);
   });
@@ -95,23 +94,6 @@ box_virtual_memory::reserve(uint32_t size)
   }
 
   return mem;
-}
-
-/**
- * Find all chunks that can reserve memory in size.
- *
- * @param size - size in bytes.
- *
- * @return memory chunk list.
- */
-memory_chunk *
-box_virtual_memory::get_fragmented_chunk(uint32_t size)
-{
-  return list_find<memory_chunk *>(memory_chunk_list,
-                                   [&] (memory_chunk *chunk)
-  {
-    return chunk->is_fragmented(size) && chunk->worth_defragmentation();
-  });
 }
 
 /**
@@ -135,7 +117,12 @@ box_virtual_memory::alloc(uint32_t size)
     return mem;
   }
 
-  memory_chunk *chunk = get_fragmented_chunk(size);
+  memory_chunk *chunk;
+
+  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
+  {
+    return chunk->is_fragmented(size) && chunk->worth_defragmentation();
+  });
 
   if (chunk)
   {
@@ -149,22 +136,6 @@ box_virtual_memory::alloc(uint32_t size)
    */
   add_memory_chunk(size);
   return reserve(size);
-}
-
-/**
- * Get chunk that contains memory.
- *
- * @param mem - the memory.
- * @return memory chunk if found, otherwise NULL.
- */
-memory_chunk *
-box_virtual_memory::get_chunk_parent(memory *mem)
-{
-  return list_find<memory_chunk *>(memory_chunk_list,
-                                   [&] (memory_chunk *chunk)
-  {
-    return chunk->is_parent_of(mem);
-  });
 }
 
 /**
@@ -184,7 +155,12 @@ box_virtual_memory::realloc(memory *mem,
     return alloc(new_size);
   }
 
-  memory_chunk *chunk = get_chunk_parent(mem);
+  memory_chunk *chunk;
+
+  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
+  {
+    return chunk->is_parent_of(mem);
+  });
 
   if (!chunk)
   {
@@ -257,7 +233,12 @@ box_virtual_memory::free(memory *mem)
     return;
   }
 
-  memory_chunk *chunk = get_chunk_parent(mem);
+  memory_chunk *chunk;
+
+  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
+  {
+    return chunk->is_parent_of(mem);
+  });
 
   if (!chunk)
   {
@@ -286,17 +267,6 @@ uint32_t
 box_virtual_memory::get_allocated_total(void)
 {
   return allocated_total;
-}
-
-/**
- * The destructor.
- */
-box_virtual_memory::~box_virtual_memory()
-{
-  for (memory_chunk *chunk : memory_chunk_list)
-  {
-    delete chunk;
-  };
 }
 
 /*

@@ -43,15 +43,10 @@ memory::get_address() const
  * @return element.
  */
 template <typename T>
-T
+T &
 memory::get_element()
 {
-  if (address)
-  {
-    return *(T *)address;
-  }
-
-  return (T)0;
+  return *(T *)address;
 }
 
 /**
@@ -165,12 +160,12 @@ memory::ready_to_remove()
 /*
  * Explicit template instatiation.
  */
-template int8_t memory::get_element();
-template int16_t memory::get_element();
-template int32_t memory::get_element();
-template int64_t memory::get_element();
-template float32_t memory::get_element();
-template float64_t memory::get_element();
+template int8_t &memory::get_element();
+template int16_t &memory::get_element();
+template int32_t &memory::get_element();
+template int64_t &memory::get_element();
+template float32_t &memory::get_element();
+template float64_t &memory::get_element();
 template void *memory::get_pointer();
 template char *memory::get_pointer();
 template const char *memory::get_pointer();

@@ -2,6 +2,7 @@
 #define BOX_DATA_H
 #include <stdint.h>
 #include <stdbool.h>
+#include <string>
 #include "box_monitor.h"
 #include "box_virtual_memory.h"
 
@@ -114,7 +115,7 @@ public:
 
   ~box_data();
 protected:
-  const char *get_string();
+  std::string get_string();
 
   box_data_type type;
   memory *mem;

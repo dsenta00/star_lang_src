@@ -4,6 +4,7 @@
 #include "box_monitor.h"
 #include <limits.h>
 #include <vector>
+#include <ctime>
 
 #define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
   ASSERT_TRUE(__VM__.get_allocated_total() == (__BYTES__), \
@@ -17,6 +18,8 @@
 static void
 box_virtual_memory_test_basic(void)
 {
+  srand((unsigned)time(NULL));
+
   box_virtual_memory vm_zero_cap(0);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
@@ -60,30 +63,6 @@ box_virtual_memory_test_basic(void)
     if (i % 2 == 0)
     {
       vm.free(memory_array[i]);
-    }
-    else if (i % 3 == 0)
-    {
-      memory *mem = memory_array[i];
-      size_t old_size = mem->get_size();
-      size_t new_size;
-
-      if (old_size > 32)
-      {
-        new_size = mem->get_size() / 2;
-      }
-      else
-      {
-        new_size = mem->get_size() * 12;
-      }
-
-      mem = vm.realloc(mem, new_size);
-
-      ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", new_size);
-      ASSERT_TRUE(mem->get_size() == new_size,
-                  "memory should have new size %u (%u) old_size -> %u",
-                  new_size,
-                  mem->get_size(),
-                  old_size);
     }
     else
     {

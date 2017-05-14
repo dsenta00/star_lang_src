@@ -1,7 +1,7 @@
 #ifndef BOX_ARRAY_H
 #define BOX_ARRAY_H
 #include "box_data.h"
-#include <vector>
+#include "box_vector.h"
 
 /**
  * Represents data array.
@@ -16,11 +16,9 @@ public:
   bool operator += (box_data *data);
   bool operator += (box_array &array);
   box_data to_string();
-
-  ~box_array();
 protected:
   box_data_type type;
-  std::vector<box_data *> box_data_vector;
+  box_vector<box_data *> data_array;
 };
 
 #endif // BOX_ARRAY_H

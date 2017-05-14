@@ -22,7 +22,9 @@ SOURCES += \
     ../box_virtual_memory.cpp \
     ../box_virtual_memory_test.cpp \
     ../main.cpp \
-    ../box_error.cpp
+    ../box_error.cpp \
+    ../box_vector.cpp \
+    ../memory.cpp
 
 HEADERS += \
     ../box_array.h \
@@ -43,4 +45,5 @@ HEADERS += \
     ../box_virtual_memory.h \
     ../box_virtual_memory_test.h \
     ../box_error.h \
-    ../memory.h
+    ../memory.h \
+    ../box_vector.h

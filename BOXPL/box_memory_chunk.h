@@ -2,7 +2,7 @@
 #define BOX_MEMORY_CHUNK_H
 #include <stdint.h>
 #include <cstdlib>
-#include <vector>
+#include "box_vector.h"
 #include "memory.h"
 
 #define MEMORY_CHUNK_RELEASE_OK                (0)
@@ -21,14 +21,12 @@ typedef enum {
 
 class memory_chunk {
 protected:
-  std::vector<memory *> free_memory;
-  std::vector<memory *> reserved_memory;
+  box_vector<memory *> free_memory;
+  box_vector<memory *> reserved_memory;
   uint32_t capacity;
   uint32_t free;
   uintptr_t start_address;
   void free_memory_union();
-  memory *find_free_memory(uint32_t size);
-  memory *find_adjacent_free(memory *mem);
 public:
   memory_chunk();
   memory_chunk(uint32_t capacity);

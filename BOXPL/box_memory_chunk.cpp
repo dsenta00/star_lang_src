@@ -1,7 +1,5 @@
 #include "box_memory_chunk.h"
 #include "box_monitor.h"
-#include "box_utils.h"
-#include <algorithm>
 #include <cstring>
 
 #define DISPERSION_LOW_TRESHOLD (131072)
@@ -26,24 +24,10 @@ memory_chunk::memory_chunk()
 bool
 memory_chunk::is_parent_of(memory *mem)
 {
-  return (mem) ? std::find(reserved_memory.begin(),
-                           reserved_memory.end(),
-                           mem) != reserved_memory.end() : false;
-}
-
-/**
- * Find adjacent free memory.
- *
- * @param mem - memory information orientation.
- * @return adjacent free memory if exist, otherwise return NULL.
- */
-memory *
-memory_chunk::find_adjacent_free(memory *mem)
-{
-  return vector_find<memory *>(free_memory, [&] (memory *m)
+  return reserved_memory.find_if([&] (memory *mem_it)
   {
-    return m->get_address() == (mem->get_address() + mem->get_size());
-  });
+    return mem_it == mem;
+  }) != NULL;
 }
 
 /**
@@ -87,7 +71,12 @@ memory_chunk::reserve(uint32_t size)
     return NULL;
   }
 
-  memory *fmem = find_free_memory(size);
+  memory *fmem;
+
+  fmem = free_memory.find_if([&] (memory *mem)
+  {
+    return mem->get_size() >= size;
+  });;
 
   if (!fmem)
   {
@@ -104,7 +93,7 @@ memory_chunk::reserve(uint32_t size)
 
   if (fmem->get_size() == 0)
   {
-    vector_remove<memory *>(free_memory, fmem);
+    free_memory.delete_element(fmem);
   }
 
   return mem;
@@ -153,7 +142,12 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
   else if (new_size < mem->get_size())
   {
     /* Find free memory after requested memory */
-    memory *fmem = find_adjacent_free(mem);
+    memory *fmem;
+
+    fmem = free_memory.find_if([&] (memory *m)
+    {
+      return m->get_address() == (mem->get_address() + mem->get_size());
+    });
 
     if (fmem)
     {
@@ -179,7 +173,12 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
       return MEMORY_CHUNK_RESIZE_NO_MEMORY;
     }
 
-    memory *fmem = find_adjacent_free(mem);
+    memory *fmem;
+
+    fmem = free_memory.find_if([&] (memory *m)
+    {
+      return m->get_address() == (mem->get_address() + mem->get_size());
+    });
 
     if (!fmem)
     {
@@ -208,26 +207,11 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
 
     if (fmem->get_size() == 0)
     {
-      vector_remove<memory *>(free_memory, fmem);
+      free_memory.delete_element(fmem);
     }
 
     return MEMORY_CHUNK_RESIZE_OK;
   }
-}
-
-/**
- * Find free memory.
- *
- * @param size - size in bytes.
- * @return memory if found, otherwise return NULL.
- */
-memory *
-memory_chunk::find_free_memory(uint32_t size)
-{
-  return vector_find<memory *>(free_memory, [&] (memory *mem)
-  {
-    return mem->get_size() >= size;
-  });
 }
 
 /**
@@ -236,17 +220,17 @@ memory_chunk::find_free_memory(uint32_t size)
 void
 memory_chunk::free_memory_union()
 {
-  vector_sort<memory *>(free_memory, [&] (const memory *m1, const memory *m2)
+  free_memory.sort([&] (const memory *m1, const memory *m2)
   {
     return m1->get_address() < m2->get_address();
   });
 
-  vector_foreach2<memory *>(free_memory, [&] (memory *m1, memory *m2)
+  free_memory.for_each([&] (memory *m1, memory *m2)
   {
     if (m2->get_address() == (m1->get_address() + m1->get_size()))
     {
       m1->assign(m1->get_address(), m1->get_size() + m2->get_size());
-      vector_remove(free_memory, m2);
+      free_memory.delete_element(m2);
       return false;
     }
 
@@ -280,7 +264,7 @@ memory_chunk::release(memory *mem)
   free += mem->get_size();
   free_memory_union();
 
-  vector_remove<memory *>(reserved_memory, mem);
+  reserved_memory.delete_element(mem);
 
   return MEMORY_CHUNK_RELEASE_OK;
 }
@@ -351,7 +335,10 @@ memory_chunk::can_reserve(uint32_t size)
     return true;
   }
 
-  return find_free_memory(size) != NULL;
+  return free_memory.find_if([&] (memory *mem)
+  {
+    return mem->get_size() >= size;
+  }) != NULL;
 }
 
 /**
@@ -377,8 +364,7 @@ memory_chunk::defragmentation()
     return;
   }
 
-  vector_sort<memory *>(reserved_memory,
-                        [&] (const memory *m1, const memory *m2)
+  reserved_memory.sort([&] (const memory *m1, const memory *m2)
   {
     return m1->get_address() < m2->get_address();
   });
@@ -397,8 +383,7 @@ memory_chunk::defragmentation()
   /*
    * Real defragmentation part.
    */
-  vector_foreach2<memory *>(reserved_memory,
-                            [&] (memory *mem, memory *adjacent_memory)
+  reserved_memory.for_each([&](memory *mem, memory *adjacent_memory)
   {
     mem->allign(adjacent_memory);
     return true;
@@ -407,13 +392,7 @@ memory_chunk::defragmentation()
   memory *new_fmem;
   new_fmem = new memory(free_memory.front()->get_address() + mem->get_size(),
                         free);
-
-  for (memory *mem : free_memory)
-  {
-    delete mem;
-  };
-
-  free_memory.clear();
+  free_memory.delete_all();
   free_memory.push_back(new_fmem);
 }
 
@@ -423,14 +402,4 @@ memory_chunk::defragmentation()
 memory_chunk::~memory_chunk()
 {
   std::free((void *)start_address);
-
-  for (memory *mem : reserved_memory)
-  {
-    delete mem;
-  };
-
-  for (memory *mem : free_memory)
-  {
-    delete mem;
-  };
 }
