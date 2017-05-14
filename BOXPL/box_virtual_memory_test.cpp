@@ -46,7 +46,7 @@ box_virtual_memory_test_basic(void)
 
   std::vector<memory *> memory_array;
 
-  for (uint32_t i = 0; i < UINT8_MAX; i++)
+  for (uint32_t i = 0; i < UINT16_MAX; i++)
   {
     size_t size = (rand() % 8192) + 1;
 
@@ -55,25 +55,49 @@ box_virtual_memory_test_basic(void)
     memory_array.push_back(mem);
   }
 
-  for (uint32_t i = 0; i < UINT8_MAX; i++)
+  for (uint32_t i = 0; i < UINT16_MAX; i++)
   {
     if (i % 2 == 0)
     {
       vm.free(memory_array[i]);
     }
-    else
+    else if (i % 3 == 0)
     {
       memory *mem = memory_array[i];
-      size_t old_size = mem->size;
-      size_t new_size = mem->size * 2;
+      size_t old_size = mem->get_size();
+      size_t new_size;
+
+      if (old_size > 32)
+      {
+        new_size = mem->get_size() / 2;
+      }
+      else
+      {
+        new_size = mem->get_size() * 12;
+      }
 
       mem = vm.realloc(mem, new_size);
 
       ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", new_size);
-      ASSERT_TRUE(mem->size == new_size,
+      ASSERT_TRUE(mem->get_size() == new_size,
                   "memory should have new size %u (%u) old_size -> %u",
                   new_size,
-                  mem->size,
+                  mem->get_size(),
+                  old_size);
+    }
+    else
+    {
+      memory *mem = memory_array[i];
+      size_t old_size = mem->get_size();
+      size_t new_size = mem->get_size() * 3;
+
+      mem = vm.realloc(mem, new_size);
+
+      ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", new_size);
+      ASSERT_TRUE(mem->get_size() == new_size,
+                  "memory should have new size %u (%u) old_size -> %u",
+                  new_size,
+                  mem->get_size(),
                   old_size);
     }
   }
@@ -82,10 +106,10 @@ box_virtual_memory_test_basic(void)
   memory *mem = NULL;
   mem = vm.realloc(mem, size);
   ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", size);
-  ASSERT_TRUE(mem->size == size,
+  ASSERT_TRUE(mem->get_size() == size,
               "memory should have new size %u (%u) old_size -> (none)",
               size,
-              mem->size);
+              mem->get_size());
 
   memory *mem_unkown = new memory(0x204, 32);
   vm.realloc(mem_unkown, 32);

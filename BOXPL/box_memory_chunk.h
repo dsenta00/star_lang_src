@@ -28,7 +28,7 @@ protected:
   uintptr_t start_address;
   void free_memory_union();
   memory *find_free_memory(uint32_t size);
-  memory *find_adjacent_free(const memory *mem);
+  memory *find_adjacent_free(memory *mem);
 public:
   memory_chunk();
   memory_chunk(uint32_t capacity);

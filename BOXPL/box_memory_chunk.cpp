@@ -1,5 +1,6 @@
 #include "box_memory_chunk.h"
 #include "box_monitor.h"
+#include "box_utils.h"
 #include <algorithm>
 #include <cstring>
 
@@ -37,18 +38,12 @@ memory_chunk::is_parent_of(memory *mem)
  * @return adjacent free memory if exist, otherwise return NULL.
  */
 memory *
-memory_chunk::find_adjacent_free(const memory *mem)
+memory_chunk::find_adjacent_free(memory *mem)
 {
-  std::vector<memory *>::iterator position;
-
-  position = std::find_if(free_memory.begin(),
-                       free_memory.end(),
-                       [&] (memory *m) -> bool
-                       {
-                         return m->address == (mem->address + mem->size);
-                       });
-
-  return (position != free_memory.end()) ? *position : NULL;
+  return vector_find<memory *>(free_memory, [&] (memory *m)
+  {
+    return m->get_address() == (mem->get_address() + mem->get_size());
+  });
 }
 
 /**
@@ -99,20 +94,17 @@ memory_chunk::reserve(uint32_t size)
     return NULL;
   }
 
-  memory *mem = new memory(fmem->address, size);
+  memory *mem = new memory(fmem->get_address(), size);
 
   free -= size;
   reserved_memory.push_back(mem);
 
-  fmem->address += size;
-  fmem->size -= size;
+  fmem->assign(fmem->get_address() + size,
+               fmem->get_size() - size);
 
-  if (fmem->size == 0)
+  if (fmem->get_size() == 0)
   {
-    free_memory.erase(std::remove(free_memory.begin(),
-                                  free_memory.end(),
-                                  fmem), free_memory.end());
-    delete fmem;
+    vector_remove<memory *>(free_memory, fmem);
   }
 
   return mem;
@@ -134,7 +126,7 @@ memory_chunk::reserve(uint32_t size)
 memory_chunk_resize_result
 memory_chunk::resize(memory *mem, uint32_t new_size)
 {
-  if (!mem || (mem->address == 0))
+  if (!mem || (mem->get_address() == 0))
   {
     return MEMORY_CHUNK_RESIZE_NULL_MEMORY;
   }
@@ -154,35 +146,35 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
     return MEMORY_CHUNK_RESIZE_ZERO_SIZE;
   }
 
-  if (new_size == mem->size)
+  if (new_size == mem->get_size())
   {
     return MEMORY_CHUNK_RESIZE_OK;
   }
-  else if (new_size < mem->size)
+  else if (new_size < mem->get_size())
   {
     /* Find free memory after requested memory */
     memory *fmem = find_adjacent_free(mem);
 
     if (fmem)
     {
-      fmem->address -= mem->size - new_size;
-      fmem->size += mem->size - new_size;
-      mem->size = new_size;
+      fmem->assign(fmem->get_address() - mem->get_size() + new_size,
+                   fmem->get_size() + mem->get_size() - new_size);
+      mem->assign(mem->get_address(), new_size);
     }
     else
     {
       /* Not found adjacent free memory, create new free memory */
-      free_memory.push_back(new memory(mem->address + new_size,
-                                       new_size - mem->size));
+      free_memory.push_back(new memory(mem->get_address() + new_size,
+                                       new_size - mem->get_size()));
       free_memory_union();
-      mem->size = new_size;
+      mem->assign(mem->get_address(), new_size);
     }
 
     return MEMORY_CHUNK_RESIZE_OK;
   }
   else
   {
-    if ((new_size - mem->size) > free)
+    if ((new_size - mem->get_size()) > free)
     {
       return MEMORY_CHUNK_RESIZE_NO_MEMORY;
     }
@@ -201,7 +193,7 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
      * Found adjacent free memory,
      * check if new size can spread over free memory
      */
-    if (new_size > (fmem->size + mem->size))
+    if (new_size > (fmem->get_size() + mem->get_size()))
     {
       return MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY;
     }
@@ -210,16 +202,13 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
      * Adjacent free memory has enough space.
      * Spread over free memory.
      */
-    fmem->address += new_size - mem->size;
-    fmem->size -= new_size - mem->size;
-    mem->size = new_size;
+    fmem->assign(fmem->get_address() + new_size - mem->get_size(),
+                 fmem->get_size() - new_size + mem->get_size());
+    mem->assign(mem->get_address(), new_size);
 
-    if (fmem->size == 0)
+    if (fmem->get_size() == 0)
     {
-      free_memory.erase(std::remove(free_memory.begin(),
-                                    free_memory.end(),
-                                    fmem), free_memory.end());
-      delete fmem;
+      vector_remove<memory *>(free_memory, fmem);
     }
 
     return MEMORY_CHUNK_RESIZE_OK;
@@ -235,21 +224,10 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
 memory *
 memory_chunk::find_free_memory(uint32_t size)
 {
-  std::vector<memory *>::iterator position;
-
-  position = std::find_if(free_memory.begin(),
-                          free_memory.end(),
-                          [&] (memory *mem)
-                          {
-                            return mem->size >= size;
-                          });
-
-  if (position == free_memory.end())
+  return vector_find<memory *>(free_memory, [&] (memory *mem)
   {
-    return NULL;
-  }
-
-  return *position;
+    return mem->get_size() >= size;
+  });
 }
 
 /**
@@ -258,28 +236,22 @@ memory_chunk::find_free_memory(uint32_t size)
 void
 memory_chunk::free_memory_union()
 {
-  std::sort(free_memory.begin(),
-            free_memory.end(),
-            [&] (const memory *m1, const memory *m2)
-            {
-              return m1->address < m2->address;
-            });
-
-  for (std::vector<memory *>::const_iterator i = free_memory.begin();
-       i != free_memory.end() - 1;
-       i++)
+  vector_sort<memory *>(free_memory, [&] (const memory *m1, const memory *m2)
   {
-    memory *m1 = *i;
-    memory *m2 = *(i + 1);
+    return m1->get_address() < m2->get_address();
+  });
 
-    if (m2->address == (m1->address + m1->size))
+  vector_foreach2<memory *>(free_memory, [&] (memory *m1, memory *m2)
+  {
+    if (m2->get_address() == (m1->get_address() + m1->get_size()))
     {
-      m1->size += m2->size;
-      free_memory.erase(i + 1);
-      delete m2;
-      i--;
+      m1->assign(m1->get_address(), m1->get_size() + m2->get_size());
+      vector_remove(free_memory, m2);
+      return false;
     }
-  }
+
+    return true;
+  });
 }
 
 /**
@@ -304,15 +276,11 @@ memory_chunk::release(memory *mem)
     return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS;
   }
 
-  memset((void *)mem->address, 0, mem->size);
-
-  free_memory.push_back(new memory(mem->address, mem->size));
-  free += mem->size;
-
-  reserved_memory.erase(std::remove(reserved_memory.begin(),
-                                    reserved_memory.end(),
-                                    mem), reserved_memory.end());
+  free_memory.push_back(new memory(mem->get_address(), mem->get_size()));
+  free += mem->get_size();
   free_memory_union();
+
+  vector_remove<memory *>(reserved_memory, mem);
 
   return MEMORY_CHUNK_RELEASE_OK;
 }
@@ -409,61 +377,44 @@ memory_chunk::defragmentation()
     return;
   }
 
-  std::sort(reserved_memory.begin(),
-            reserved_memory.end(),
-            [&] (const memory *m1, const memory *m2)
-            {
-              return m1->address < m2->address;
-            });
+  vector_sort<memory *>(reserved_memory,
+                        [&] (const memory *m1, const memory *m2)
+  {
+    return m1->get_address() < m2->get_address();
+  });
 
-  memory *mem = reserved_memory[0];
+  memory *mem = reserved_memory.front();
 
   /*
    * Active memory isn't first in memory chunk.
    * Move it back to start_address.
    */
-  if (mem->address > start_address)
+  if (mem->get_address() > start_address)
   {
-    memcpy((void *)start_address, (void *)mem->address, mem->size);
-    mem->address = start_address;
+    mem->assign(start_address, mem->get_size());
   }
-
-  memory *mem_prev;
 
   /*
    * Real defragmentation part.
    */
-  for (uint32_t i = 1; i < reserved_memory.size(); i++)
+  vector_foreach2<memory *>(reserved_memory,
+                            [&] (memory *mem, memory *adjacent_memory)
   {
-    mem = reserved_memory[i];
-    mem_prev = reserved_memory[i - 1];
+    mem->allign(adjacent_memory);
+    return true;
+  });
 
-    memcpy((void *)(mem_prev->address + mem_prev->size),
-           (void *)mem->address,
-           mem->size);
+  memory *new_fmem;
+  new_fmem = new memory(free_memory.front()->get_address() + mem->get_size(),
+                        free);
 
-    mem->address = mem_prev->address + mem_prev->size;
-  }
-
-  memory *fmem;
-
-  /*
-   * Remove all free memory and keep one entry.
-   */
-  while (free_memory.size() > 1)
+  for (memory *mem : free_memory)
   {
-    std::vector<memory *>::iterator last = free_memory.end() - 1;
-    memory *fmem = *last;
-    free_memory.erase(last);
-    delete fmem;
-  }
+    delete mem;
+  };
 
-  mem = reserved_memory.back();
-  fmem = free_memory.front();
-
-  fmem->address = mem->address + mem->size;
-  fmem->size = free;
-  memset((void *)fmem->address, 0, fmem->size);
+  free_memory.clear();
+  free_memory.push_back(new_fmem);
 }
 
 /**
@@ -473,17 +424,13 @@ memory_chunk::~memory_chunk()
 {
   std::free((void *)start_address);
 
-  while (reserved_memory.size())
+  for (memory *mem : reserved_memory)
   {
-    memory *mem = reserved_memory.back();
-    reserved_memory.pop_back();
     delete mem;
-  }
+  };
 
-  while (free_memory.size())
+  for (memory *mem : free_memory)
   {
-    memory *mem = free_memory.back();
-    free_memory.pop_back();
     delete mem;
-  }
+  };
 }

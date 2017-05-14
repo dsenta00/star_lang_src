@@ -183,7 +183,7 @@ box_array_test_double()
   ASSERT_TRUE(strcmp((const char *)string_data.get_address(),
                      "0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 "
                      "6.000000 7.000000 8.000000 9.000000") == 0,
-              "Strings should be same! (%s)",
+              "Strings should be the same! (%s)",
               (const char *)string_data.get_address());
   ASSERT_OK;
 

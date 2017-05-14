@@ -2,51 +2,36 @@
 #define MEMORY_H
 #include <stdint.h>
 
+typedef float float32_t;
+typedef double float64_t;
+
+/**
+ * The memory object.
+ *
+ * Memory is obtained by memory chunk in order to data can keep
+ * memory information.
+ */
 class memory {
-public:
+protected:
   uintptr_t address;
   uint32_t size;
   uint32_t counting_reference;
-
-  memory(uintptr_t address, uint32_t size)
-  {
-    this->address = address;
-    this->size = size;
-    this->counting_reference = 1;
-  }
-
-  bool operator < (const memory& mem) const
-  {
-    return this->address < mem.address;
-  }
-
-  void operator += (uint32_t size)
-  {
-    this->size += size;
-  }
-
-  void operator -= (uint32_t size)
-  {
-    this->size += size;
-  }
-
-  void increase_ref()
-  {
-    this->counting_reference++;
-  }
-
-  void decrease_ref()
-  {
-    if (this->counting_reference > 0)
-    {
-      this->counting_reference--;
-    }
-  }
-
-  bool ready_to_remove()
-  {
-    return this->counting_reference == 0;
-  }
+public:
+  memory(uintptr_t address, uint32_t size);
+  template <typename T>
+  T get_pointer();
+  uintptr_t get_address() const;
+  template <typename T>
+  T get_element();
+  void allign(memory *adjacent_memory);
+  uint32_t get_size();
+  bool operator < (const memory& mem) const;
+  void operator += (uint32_t size);
+  void operator -= (uint32_t size);
+  void assign(uintptr_t address, uint32_t size);
+  void increase_ref();
+  void decrease_ref();
+  bool ready_to_remove();
 };
 
 #endif // MEMORY_H

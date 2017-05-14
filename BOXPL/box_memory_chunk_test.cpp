@@ -46,7 +46,7 @@ box_memory_chunk_test_advanced(void)
   {
     memory *mem1 = to_keep[i];
     memory *mem2 = to_keep[i + 1];
-    ASSERT_TRUE(((mem1->address + (2 * RESERVATION)) == mem2->address),
+    ASSERT_TRUE(((mem1->get_address() + (2 * RESERVATION)) == mem2->get_address()),
                 "reserved memories should be %u bytes far",
                 RESERVATION);
   }
@@ -57,7 +57,7 @@ box_memory_chunk_test_advanced(void)
   {
     memory *mem1 = to_keep[i];
     memory *mem2 = to_keep[i + 1];
-    ASSERT_TRUE(((mem1->address + RESERVATION) == mem2->address),
+    ASSERT_TRUE(((mem1->get_address() + RESERVATION) == mem2->get_address()),
                 "reserved memories should be %u bytes far",
                 RESERVATION);
   }
@@ -93,7 +93,7 @@ box_memory_chunk_test_advanced(void)
   {
     memory *mem1 = to_keep[i];
     memory *mem2 = to_keep[i + 1];
-    ASSERT_TRUE(((mem1->address + mem1->size) == mem2->address),
+    ASSERT_TRUE(((mem1->get_address() + mem1->get_size()) == mem2->get_address()),
                 "reserved memories should be %u bytes far",
                 RESERVATION);
   }
@@ -155,9 +155,9 @@ box_memory_chunk_test_basic(void)
 
   ASSERT_TRUE(mem != NULL,
               "Reserved memory should be different than NULL");
-  ASSERT_TRUE(mem->address != 0,
+  ASSERT_TRUE(mem->get_address() != 0,
               "Reserved address should be different than NULL");
-  ASSERT_TRUE(mem->size == BYTES_RESERVATION_30,
+  ASSERT_TRUE(mem->get_size() == BYTES_RESERVATION_30,
               "Reserved size should be %u",
               BYTES_RESERVATION_30);
   ASSERT_TRUE(chunk.can_reserve(capacity),
@@ -177,9 +177,9 @@ box_memory_chunk_test_basic(void)
   memory *mem2 = chunk.reserve(BYTES_RESERVATION_20);
 
   ASSERT_TRUE(mem2 != NULL, "Reserved memory should be different than NULL");
-  ASSERT_TRUE(mem2->address != 0,
+  ASSERT_TRUE(mem2->get_address() != 0,
               "Reserved address should be different than NULL");
-  ASSERT_TRUE(mem2->size == BYTES_RESERVATION_20,
+  ASSERT_TRUE(mem2->get_size() == BYTES_RESERVATION_20,
               "Reserved size should be %u",
               BYTES_RESERVATION_20);
   ASSERT_TRUE(chunk.can_reserve(capacity),
@@ -198,9 +198,9 @@ box_memory_chunk_test_basic(void)
   memory *mem3 = chunk.reserve(BYTES_RESERVATION_30);
 
   ASSERT_TRUE(mem3 != NULL, "Reserved memory should be different than NULL");
-  ASSERT_TRUE(mem3->address != 0,
+  ASSERT_TRUE(mem3->get_address() != 0,
               "Reserved address should be different than NULL");
-  ASSERT_TRUE(mem3->size == BYTES_RESERVATION_30,
+  ASSERT_TRUE(mem3->get_size() == BYTES_RESERVATION_30,
               "Reserved size should be %u",
               BYTES_RESERVATION_30);
   ASSERT_TRUE(chunk.can_reserve(capacity),
@@ -230,7 +230,7 @@ box_memory_chunk_test_basic(void)
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   ASSERT_FALSE(chunk.can_reserve(BYTES_FINAL_FREE_CAPACITY),
-               "Chunk shouldn't be able to reserve %u bytes.");
+               "Chunk should be able to reserve %u bytes.");
   memory *mem4 = chunk.reserve(BYTES_FINAL_FREE_CAPACITY);
   ASSERT_TRUE(mem4 == NULL, "chunk should not reserve %u memory",
               BYTES_FINAL_FREE_CAPACITY);
@@ -274,11 +274,11 @@ box_memory_chunk_test_basic(void)
               "expand should return MEMORY_CHUNK_RESIZE_OK (%u)",
               status);
   ASSERT_TRUE(mem != NULL, "Reserved memory should be different than NULL");
-  ASSERT_TRUE(mem->address != 0, "Reserved address should be different than NULL");
-  ASSERT_TRUE(mem->size == (BYTES_RESERVATION_30 + BYTES_RESERVATION_20),
+  ASSERT_TRUE(mem->get_address() != 0, "Reserved address should be different than NULL");
+  ASSERT_TRUE(mem->get_size() == (BYTES_RESERVATION_30 + BYTES_RESERVATION_20),
               "Reserved size should be %u (%u)",
               BYTES_RESERVATION_30 + BYTES_RESERVATION_20,
-              mem->size);
+              mem->get_size());
   ASSERT_TRUE(chunk.can_reserve(capacity),
               "Chunk should be able to reserve %u bytes.",
               capacity);

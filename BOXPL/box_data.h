@@ -5,9 +5,6 @@
 #include "box_monitor.h"
 #include "box_virtual_memory.h"
 
-typedef float float32_t;
-typedef double float64_t;
-
 /**
  * BOX data type enumeration.
  *

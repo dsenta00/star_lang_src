@@ -1,6 +1,6 @@
 #include "box_virtual_memory.h"
 #include "box_monitor.h"
-#include <algorithm>
+#include "box_utils.h"
 #include <limits.h>
 
 /**
@@ -74,25 +74,24 @@ box_virtual_memory::box_virtual_memory(uint32_t init_capacity)
 memory *
 box_virtual_memory::reserve(uint32_t size)
 {
-  std::list<memory_chunk *>::iterator position;
+  memory_chunk *chunk;
 
-  position = std::find_if(memory_chunk_list.begin(),
-                          memory_chunk_list.end(),
-                          [&] (memory_chunk *chunk)
-                          {
-                            return chunk->can_reserve(size);
-                          });
+  chunk = list_find<memory_chunk *>(memory_chunk_list,
+                                    [&] (memory_chunk *chunk)
+  {
+    return chunk->can_reserve(size);
+  });
 
-  if (position == memory_chunk_list.end())
+  if (!chunk)
   {
     return NULL;
   }
 
-  memory *mem = (*position)->reserve(size);
+  memory *mem = chunk->reserve(size);
 
   if (mem)
   {
-    allocated_total += mem->size;
+    allocated_total += mem->get_size();
   }
 
   return mem;
@@ -108,22 +107,11 @@ box_virtual_memory::reserve(uint32_t size)
 memory_chunk *
 box_virtual_memory::get_fragmented_chunk(uint32_t size)
 {
-  std::list<memory_chunk *>::iterator position;
-
-  position = std::find_if(memory_chunk_list.begin(),
-                          memory_chunk_list.end(),
-                          [&] (memory_chunk *chunk)
-                          {
-                            return chunk->is_fragmented(size) &&
-                                   chunk->worth_defragmentation();
-                          });
-
-  if (position == memory_chunk_list.end())
+  return list_find<memory_chunk *>(memory_chunk_list,
+                                   [&] (memory_chunk *chunk)
   {
-    return NULL;
-  }
-
-  return *position;
+    return chunk->is_fragmented(size) && chunk->worth_defragmentation();
+  });
 }
 
 /**
@@ -172,21 +160,11 @@ box_virtual_memory::alloc(uint32_t size)
 memory_chunk *
 box_virtual_memory::get_chunk_parent(memory *mem)
 {
-  std::list<memory_chunk *>::iterator position;
-
-  position = std::find_if(memory_chunk_list.begin(),
-                          memory_chunk_list.end(),
-                          [&] (memory_chunk *chunk)
-                          {
-                            return chunk->is_parent_of(mem);
-                          });
-
-  if (position == memory_chunk_list.end())
+  return list_find<memory_chunk *>(memory_chunk_list,
+                                   [&] (memory_chunk *chunk)
   {
-    return NULL;
-  }
-
-  return *position;
+    return chunk->is_parent_of(mem);
+  });
 }
 
 /**
@@ -218,7 +196,7 @@ box_virtual_memory::realloc(memory *mem,
     return mem;
   }
 
-  uint32_t old_size = mem->size;
+  uint32_t old_size = mem->get_size();
   uint32_t result = chunk->resize(mem, new_size);
 
   switch (result)
@@ -233,9 +211,9 @@ box_virtual_memory::realloc(memory *mem,
 
     if (new_mem)
     {
-      memcpy((void *)new_mem->address,
-             (void *)mem->address,
-             mem->size);
+      memcpy((void *)new_mem->get_address(),
+             (void *)mem->get_address(),
+             mem->get_size());
       free(mem);
       mem = new_mem;
     }
@@ -287,7 +265,7 @@ box_virtual_memory::free(memory *mem)
     return;
   }
 
-  size_t size = mem->size;
+  size_t size = mem->get_size();
 
   if (chunk->release(mem) == MEMORY_CHUNK_RELEASE_OK)
   {
@@ -315,13 +293,10 @@ box_virtual_memory::get_allocated_total(void)
  */
 box_virtual_memory::~box_virtual_memory()
 {
-  while (memory_chunk_list.size())
+  for (memory_chunk *chunk : memory_chunk_list)
   {
-    delete memory_chunk_list.front();
-    memory_chunk_list.pop_front();
-  }
-
-  allocated_total = 0;
+    delete chunk;
+  };
 }
 
 /*
