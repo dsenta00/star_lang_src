@@ -1,14 +1,42 @@
 #include "box_data.h"
 #include "box_data_test.h"
 #include "box_assert.h"
+#include "box_monitor.h"
+#include "box_virtual_memory.h"
+#include "ORM/orm.h"
+#include "memory.h"
 
-extern box_virtual_memory virtual_memory;
+static box_virtual_memory *virtual_memory;
 
 #define ASSERT_VIRTUAL_MEMORY(__BYTES__) \
-  ASSERT_TRUE(virtual_memory.get_allocated_total() == (__BYTES__), \
+  ASSERT_TRUE(virtual_memory->get_allocated_total() == (__BYTES__), \
   "Total allocated should be %u (%u)", \
   (__BYTES__), \
-  virtual_memory.get_allocated_total())
+  virtual_memory->get_allocated_total())
+
+#define BOX_TEST(__test__) \
+  printf("\t-> " #__test__ "()::Start\r\n"); \
+  clear_vm(); \
+  __test__(); \
+  BOX_OK;
+
+static box_data &
+alloc_box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL)
+{
+  return *(box_data *)orm::create((entity *)new box_data(id, type, value));
+}
+
+static void clear_vm()
+{
+  if (virtual_memory)
+  {
+    orm::destroy(virtual_memory);
+  }
+
+  virtual_memory =
+      (box_virtual_memory *)orm::create((entity *)new box_virtual_memory(CHUNK_MINIMUM_CAPACITY));
+}
+
 
 /**
  * Test data as float.
@@ -16,10 +44,11 @@ extern box_virtual_memory virtual_memory;
 static void
 box_data_test_float()
 {
+  BOX_ERROR_CLEAR;
   ASSERT_VIRTUAL_MEMORY(0);
 
   float fnum = 65.0f;
-  box_data float_data(BOX_DATA_FLOAT, &fnum);
+  box_data &float_data = alloc_box_data("float_data", BOX_DATA_FLOAT, &fnum);
   ASSERT_VIRTUAL_MEMORY(sizeof(float));
 
   ASSERT_OK;
@@ -57,7 +86,7 @@ box_data_test_float()
               float_data.to_double(), 65.0);
   ASSERT_OK;
 
-  box_data str = float_data.to_string();
+  box_data &str = float_data.to_string();
   ASSERT_TRUE(strcmp((const char *)str.get_address(), "65.000000") == 0,
               "string should be 65.000000! (%s)",
               (const char *)str.get_address());
@@ -67,7 +96,7 @@ box_data_test_float()
                         sizeof("65.000000"));
 
   int num = 35;
-  box_data int_data(BOX_DATA_INT, &num);
+  box_data &int_data = alloc_box_data("int_data", BOX_DATA_INT, &num);
 
   ASSERT_VIRTUAL_MEMORY(sizeof(float) +
                         sizeof("65.000000") +
@@ -131,12 +160,8 @@ box_data_test_float()
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
-  /*
-   * Putting int_data to value of 65.
-   */
-
   float fnum2 = 35.0f;
-  box_data float_data2(BOX_DATA_FLOAT, &fnum2);
+  box_data &float_data2 = alloc_box_data("float_data2", BOX_DATA_FLOAT, &fnum2);
 
   ASSERT_VIRTUAL_MEMORY(sizeof(float) +
                         sizeof("65.000000") +
@@ -202,7 +227,7 @@ box_data_test_float()
 
   /* interaction with string */
 
-  box_data string_data(BOX_DATA_STRING, "35");
+  box_data &string_data = alloc_box_data("string_data", BOX_DATA_STRING, "35");
 
   ASSERT_VIRTUAL_MEMORY(sizeof(float) +
                         sizeof("65.000000") +
@@ -353,14 +378,15 @@ box_data_test_float()
 static void
 box_data_test_string()
 {
+  BOX_ERROR_CLEAR;
   ASSERT_VIRTUAL_MEMORY(0);
-  box_data empty_string(BOX_DATA_STRING);
+  box_data &empty_string = alloc_box_data("empty_string", BOX_DATA_STRING);
   ASSERT_OK;
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
   ASSERT_TRUE(strcmp((const char *)empty_string.get_address(), "") == 0,
               "string_data should be empty!");
 
-  box_data string_data(BOX_DATA_STRING, "32");
+  box_data &string_data = alloc_box_data("string_data", BOX_DATA_STRING, "32");
   ASSERT_OK;
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING] +
                         sizeof("32"));
@@ -401,7 +427,7 @@ box_data_test_string()
               32.0);
   ASSERT_OK;
 
-  box_data str = string_data.to_string();
+  box_data &str = string_data.to_string();
   ASSERT_TRUE(strcmp((const char *)str.get_address(), "32") == 0,
               "string should be 32! (%s)",
               (const char *)str.get_address());
@@ -410,7 +436,7 @@ box_data_test_string()
                         sizeof("32") +
                         sizeof("32"));
 
-  box_data string_data2(BOX_DATA_STRING, "31");
+  box_data &string_data2 = alloc_box_data("string_data2", BOX_DATA_STRING, "31");
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING] +
                         sizeof("32") +
                         sizeof("32") +
@@ -447,6 +473,7 @@ box_data_test_string()
 
   ASSERT_TRUE(string_data += string_data2,
               "string_data and string_data2 should add");
+  ASSERT_OK;
   ASSERT_TRUE(strcmp((const char *)string_data.get_address(), "3231") == 0,
               "string_data should be 3231! (%s)",
               (const char *)string_data.get_address());
@@ -486,7 +513,7 @@ box_data_test_string()
   BOX_ERROR_CLEAR;
 
   int num = 31;
-  box_data int_data(BOX_DATA_INT, &num);
+  box_data &int_data = alloc_box_data("int_data", BOX_DATA_INT, &num);
 
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING] +
                         sizeof("3231") +
@@ -557,7 +584,7 @@ box_data_test_string()
   BOX_ERROR_CLEAR;
 
   float fnum = 31.0f;
-  box_data float_data(BOX_DATA_FLOAT, &fnum);
+  box_data &float_data = alloc_box_data("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING] +
                         sizeof("323131") +
@@ -665,9 +692,8 @@ static void
 box_data_test_int()
 {
   BOX_ERROR_CLEAR;
-
   int num = 65;
-  box_data int_data(BOX_DATA_INT, &num);
+  box_data &int_data = alloc_box_data("int_data", BOX_DATA_INT, &num);
 
   ASSERT_OK;
 
@@ -718,14 +744,14 @@ box_data_test_int()
               65.0);
   ASSERT_OK;
 
-  box_data str = int_data.to_string();
+  box_data &str = int_data.to_string();
   ASSERT_OK;
   ASSERT_TRUE(strcmp((const char *)str.get_address(), "65") == 0,
               "string should be 65! (%s)",
               (const char *)str.get_address());
 
   int num2 = 35;
-  box_data int_data2(BOX_DATA_INT, &num2);
+  box_data &int_data2 = alloc_box_data("int_data", BOX_DATA_INT, &num2);
 
   ASSERT_FALSE(int_data == int_data2,
                "int_data and int_data2 should not be equal");
@@ -790,7 +816,7 @@ box_data_test_int()
   *(int *)int_data.get_address() = 65;
 
   float fnum = 35.0f;
-  box_data float_data(BOX_DATA_FLOAT, &fnum);
+  box_data &float_data = alloc_box_data("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_FALSE(int_data == float_data,
                "int_data and float_data should not be equal");
@@ -848,7 +874,7 @@ box_data_test_int()
 
   /* interaction with string */
 
-  box_data string_data(BOX_DATA_STRING, "35");
+  box_data &string_data = alloc_box_data("string_data", BOX_DATA_STRING, "35");
 
   ASSERT_FALSE(int_data == string_data,
                "int_data and string_data should not be equal");
@@ -898,6 +924,7 @@ box_data_test_int()
   BOX_ERROR_CLEAR;
 
   string_data = "35 Grupa Zana rules!";
+  ASSERT_OK;
 
   ASSERT_FALSE(int_data == string_data,
                "int_data and string_data should not be equal");
@@ -951,8 +978,8 @@ box_data_test_int()
 
   ASSERT_FALSE(int_data /= string_data,
                "int_data and float_data shouldn't divide");
-  ASSERT_TRUE(int_data.to_int() == 65, "int_data should be 65");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
+  ASSERT_TRUE(int_data.to_int() == 65, "int_data should be 65");
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(int_data %= string_data,
@@ -972,6 +999,18 @@ box_data_test_int()
               float_data.to_int());
   ASSERT_OK;
 
+  int_data.print();
+
+  orm::destroy(&int_data);
+  BOX_OK;
+  orm::destroy(&int_data2);
+  BOX_OK;
+  orm::destroy(&float_data);
+  BOX_OK;
+  orm::destroy(&string_data);
+  BOX_OK;
+
+  printf("total allocated: %u\n", virtual_memory->get_allocated_total());
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
@@ -982,7 +1021,7 @@ static void
 box_data_test_basic()
 {
   /* Completely invalid data */
-  box_data invalid_box_data;
+  box_data &invalid_box_data = alloc_box_data("invalid_box_data");
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
   BOX_ERROR_CLEAR;
 
@@ -1037,12 +1076,12 @@ box_data_test_basic()
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
-  invalid_box_data.to_string();
+  box_data &invalid_box_data_string = invalid_box_data.to_string();
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
   int valid = 24;
-  box_data valid_data(BOX_DATA_INT, &valid);
+  box_data &valid_data = alloc_box_data("valid_data", BOX_DATA_INT, &valid);
   ASSERT_OK;
 
   ASSERT_FALSE(valid_data = invalid_box_data,
@@ -1055,12 +1094,38 @@ box_data_test_basic()
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
+  orm::destroy(&invalid_box_data);
+  BOX_OK;
+  orm::destroy(&invalid_box_data_string);
+  BOX_OK;
+  orm::destroy(&valid_data);
+  BOX_OK;
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
-#define BOX_TEST(__test__) \
-  printf("\t-> " #__test__ "()::Start\r\n"); \
-  __test__();
+/**
+ * Test box data convert
+ */
+void box_data_test_convert()
+{
+  BOX_ERROR_CLEAR;
+  box_data &string_data = alloc_box_data("string_data", BOX_DATA_STRING, "35");
+
+  string_data.convert_itself(BOX_DATA_INT);
+  ASSERT_OK;
+  ASSERT_TRUE(*(int *)string_data.get_address() == 35, "data should be 35!");
+
+  string_data.convert_itself(BOX_DATA_FLOAT);
+  ASSERT_OK;
+  ASSERT_TRUE(*(float *)string_data.get_address() == 35.0f, "data should be 35.0f!");
+
+  string_data.convert_itself(BOX_DATA_STRING);
+  ASSERT_OK;
+  ASSERT_TRUE(strcmp((char *)string_data.get_address(), "35.000000") == 0,
+              "data should be 35");
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
 
 /**
  * Test box data class.
@@ -1068,9 +1133,13 @@ box_data_test_basic()
 void box_data_test()
 {
   printf("%s()\r\n", __FUNCTION__);
+
+  virtual_memory = (box_virtual_memory *)orm::get_first("box_virtual_memory");
+
   BOX_TEST(box_data_test_basic);
   BOX_TEST(box_data_test_int);
   BOX_TEST(box_data_test_string);
   BOX_TEST(box_data_test_float);
+  BOX_TEST(box_data_test_convert);
   printf("\r\n\r\n");
 }

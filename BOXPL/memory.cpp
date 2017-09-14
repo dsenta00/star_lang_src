@@ -1,5 +1,10 @@
 #include "memory.h"
+#include "ORM/relationship.h"
+#include <stdint.h>
 #include <cstring>
+
+typedef float float32_t;
+typedef double float64_t;
 
 /**
  * The constructor.
@@ -7,11 +12,14 @@
  * @param address - memory address.
  * @param size - memory size.
  */
-memory::memory(uintptr_t address, uint32_t size)
+memory::memory(uintptr_t address, uint32_t size) : entity::entity("memory", address)
 {
+  this->addRelationship("free_memory", MANY_TO_ONE);
+  this->addRelationship("reserved_memory", MANY_TO_ONE);
+  this->addRelationship("box_data_memory", ONE_TO_MANY);
+
   this->address = address;
   this->size = size;
-  counting_reference = 1;
 }
 
 /**
@@ -57,11 +65,12 @@ memory::get_element()
 void
 memory::allign(memory *adjacent_memory)
 {
-  memmove((void *)(address + size),
+  memmove((void *)(this->address + size),
           (void *)adjacent_memory->address,
           adjacent_memory->size);
 
-  adjacent_memory->address = address + size;
+  adjacent_memory->address = this->address + this->size;
+  adjacent_memory->id = std::to_string(adjacent_memory->address);
 }
 
 /**
@@ -120,29 +129,9 @@ void
 memory::assign(uintptr_t address,
                uint32_t size)
 {
+  this->id = std::to_string(address);
   this->address = address;
   this->size = size;
-}
-
-/**
- * Increase counting reference.
- */
-void
-memory::increase_ref()
-{
-  counting_reference++;
-}
-
-/**
- * Decrease counting reference.
- */
-void
-memory::decrease_ref()
-{
-  if (counting_reference > 0)
-  {
-    counting_reference--;
-  }
 }
 
 /**
@@ -154,7 +143,7 @@ memory::decrease_ref()
 bool
 memory::ready_to_remove()
 {
-  return counting_reference == 0;
+  return this->getRelationship("box_data_memory")->numOfEntities() == 0;
 }
 
 /*
@@ -175,4 +164,3 @@ template int32_t *memory::get_pointer();
 template int64_t *memory::get_pointer();
 template float32_t *memory::get_pointer();
 template float64_t *memory::get_pointer();
-

@@ -1,0 +1,180 @@
+#include "../box_assert.h"
+#include "../box_monitor.h"
+#include "entity.h"
+#include "relationship.h"
+#include "orm_test.h"
+#include "orm.h"
+
+class class2;
+
+class class1 : public entity {
+public:
+  class1() : entity::entity("class1", "class1")
+  {
+    this->addRelationship("class1_class2", ONE_TO_MANY);
+  }
+
+  void addClass2(class2 *c2)
+  {
+    this->addEntity("class1_class2", (entity *)c2);
+    entity *e = (entity *)c2;
+    e->addEntity("class1_class2", (entity *)this);
+  }
+
+  virtual ~class1()
+  {
+
+  }
+};
+
+class class2 : public entity {
+public:
+  int number;
+
+  class2(int i = 0) : entity::entity("class2", i)
+  {
+    number = i;
+    this->addRelationship("class1_class2", MANY_TO_ONE);
+  }
+};
+
+static void orm_test_basic()
+{
+  ASSERT_OK;
+  class1 *c1 = (class1 *)orm::create((entity *)new class1());
+  ASSERT_OK;
+
+  c1->addEntity("konan", NULL);
+  ASSERT_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+  BOX_ERROR_CLEAR;
+
+  class2 *c2 = (class2 *)orm::create((entity *)new class2());
+  c1->addClass2(c2);
+  ASSERT_OK;
+
+  relationship *c1_relationship = c1->getRelationship("class1_class2");
+  relationship *c2_relationship = c2->getRelationship("class1_class2");
+
+  ASSERT_TRUE(c1_relationship != NULL, "relationship class1_class2 should exist!");
+  ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
+  ASSERT_TRUE(c1_relationship->getType() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
+  ASSERT_TRUE(c2_relationship->getType() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
+  ASSERT_TRUE(c1_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
+  ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c2_relationship->numOfEntities());
+
+  class2 *c2_1 = (class2 *)c1->back("class1_class2");
+  ASSERT_TRUE(c2_1 == c2, "back() should return 0x%X (0x%X)", c2, c2_1);
+
+  class1 *c1_1 = (class1 *)c2->back("class1_class2");
+  ASSERT_TRUE(c1_1 == c1, "back() should return 0x%X (0x%X)", c1, c1_1);
+
+  orm::destroy(c2);
+  ASSERT_OK;
+  ASSERT_TRUE(orm::get_first("class1") == NULL, "class1 repository should not have entities");
+  ASSERT_TRUE(orm::get_first("class2") == NULL, "class2 repository should not have entities");
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+void orm_test_advanced()
+{
+  class1 *c1 = (class1 *)orm::create((entity *)new class1());
+
+  for (uint32_t i = 0; i < 16; i++)
+  {
+    c1->addClass2((class2 *)orm::create((entity *)new class2(i)));
+  }
+
+  relationship *c1_relationship = c1->getRelationship("class1_class2");
+
+  ASSERT_TRUE(c1_relationship != NULL, "relationship class1_class2 should exist!");
+  ASSERT_TRUE(c1_relationship->getType() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
+  ASSERT_TRUE(c1_relationship->numOfEntities() == 16, "number of entities should be 16! (%u)", c1_relationship->numOfEntities());
+
+  std::vector<entity *> &entities = c1->getRelationship("class1_class2")->getEntities();
+  for (entity *e : entities)
+  {
+    relationship *c2_relationship = e->getRelationship("class1_class2");
+
+    ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
+    ASSERT_TRUE(c2_relationship->getType() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
+    ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
+  }
+
+  /*
+   * test foreach with two parameters
+   */
+  c1_relationship->for_each([&] (entity *e1, entity *e2) {
+    class2 *c2_1 = (class2 *)e1;
+    class2 *c2_2 = (class2 *)e2;
+
+    ASSERT_TRUE(c2_2->number == (c2_1->number + 1), "they should follow each other (%u) (%u)", c2_1->number, c2_2->number);
+    return FOREACH_CONTINUE;
+  });
+
+  c1_relationship->for_each([&] (entity *e1, entity *e2) {
+    class2 *c2_2 = (class2 *)e2;
+
+    if (c2_2->number % 2 == 1)
+    {
+      orm::destroy(e2);
+      return FOREACH_IT2_REMOVED;
+    }
+
+    return FOREACH_CONTINUE;
+  });
+
+  c1_relationship = c1->getRelationship("class1_class2");
+
+  ASSERT_TRUE(c1_relationship != NULL, "relationship class1_class2 should exist!");
+  ASSERT_TRUE(c1_relationship->getType() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
+  ASSERT_TRUE(c1_relationship->numOfEntities() == 8, "number of entities should be 8! (%u)", c1_relationship->numOfEntities());
+
+  for (entity *e : entities)
+  {
+    ASSERT_TRUE(((class2 *)e)->number % 2 == 0, "number should be pair (%u)", ((class2 *)e)->number);
+
+    relationship *c2_relationship = e->getRelationship("class1_class2");
+
+    ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
+    ASSERT_TRUE(c2_relationship->getType() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
+    ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
+  }
+
+  /*
+   * test sort
+   */
+  c1_relationship->sort([&] (entity *e1, entity *e2) {
+    return ((class2 *)e1)->number > ((class2 *)e2)->number;
+  });
+
+  c1_relationship->for_each([&] (entity *e1, entity *e2) {
+    class2 *c2_1 = (class2 *)e1;
+    class2 *c2_2 = (class2 *)e2;
+
+    ASSERT_TRUE(c2_1->number == (c2_2->number + 2), "they should follow each other (%u) (%u)", c2_1->number, c2_2->number);
+    return FOREACH_CONTINUE;
+  });
+
+  /*
+   * test orm destroy
+   */
+  orm::destroy((entity *)c1);
+
+  ASSERT_TRUE(orm::get_first("class1") == NULL, "class1 repository should not have entities");
+  ASSERT_TRUE(orm::get_first("class2") == NULL, "class2 repository should not have entities");
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+void orm_test()
+{
+  orm::addEntityRepostiory("class1");
+  orm::addEntityRepostiory("class2");
+
+  printf("%s()\r\n", __FUNCTION__);
+  orm_test_basic();
+  orm_test_advanced();
+  printf("\r\n\r\n");
+}
+

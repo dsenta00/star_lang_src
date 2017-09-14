@@ -1,6 +1,10 @@
 #include "box_virtual_memory.h"
+#include "box_memory_chunk.h"
+#include "memory.h"
 #include "box_monitor.h"
 #include <limits.h>
+#include "ORM/relationship.h"
+#include "ORM/orm.h"
 
 /**
  * Find first bigger number with power of 2.
@@ -35,11 +39,32 @@ next_power_of_2(uint32_t number)
 }
 
 /**
+ * @brief box_virtual_memory::find_memory_chunk
+ * @param func
+ * @return
+ */
+memory_chunk *
+box_virtual_memory::find_memory_chunk(std::function<bool(memory_chunk *)> func)
+{
+  for (entity *e : this->box_memory_chunk->getEntities())
+  {
+    memory_chunk *chunk = (memory_chunk *)e;
+
+    if (func(chunk))
+    {
+      return chunk;
+    }
+  }
+
+  return NULL;
+}
+
+/**
  * Add new memory chunk.
  *
  * @param capacity - requested capacity.
  */
-void
+memory_chunk *
 box_virtual_memory::add_memory_chunk(uint32_t capacity)
 {
   capacity = next_power_of_2(capacity);
@@ -49,8 +74,10 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
     max_allocated_bytes = capacity;
   }
 
-  memory_chunk *new_memory_chunk = new memory_chunk(max_allocated_bytes);
-  memory_chunks.push_front(new_memory_chunk);
+  memory_chunk *chunk = (memory_chunk *)orm::create((entity *)new memory_chunk(max_allocated_bytes));
+  this->box_memory_chunk->addEntity((entity *)chunk);
+
+  return chunk;
 }
 
 /**
@@ -58,11 +85,34 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
  *
  * @param init_capacity - initial capacity.
  */
-box_virtual_memory::box_virtual_memory(uint32_t init_capacity)
+box_virtual_memory::box_virtual_memory(uint32_t init_capacity) : entity::entity("box_virtual_memory", "MAIN")
 {
-  allocated_total = 0;
-  max_allocated_bytes = 0;
-  add_memory_chunk(init_capacity);
+  this->addRelationship("box_memory_chunk", ONE_TO_MANY);
+  this->box_memory_chunk = this->getRelationship("box_memory_chunk");
+
+  this->allocated_total = 0;
+  this->max_allocated_bytes = 0;
+  this->add_memory_chunk(init_capacity);
+}
+
+/**
+ * Reserve memory from chunk.
+ *
+ * @param chunk
+ * @param size
+ * @return memory if found, otherwise return NULL.
+ */
+memory *
+box_virtual_memory::reserve_from_chunk(memory_chunk *chunk, uint32_t size)
+{
+  memory *mem = chunk->reserve(size);
+
+  if (mem)
+  {
+    this->allocated_total += mem->get_size();
+  }
+
+  return mem;
 }
 
 /**
@@ -74,10 +124,7 @@ box_virtual_memory::box_virtual_memory(uint32_t init_capacity)
 memory *
 box_virtual_memory::reserve(uint32_t size)
 {
-  memory_chunk *chunk;
-
-  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
-  {
+  memory_chunk *chunk = this->find_memory_chunk([&] (memory_chunk *chunk) {
     return chunk->can_reserve(size);
   });
 
@@ -86,14 +133,61 @@ box_virtual_memory::reserve(uint32_t size)
     return NULL;
   }
 
-  memory *mem = chunk->reserve(size);
+  return this->reserve_from_chunk(chunk, size);
+}
 
-  if (mem)
+memory *
+box_virtual_memory::add_new_chunk_and_alloc(uint32_t size)
+{
+  memory_chunk *chunk = this->add_memory_chunk(size);
+  if (chunk->can_reserve(size))
   {
-    allocated_total += mem->get_size();
+    return this->reserve_from_chunk(chunk, size);
   }
 
-  return mem;
+  /*
+   * New chunk is not allocated.
+   * Remove previously allocated chunk and defragment all memory.
+   */
+  orm::destroy((entity *)chunk);
+
+  this->box_memory_chunk->for_each([&] (entity *entity) {
+    memory_chunk *chunk = (memory_chunk *)entity;
+    chunk->defragmentation();
+  });
+
+  return this->reserve(size);
+}
+
+memory *
+box_virtual_memory::solve_defragmentation_and_alloc(uint32_t size)
+{
+  /*
+   * Check for fragmentation according to size.
+   */
+  memory_chunk *chunk = this->find_memory_chunk([&] (memory_chunk *chunk) {
+    return chunk->is_fragmented(size) && chunk->worth_defragmentation();
+  });
+
+  if (!chunk)
+  {
+    /*
+     * No chunk is worth it (yet).
+     * Less expensive is to allocate a new chunk.
+     */
+    return this->add_new_chunk_and_alloc(size);
+  }
+
+  chunk->defragmentation();
+
+  if (chunk->can_reserve(size))
+  {
+    return this->reserve_from_chunk(chunk, size);
+  }
+  else
+  {
+    return this->reserve(size);
+  }
 }
 
 /**
@@ -105,37 +199,19 @@ box_virtual_memory::reserve(uint32_t size)
 memory *
 box_virtual_memory::alloc(uint32_t size)
 {
-  if (size == 0)
+  if ((size == 0) || (size == UINT32_MAX))
   {
     return NULL;
   }
 
-  memory *mem = reserve(size);
+  memory *mem = this->reserve(size);
 
   if (mem)
   {
     return mem;
   }
 
-  memory_chunk *chunk;
-
-  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
-  {
-    return chunk->is_fragmented(size) && chunk->worth_defragmentation();
-  });
-
-  if (chunk)
-  {
-    chunk->defragmentation();
-    return chunk->reserve(size);
-  }
-
-  /*
-   * No chunk is worth it (yet).
-   * Less expensive is to allocate a new chunk.
-   */
-  add_memory_chunk(size);
-  return reserve(size);
+  return this->solve_defragmentation_and_alloc(size);
 }
 
 /**
@@ -147,18 +223,17 @@ box_virtual_memory::alloc(uint32_t size)
  * @return memory with new size if success, otherwise memory with old size.
  */
 memory *
-box_virtual_memory::realloc(memory *mem,
-                            uint32_t new_size)
+box_virtual_memory::realloc(memory *mem, uint32_t new_size)
 {
   if (!mem)
   {
-    return alloc(new_size);
+    /*
+     * realloc(NULL, size) == alloc(size);
+     */
+    return this->alloc(new_size);
   }
 
-  memory_chunk *chunk;
-
-  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
-  {
+  memory_chunk *chunk = this->find_memory_chunk([&] (memory_chunk *chunk) {
     return chunk->is_parent_of(mem);
   });
 
@@ -168,7 +243,7 @@ box_virtual_memory::realloc(memory *mem,
      * Memory is obtained by other mechanism.
      * Return existing memory.
      */
-    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UKNOWN_CHUNK);
+    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
     return mem;
   }
 
@@ -177,44 +252,67 @@ box_virtual_memory::realloc(memory *mem,
 
   switch (result)
   {
-  case MEMORY_CHUNK_RESIZE_OK:
-    allocated_total += new_size - old_size;
-    break;
-  case MEMORY_CHUNK_RESIZE_NO_MEMORY:
-  case MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY:
-  {
-    memory *new_mem = alloc(new_size);
-
-    if (new_mem)
+    case MEMORY_CHUNK_RESIZE_OK:
     {
-      memcpy((void *)new_mem->get_address(),
-             (void *)mem->get_address(),
-             mem->get_size());
-      free(mem);
-      mem = new_mem;
+      allocated_total += new_size - old_size;
+      break;
     }
-    break;
-  }
-  case MEMORY_CHUNK_RESIZE_NULL_MEMORY:
-    mem = alloc(new_size);
-    break;
-  case MEMORY_CHUNK_RESIZE_ZERO_CAPACITY:
-    /*
-     * This shouldn't happen.
-     * If memory belongs to this chunk, it can not have more size than capacity.
-     * Return memory.
-     */
-    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_ZERO_CAPACITY);
-    break;
-  case MEMORY_CHUNK_RESIZE_ZERO_SIZE:
-  case MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS:
-    /*
+    case MEMORY_CHUNK_RESIZE_NO_MEMORY:
+    {
+      memory *new_mem = this->add_new_chunk_and_alloc(new_size);
+
+      if (new_mem)
+      {
+        memcpy((void *)new_mem->get_address(),
+               (void *)mem->get_address(),
+               mem->get_size());
+
+        this->free(mem);
+        mem = new_mem;
+      }
+      break;
+    }
+    case MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY:
+    {
+      memory *new_mem = this->solve_defragmentation_and_alloc(new_size);
+
+      if (new_mem)
+      {
+        memcpy((void *)new_mem->get_address(),
+               (void *)mem->get_address(),
+               mem->get_size());
+
+        this->free(mem);
+        mem = new_mem;
+      }
+      break;
+    }
+    case MEMORY_CHUNK_RESIZE_NULL_MEMORY:
+    {
+      mem = alloc(new_size);
+      break;
+    }
+    case MEMORY_CHUNK_RESIZE_ZERO_CAPACITY:
+    {
+      /*
+       * This shouldn't happen.
+       * If memory belongs to this chunk, it can not have more size than capacity.
+       * Return memory.
+       */
+      BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_ZERO_CAPACITY);
+      break;
+    }
+    case MEMORY_CHUNK_RESIZE_ZERO_SIZE:
+    case MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS:
+    {
+      /*
      * Do nothing. Keep current memory.
      */
-    break;
-  default:
-    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_FAULT);
-    break;
+      break;
+    }
+    default:
+      BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_FAULT);
+      break;
   }
 
   return mem;
@@ -233,16 +331,13 @@ box_virtual_memory::free(memory *mem)
     return;
   }
 
-  memory_chunk *chunk;
-
-  chunk = memory_chunks.find_if([&] (memory_chunk *chunk)
-  {
+  memory_chunk *chunk = this->find_memory_chunk([&] (memory_chunk *chunk) {
     return chunk->is_parent_of(mem);
   });
 
   if (!chunk)
   {
-    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UKNOWN_CHUNK);
+    BOX_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
     return;
   }
 
@@ -268,8 +363,3 @@ box_virtual_memory::get_allocated_total(void)
 {
   return allocated_total;
 }
-
-/*
- * Global virtual memory.
- */
-box_virtual_memory virtual_memory(CHUNK_MINIMUM_CAPACITY);

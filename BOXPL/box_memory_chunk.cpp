@@ -1,5 +1,8 @@
 #include "box_memory_chunk.h"
 #include "box_monitor.h"
+#include "ORM/relationship.h"
+#include "memory.h"
+#include "ORM/orm.h"
 #include <cstring>
 
 #define DISPERSION_LOW_TRESHOLD (131072)
@@ -7,12 +10,28 @@
 
 /**
  * The constructor.
+ *
+ * @param capacity - chunk capacity.
  */
-memory_chunk::memory_chunk()
+memory_chunk::memory_chunk(uint32_t capacity) : memory_chunk_if::memory_chunk_if()
 {
-  capacity = 0;
-  start_address = 0;
-  free = 0;
+  this->capacity = 0;
+  this->start_address = 0;
+
+  if (capacity == 0)
+  {
+    return;
+  }
+
+  this->start_address = (uintptr_t)calloc(capacity, sizeof(uint8_t));
+
+  if (!this->start_address)
+  {
+    return;
+  }
+
+  this->capacity = capacity;
+  memory_chunk_if::free_memory_add(start_address, capacity);
 }
 
 /**
@@ -24,36 +43,9 @@ memory_chunk::memory_chunk()
 bool
 memory_chunk::is_parent_of(memory *mem)
 {
-  return reserved_memory.find_if([&] (memory *mem_it)
-  {
+  return memory_chunk_if::reserved_memory_find([&] (memory *mem_it) {
     return mem_it == mem;
   }) != NULL;
-}
-
-/**
- * The constructor.
- *
- * @param capacity - chunk capacity.
- */
-memory_chunk::memory_chunk(uint32_t capacity)
-{
-  ::memory_chunk();
-
-  if (capacity == 0)
-  {
-    return;
-  }
-
-  start_address = (uintptr_t)calloc(capacity, sizeof(uint8_t));
-
-  if (!start_address)
-  {
-    return;
-  }
-
-  this->capacity = capacity;
-  free = capacity;
-  free_memory.push_back(new memory(start_address, capacity));
 }
 
 /**
@@ -71,29 +63,21 @@ memory_chunk::reserve(uint32_t size)
     return NULL;
   }
 
-  memory *fmem;
-
-  fmem = free_memory.find_if([&] (memory *mem)
-  {
-    return mem->get_size() >= size;
-  });;
+  memory *fmem = memory_chunk_if::free_memory_find([&] (memory *m) {
+      return m->get_size() >= size;
+  });
 
   if (!fmem)
   {
     return NULL;
   }
 
-  memory *mem = new memory(fmem->get_address(), size);
-
-  free -= size;
-  reserved_memory.push_back(mem);
-
-  fmem->assign(fmem->get_address() + size,
-               fmem->get_size() - size);
+  memory *mem = memory_chunk_if::reserved_memory_add(fmem->get_address(), size);
+  fmem->assign(fmem->get_address() + size, fmem->get_size() - size);
 
   if (fmem->get_size() == 0)
   {
-    free_memory.delete_element(fmem);
+    memory_chunk_if::free_memory_remove(fmem);
   }
 
   return mem;
@@ -142,10 +126,7 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
   else if (new_size < mem->get_size())
   {
     /* Find free memory after requested memory */
-    memory *fmem;
-
-    fmem = free_memory.find_if([&] (memory *m)
-    {
+    memory *fmem = memory_chunk_if::free_memory_find([&] (memory *m) {
       return m->get_address() == (mem->get_address() + mem->get_size());
     });
 
@@ -158,9 +139,8 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
     else
     {
       /* Not found adjacent free memory, create new free memory */
-      free_memory.push_back(new memory(mem->get_address() + new_size,
-                                       new_size - mem->get_size()));
-      free_memory_union();
+      memory_chunk_if::free_memory_add(mem->get_address() + new_size, new_size - mem->get_size());
+      memory_chunk_if::free_memory_union();
       mem->assign(mem->get_address(), new_size);
     }
 
@@ -173,10 +153,7 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
       return MEMORY_CHUNK_RESIZE_NO_MEMORY;
     }
 
-    memory *fmem;
-
-    fmem = free_memory.find_if([&] (memory *m)
-    {
+    memory *fmem = memory_chunk_if::free_memory_find([&] (memory *m) {
       return m->get_address() == (mem->get_address() + mem->get_size());
     });
 
@@ -207,35 +184,11 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
 
     if (fmem->get_size() == 0)
     {
-      free_memory.delete_element(fmem);
+      memory_chunk_if::free_memory_remove(fmem);
     }
 
     return MEMORY_CHUNK_RESIZE_OK;
   }
-}
-
-/**
- * Perform memory union of free memory container.
- */
-void
-memory_chunk::free_memory_union()
-{
-  free_memory.sort([&] (const memory *m1, const memory *m2)
-  {
-    return m1->get_address() < m2->get_address();
-  });
-
-  free_memory.for_each([&] (memory *m1, memory *m2)
-  {
-    if (m2->get_address() == (m1->get_address() + m1->get_size()))
-    {
-      m1->assign(m1->get_address(), m1->get_size() + m2->get_size());
-      free_memory.delete_element(m2);
-      return false;
-    }
-
-    return true;
-  });
 }
 
 /**
@@ -260,11 +213,14 @@ memory_chunk::release(memory *mem)
     return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS;
   }
 
-  free_memory.push_back(new memory(mem->get_address(), mem->get_size()));
-  free += mem->get_size();
-  free_memory_union();
+  if (!mem->ready_to_remove())
+  {
+    return MEMORY_CHUNK_RELEASE_OK;
+  }
 
-  reserved_memory.delete_element(mem);
+  memory_chunk_if::free_memory_add(mem->get_address(), mem->get_size());
+  memory_chunk_if::free_memory_union();
+  memory_chunk_if::reserved_memory_remove(mem);
 
   return MEMORY_CHUNK_RELEASE_OK;
 }
@@ -297,14 +253,13 @@ memory_chunk::release(memory *mem)
 bool
 memory_chunk::worth_defragmentation()
 {
-  if (free_memory.size() == 1)
+  if (memory_chunk_if::free_memory_num() == 1)
   {
     return false;
   }
 
-  uint64_t dispersion = free * free_memory.size();
-  return (dispersion >= DISPERSION_LOW_TRESHOLD) &&
-      (dispersion < DISPERSION_HIGH_TRESHOLD);
+  uint64_t dispersion = free * memory_chunk_if::free_memory_num();
+  return (dispersion >= DISPERSION_LOW_TRESHOLD) && (dispersion < DISPERSION_HIGH_TRESHOLD);
 }
 
 /**
@@ -321,7 +276,7 @@ memory_chunk::can_reserve(uint32_t size)
     return false;
   }
 
-  if (free < size)
+  if (this->free < size)
   {
     return false;
   }
@@ -330,14 +285,13 @@ memory_chunk::can_reserve(uint32_t size)
    * Optimization part.
    * I'm so damn smart.
    */
-  if (free_memory.size() == 1)
+  if (memory_chunk_if::free_memory_num() == 1)
   {
     return true;
   }
 
-  return free_memory.find_if([&] (memory *mem)
-  {
-    return mem->get_size() >= size;
+  return memory_chunk_if::free_memory_find([&] (memory *m) {
+    return m->get_size() >= size;
   }) != NULL;
 }
 
@@ -350,7 +304,7 @@ memory_chunk::can_reserve(uint32_t size)
 bool
 memory_chunk::is_fragmented(uint32_t size)
 {
-  return (free >= size) && (!can_reserve(size));
+  return (this->free >= size) && (!can_reserve(size));
 }
 
 /**
@@ -359,46 +313,44 @@ memory_chunk::is_fragmented(uint32_t size)
 void
 memory_chunk::defragmentation()
 {
-  if (reserved_memory.size() == 0)
+  if (memory_chunk_if::reserved_memory_num() == 0)
   {
     return;
   }
 
-  reserved_memory.sort([&] (const memory *m1, const memory *m2)
-  {
-    return m1->get_address() < m2->get_address();
-  });
+  memory_chunk_if::reserved_memory_sort();
+  memory *mem = memory_chunk_if::reserved_memory_front();
 
-  memory *mem = reserved_memory.front();
-
-  /*
-   * Active memory isn't first in memory chunk.
-   * Move it back to start_address.
-   */
   if (mem->get_address() > start_address)
   {
-    mem->assign(start_address, mem->get_size());
+    /*
+     * Active memory isn't first in memory chunk.
+     * Move it back to start_address.
+     */
+    memmove((void *)this->start_address,
+            (void *)mem->get_address(),
+            mem->get_size());
+    mem->assign(this->start_address, mem->get_size());
   }
 
   /*
    * Real defragmentation part.
    */
-  reserved_memory.for_each([&](memory *mem, memory *adjacent_memory)
+  this->reserved_memory->for_each([&](entity *e1, entity *e2)
   {
+    memory *mem = (memory *)e1;
+    memory *adjacent_memory = (memory *)e2;
+
     mem->allign(adjacent_memory);
-    return true;
+    return FOREACH_CONTINUE;
   });
 
-  memory *new_fmem;
-  new_fmem = new memory(free_memory.front()->get_address() + mem->get_size(),
-                        free);
-  free_memory.delete_all();
-  free_memory.push_back(new_fmem);
+  uint32_t free_temp = this->free;
+  memory_chunk_if::free_memory_delete_all();
+  memory *back_reserved = memory_chunk_if::reserved_memory_back();
+  memory_chunk_if::free_memory_add(back_reserved->get_address() + back_reserved->get_size(), free_temp);
 }
 
-/**
- * The destructor.
- */
 memory_chunk::~memory_chunk()
 {
   std::free((void *)start_address);

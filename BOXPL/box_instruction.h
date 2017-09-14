@@ -2,7 +2,7 @@
 #define BOX_INSTRUCTION_H
 #include <stdint.h>
 
-typedef enum _box_op_code {
+typedef enum {
   MOV,
   ADD,
   MUL,

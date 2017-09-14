@@ -1,9 +1,8 @@
 #ifndef BOX_MEMORY_CHUNK_H
 #define BOX_MEMORY_CHUNK_H
-#include <stdint.h>
+#include "box_memory_chunk_if.h"
+#include <cstdint>
 #include <cstdlib>
-#include "box_vector.h"
-#include "memory.h"
 
 #define MEMORY_CHUNK_RELEASE_OK                (0)
 #define MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS   (1)
@@ -19,17 +18,12 @@ typedef enum {
   MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS
 } memory_chunk_resize_result;
 
-class memory_chunk {
+class memory_chunk : public memory_chunk_if {
 protected:
-  box_vector<memory *> free_memory;
-  box_vector<memory *> reserved_memory;
   uint32_t capacity;
-  uint32_t free;
   uintptr_t start_address;
-  void free_memory_union();
 public:
-  memory_chunk();
-  memory_chunk(uint32_t capacity);
+  memory_chunk(uint32_t capacity = 0);
   memory *reserve(uint32_t size);
   memory_chunk_resize_result resize(memory *mem, uint32_t new_size);
   uint32_t release(memory * mem);
@@ -38,7 +32,7 @@ public:
   bool is_fragmented(uint32_t size);
   bool worth_defragmentation();
   void defragmentation();
-  ~memory_chunk();
+  virtual ~memory_chunk();
 };
 
 #endif // BOX_MEMORY_CHUNK_H

@@ -2,409 +2,53 @@
 #include "box_array.h"
 #include "box_assert.h"
 #include "box_virtual_memory.h"
+#include "box_monitor.h"
+#include "box_data.h"
+#include "ORM/orm.h"
 #include <limits.h>
 
-extern box_virtual_memory virtual_memory;
+static box_virtual_memory *virtual_memory;
 
 #define TEST_ARRAY_SIZE (10)
 
 #define ASSERT_VIRTUAL_MEMORY(__BYTES__) \
-  ASSERT_TRUE(virtual_memory.get_allocated_total() == __BYTES__, \
+  ASSERT_TRUE(virtual_memory->get_allocated_total() == __BYTES__, \
               "Total allocated should be %u (%u)", \
               __BYTES__, \
-              virtual_memory.get_allocated_total())
+              virtual_memory->get_allocated_total())
 
-/**
- * Test char array.
- */
-static void
-box_array_test_char()
+#define BOX_TEST(__test__) \
+  printf("\t-> " #__test__ "::Start\r\n"); \
+  clear_vm(); \
+  __test__; \
+  BOX_OK;
+
+#define ARRAY_SIZE (10)
+
+static box_data &
+alloc_box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL)
 {
-  ASSERT_VIRTUAL_MEMORY(0);
-  box_array char_array(BOX_DATA_CHAR, TEST_ARRAY_SIZE);
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_CHAR] * TEST_ARRAY_SIZE);
-  ASSERT_OK;
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(char_array[i] != NULL,
-                "Returned reference shouldn't be NULL! (0x%X)",
-                char_array[i]);
-    ASSERT_OK;
-    ASSERT_TRUE(*(int8_t *)(char_array[i]->get_address()) == 0,
-                "Default element value should be 0! (%c)",
-                *(int8_t *)(char_array[i]->get_address()));
-  }
-
-  for (uint16_t i = TEST_ARRAY_SIZE; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(char_array[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                char_array[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_OUT_OF_BOUNDS);
-    BOX_ERROR_CLEAR;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    *(int8_t *)(char_array[i]->get_address()) = (float32_t)(i + '0');
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(*(int8_t *)(char_array[i]->get_address()) == (int8_t)(i + '0'),
-                "Element value should be %c! (%c)",
-                (int8_t)(i + '0'),
-                *(int8_t *)(char_array[i]->get_address()));
-  }
-
-  *(int8_t *)(char_array[TEST_ARRAY_SIZE - 1]->get_address()) = 0;
-
-  box_data string_data = char_array.to_string();
-
-  ASSERT_TRUE(strcmp((const char *)string_data.get_address(), "012345678") == 0,
-              "Strings should be same! (%s)",
-              (const char *)string_data.get_address());
-  ASSERT_OK;
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_CHAR] * TEST_ARRAY_SIZE +
-                        sizeof("012345678"));
-  printf("\t-> %s()::OK\n", __FUNCTION__);
+  return *(box_data *)orm::create((entity *)new box_data(id, type, value));
 }
 
-/**
- * Test float array.
- */
-static void
-box_array_test_float()
+static box_array &
+alloc_box_array(std::string id, box_array *array = NULL)
 {
-  ASSERT_VIRTUAL_MEMORY(0);
-  box_array float_array(BOX_DATA_FLOAT, TEST_ARRAY_SIZE);
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_FLOAT] * TEST_ARRAY_SIZE);
-  ASSERT_OK;
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(float_array[i] != NULL,
-                "Returned reference shouldn't be NULL! (0x%X)",
-                float_array[i]);
-    ASSERT_OK;
-
-    ASSERT_TRUE(*(float32_t *)(float_array[i]->get_address()) == 0.0,
-                "Default element value should be 0.0! (%f)",
-                *(float32_t *)(float_array[i]->get_address()));
-  }
-
-  for (uint16_t i = TEST_ARRAY_SIZE; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(float_array[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                float_array[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_OUT_OF_BOUNDS);
-    BOX_ERROR_CLEAR;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    *(float32_t *)(float_array[i]->get_address()) = (float32_t)i;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(*(float32_t *)(float_array[i]->get_address()) == (float32_t)i,
-                "Element value should be %f! (%f)", (float32_t)i,
-                *(float32_t *)(float_array[i]->get_address()));
-  }
-
-  box_data string_data = float_array.to_string();
-
-  ASSERT_TRUE(strcmp((const char *)string_data.get_address(),
-                     "0.000000 1.000000 2.000000 3.000000 4.000000 "
-                     "5.000000 6.000000 7.000000 8.000000 9.000000") == 0,
-              "Strings should be same! (%s)",
-              (const char *)string_data.get_address());
-  ASSERT_OK;
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_FLOAT] * TEST_ARRAY_SIZE +
-                        sizeof("0.000000 1.000000 2.000000 3.000000 4.000000 "
-                               "5.000000 6.000000 7.000000 8.000000 9.000000"));
-  printf("\t-> %s()::OK\n", __FUNCTION__);
+  return *(box_array *)orm::create((entity *)new box_array(id, array));
 }
 
-/**
- * Test array of double.
- */
-static void
-box_array_test_double()
+static void clear_vm()
 {
-  ASSERT_VIRTUAL_MEMORY(0);
-  box_array float_array(BOX_DATA_DOUBLE, TEST_ARRAY_SIZE);
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_DOUBLE] * TEST_ARRAY_SIZE);
-
-  ASSERT_OK;
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
+  if (virtual_memory)
   {
-    ASSERT_TRUE(float_array[i] != NULL,
-                "Returned reference shouldn't be NULL! (0x%X)",
-                float_array[i]);
-
-    ASSERT_OK;
-
-    ASSERT_TRUE(*(float64_t *)(float_array[i]->get_address()) == 0.0,
-                "Default element value should be 0.0! (%f)",
-                *(float64_t *)(float_array[i]->get_address()));
+    orm::destroy(virtual_memory);
   }
 
-  for (uint16_t i = TEST_ARRAY_SIZE; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(float_array[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                float_array[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_OUT_OF_BOUNDS);
-    BOX_ERROR_CLEAR;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    *(float64_t *)(float_array[i]->get_address()) = (float32_t)i;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(*(float64_t *)(float_array[i]->get_address()) == (float64_t)i,
-                "Element value should be %f! (%f)",
-                (float64_t)i,
-                *(float64_t *)(float_array[i]->get_address()));
-  }
-
-  box_data string_data = float_array.to_string();
-
-  ASSERT_TRUE(strcmp((const char *)string_data.get_address(),
-                     "0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 "
-                     "6.000000 7.000000 8.000000 9.000000") == 0,
-              "Strings should be the same! (%s)",
-              (const char *)string_data.get_address());
-  ASSERT_OK;
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_DOUBLE] * TEST_ARRAY_SIZE +
-                        sizeof("0.000000 1.000000 2.000000 3.000000 4.000000 "
-                               "5.000000 6.000000 7.000000 8.000000 9.000000"));
-  printf("\t-> %s()::OK\n", __FUNCTION__);
-}
-
-/**
- * Test int array. (16, 32, 64 bit)
- */
-template <typename T>
-static void
-box_array_test_int(box_data_type int_type)
-{
-  ASSERT_VIRTUAL_MEMORY(0);
-  box_array int_array(int_type, TEST_ARRAY_SIZE);
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * TEST_ARRAY_SIZE);
-
-  ASSERT_OK;
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(int_array[i] != NULL,
-                "Returned reference shouldn't be NULL! (0x%X)",
-                int_array[i]);
-    ASSERT_OK;
-
-    ASSERT_TRUE(*(T *)(int_array[i]->get_address()) == 0,
-                "Default element value should be 0! (%d)",
-                *(T *)(int_array[i]->get_address()));
-  }
-
-  for (uint16_t i = TEST_ARRAY_SIZE; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(int_array[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                int_array[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_OUT_OF_BOUNDS);
-    BOX_ERROR_CLEAR;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    *(T *)(int_array[i]->get_address()) = i;
-  }
-
-  for (uint16_t i = 0; i < TEST_ARRAY_SIZE; i++)
-  {
-    ASSERT_TRUE(*(T *)(int_array[i]->get_address()) == i,
-                "Element value should be %d! (%d)",
-                i,
-                *(T *)(int_array[i]->get_address()));
-  }
-
-  box_data string_data = int_array.to_string();
-
-  ASSERT_TRUE(strcmp((const char *)string_data.get_address(),
-                     "0 1 2 3 4 5 6 7 8 9") == 0,
-              "Strings should be same! (%s)",
-              (const char *)string_data.get_address());
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * TEST_ARRAY_SIZE +
-                        sizeof("0 1 2 3 4 5 6 7 8 9"));
-  ASSERT_OK;
-
-  box_data int_data(int_type);
-  *(T *)int_data.get_address() = 10;
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * TEST_ARRAY_SIZE +
-                        sizeof("0 1 2 3 4 5 6 7 8 9") +
-                        BOX_DATA_TYPE_SIZE[int_type]);
-
-  ASSERT_TRUE(int_array += &int_data, "int_array and int_data should add!");
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * (TEST_ARRAY_SIZE + 1) +
-                        sizeof("0 1 2 3 4 5 6 7 8 9") +
-                        BOX_DATA_TYPE_SIZE[int_type]);
-
-  ASSERT_TRUE(int_array.get_noof() == (TEST_ARRAY_SIZE + 1),
-              "int_array should have %u members (%u)",
-              (TEST_ARRAY_SIZE + 1),
-              int_array.get_noof());
-
-  ASSERT_TRUE(*(T *)int_array[TEST_ARRAY_SIZE]->get_address() == 10,
-              "int_array[%u] should be %u (%u)",
-              TEST_ARRAY_SIZE,
-              10,
-              *(int32_t *)int_array[TEST_ARRAY_SIZE]->get_address());
-
-  box_array second_int_array(int_type, 3);
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * (TEST_ARRAY_SIZE + 1) +
-                        sizeof("0 1 2 3 4 5 6 7 8 9") +
-                        BOX_DATA_TYPE_SIZE[int_type] +
-                        BOX_DATA_TYPE_SIZE[int_type] * 3);
-
-  for (uint16_t i = 0; i < 3; i++)
-  {
-    *(T *)(second_int_array[i]->get_address()) = i + 11;
-  }
-
-  ASSERT_TRUE(int_array += second_int_array,
-              "int_array and second_int_array should add!");
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[int_type] * (TEST_ARRAY_SIZE + 4) +
-                        sizeof("0 1 2 3 4 5 6 7 8 9") +
-                        BOX_DATA_TYPE_SIZE[int_type] +
-                        BOX_DATA_TYPE_SIZE[int_type] * 3);
-
-  ASSERT_TRUE(int_array.get_noof() == (TEST_ARRAY_SIZE + 4),
-              "int_array should have %u members (%u)",
-              (TEST_ARRAY_SIZE + 4),
-              int_array.get_noof());
-
-  for (uint16_t i = 0; i < (TEST_ARRAY_SIZE + 4); i++)
-  {
-    ASSERT_TRUE(*(T *)(int_array[i]->get_address()) == i,
-                "int_array[%u] should be %u",
-                i,
-                *(int32_t *)(int_array[i]->get_address()));
-  }
-
-
-  printf("\t-> %s(%s)::OK\n", __FUNCTION__, int_data.get_type_str());
-}
-
-/**
- * Test array basics.
- */
-static void
-box_array_test_basic()
-{
-  ASSERT_VIRTUAL_MEMORY(0);
-  box_array invalid_array;
-  ASSERT_VIRTUAL_MEMORY(0);
-
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-
-  for (uint16_t i = 0; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(invalid_array[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                invalid_array[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-    BOX_ERROR_CLEAR;
-  }
-
-  box_data str = invalid_array.to_string();
-  ASSERT_TRUE(strcmp((const char *)str.get_address(),
-                     "") == 0,
-              "Returned string should be empty! (%s)",
-              (const char *)str.get_address());
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
-
-  box_array invalid_array2(BOX_DATA_INVALID, 0);
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
-
-  for (uint16_t i = 0; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(invalid_array2[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                invalid_array2[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-    BOX_ERROR_CLEAR;
-  }
-
-  ASSERT_TRUE(strcmp((const char *)invalid_array2.to_string().get_address(),
-                     "") == 0,
-              "Returned string should be empty! (%s)",
-              (const char *)invalid_array2.to_string().get_address());
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-
-  box_array invalid_array3(BOX_DATA_INVALID, 16);
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-
-  for (uint16_t i = 0; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(invalid_array3[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                invalid_array3[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-    BOX_ERROR_CLEAR;
-  }
-
-  ASSERT_TRUE(strcmp((const char *)invalid_array3.to_string().get_address(),
-                     "") == 0,
-              "Returned string should be empty! (%s)",
-              (const char *)invalid_array3.to_string().get_address());
-  ASSERT_ERROR(ERROR_BOX_ARRAY_INVALID_DATA_TYPE);
-  BOX_ERROR_CLEAR;
-
-  box_array invalid_array4(BOX_DATA_INT, 0);
-  ASSERT_ERROR(ERROR_BOX_ARRAY_ZERO_SIZE);
-  BOX_ERROR_CLEAR;
-
-  for (uint16_t i = 0; i < USHRT_MAX; i++)
-  {
-    ASSERT_TRUE(invalid_array4[i] == NULL,
-                "Returned reference should be NULL! (0x%X)",
-                invalid_array4[i]);
-    ASSERT_ERROR(ERROR_BOX_ARRAY_ZERO_SIZE);
-    BOX_ERROR_CLEAR;
-  }
-
-  ASSERT_TRUE(strcmp((const char *)invalid_array4.to_string().get_address(),
-                     "") == 0,
-              "Returned string should be empty! (%s)",
-              (const char *)invalid_array4.to_string().get_address());
-  ASSERT_ERROR(ERROR_BOX_ARRAY_ZERO_SIZE);
-  BOX_ERROR_CLEAR;
-
-  printf("\t-> %s()::OK \n", __FUNCTION__);
+  virtual_memory =
+      (box_virtual_memory *)
+      orm::create(
+        (entity *)new box_virtual_memory(CHUNK_MINIMUM_CAPACITY)
+        );
 }
 
 /**
@@ -412,7 +56,7 @@ box_array_test_basic()
  *
  * @return random name.
  */
-static const char *random_name()
+static const char *random_name(uint32_t i = -1)
 {
   static const char str[][64] =
   {
@@ -428,54 +72,176 @@ static const char *random_name()
     "Ante",
   };
 
-  return str[rand() % 10];
+  return (i == -1) ? str[rand() % 10] : str[i % 10];
 }
 
 /**
- * Test string array.
+ * Test array basics.
  */
-void
-box_array_test_string()
+static void
+box_array_test_basic()
 {
-#define STRING_ARRAY_SIZE (10)
-  box_data str(BOX_DATA_STRING);
-  box_array str_array(BOX_DATA_STRING, STRING_ARRAY_SIZE);
+  BOX_ERROR_CLEAR;
+  ASSERT_VIRTUAL_MEMORY(0);
+  box_array &empty_array = alloc_box_array("empty_array");
+  ASSERT_VIRTUAL_MEMORY(0);
 
-  for (uint32_t i = 0; i < STRING_ARRAY_SIZE; i++)
+  for (uint16_t i = 0; i < USHRT_MAX; i++)
   {
-    const char *random_name_str = random_name();
-    (*str_array[i]) = (const void *)random_name_str;
+    ASSERT_TRUE(empty_array[i] == NULL,
+                "Returned reference should be NULL! (0x%X)",
+                empty_array[i]);
+  }
 
-    ASSERT_TRUE(strcmp((const char *)str_array[i]->get_address(),
-                       random_name_str) == 0,
-                "Should be same (%s) and (%s)",
-                (const char *)str_array[i]->get_address(),
-                random_name_str);
-    ASSERT_OK;
+  box_data &str = empty_array.to_string();
+  ASSERT_TRUE(strcmp((const char *)str.get_address(),
+                     "") == 0,
+              "Returned string should be empty! (%s)",
+              (const char *)str.get_address());
+  ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
 
-    if (i != (STRING_ARRAY_SIZE - 1))
+  std::string comparision;
+
+  for (uint32_t i = 0; i < ARRAY_SIZE; i++)
+  {
+    if (i % 2 == 0)
     {
-      str += (*str_array[i]);
-      char separator = ' ';
-      box_data box_char(BOX_DATA_CHAR, (void *)&separator);
-      str += box_char;
+      box_data &data = alloc_box_data("temp_name", BOX_DATA_STRING, random_name(i));
+      empty_array.insert(i, (entity *)&data);
+      ASSERT_OK;
+      comparision.append(random_name(i));
+    }
+    else if (i % 3 == 0)
+    {
+      box_data &data = alloc_box_data("temp_name", BOX_DATA_INT, (const void *)&i);
+      empty_array.insert(i, (entity *)&data);
+      ASSERT_OK;
+      comparision.append(std::to_string(i));
     }
     else
     {
-      str += (*str_array[i]);
+      float32_t fi = (float32_t)i;
+      box_data &data = alloc_box_data("temp_name", BOX_DATA_FLOAT, (const void *)&fi);
+      empty_array.insert(i, (entity *)&data);
+      ASSERT_OK;
+      comparision.append(std::to_string(fi));
     }
-    ASSERT_OK;
+
+    if (i < (ARRAY_SIZE - 1))
+    {
+      comparision.append(" ");
+    }
   }
 
-  box_data str_array_str = str_array.to_string();
+  for (uint32_t i = 0; i < ARRAY_SIZE; i++)
+  {
+    if (i % 2 == 0)
+    {
+      box_data *data = (box_data *)empty_array[i];
 
-  ASSERT_TRUE(str == str_array_str,
-              "str (%s) and str_array.to_string() (%s) should be the same",
-              (const char *)str.get_address(),
-              (const char *)str_array_str.get_address());
+      ASSERT_TRUE(data->get_type() == BOX_DATA_STRING,
+                  "data should be BOX_DATA_STRING");
 
-  printf("\t-> %s()::OK\n", __FUNCTION__);
-#undef STRING_ARRAY_SIZE
+      ASSERT_TRUE(strcmp((const char *)data->get_address(),
+                         random_name(i)) == 0,
+                  "data should be %s (%s)",
+                  random_name(i),
+                  (const char *)data->get_address());
+      ASSERT_OK;
+    }
+    else if (i % 3 == 0)
+    {
+      box_data *data = (box_data *)empty_array[i];
+      ASSERT_TRUE(data->get_type() == BOX_DATA_INT,
+                  "data should be BOX_DATA_INT");
+
+      ASSERT_TRUE(*(uint32_t *)data->get_address() == i,
+                  "data should be %u (%u)",
+                  i,
+                  *(uint32_t *)data->get_address());
+
+      ASSERT_OK;
+    }
+    else
+    {
+      float32_t fi = (float32_t)i;
+      box_data *data = (box_data *)empty_array[i];
+
+      ASSERT_TRUE(data->get_type() == BOX_DATA_FLOAT,
+                  "data should be BOX_DATA_FLOAT");
+
+      ASSERT_TRUE(*(float32_t *)data->get_address() == fi,
+                  "data should be %f (%f)",
+                  fi,
+                  *(float32_t *)data->get_address());
+
+      ASSERT_OK;
+    }
+  }
+
+  box_data &str2 = empty_array.to_string();
+
+  ASSERT_TRUE(comparision.compare((const char *)str2.get_address()) == 0,
+              "they should be the same: expected %s, got %s",
+              comparision.c_str(),
+              (const char *)str2.get_address());
+
+  box_array &array = alloc_box_array("array");
+
+  for (uint32_t i = 0; i < ARRAY_SIZE; i++)
+  {
+    if (i % 2 == 0)
+    {
+      box_data &data = alloc_box_data("temp_name", BOX_DATA_STRING, random_name(i));
+      array.insert(i, (entity *)&data);
+      ASSERT_OK;
+    }
+    else if (i % 3 == 0)
+    {
+      box_data &data = alloc_box_data("temp_name", BOX_DATA_INT, (const void *)&i);
+      array.insert(i, (entity *)&data);
+      ASSERT_OK;
+    }
+    else
+    {
+      array.insert(i, (entity *)&empty_array);
+      ASSERT_OK;
+    }
+  }
+
+  for (uint32_t i = 0; i < ARRAY_SIZE; i++)
+  {
+    if (i % 2 == 0)
+    {
+      box_data *data = (box_data *)array[i];
+      ASSERT_OK;
+      ASSERT_TRUE(data->get_type() == BOX_DATA_STRING, "data should be BOX_DATA_STRING");
+      ASSERT_TRUE(strcmp((const char *)data->get_address(),
+                         random_name(i)) == 0,
+                  "data should be %s (%s)",
+                  random_name(i),
+                  (const char *)data->get_address());
+    }
+    else if (i % 3 == 0)
+    {
+      box_data *data = (box_data *)array[i];
+      ASSERT_OK;
+      ASSERT_TRUE(data->get_type() == BOX_DATA_INT, "data should be BOX_DATA_INT");
+      ASSERT_TRUE(*(uint32_t *)data->get_address() == i,
+                  "data should be %u (%u)",
+                  i,
+                  *(uint32_t *)data->get_address());
+    }
+    else
+    {
+      box_array *array_inside = (box_array *)array[i];
+      ASSERT_OK;
+      ASSERT_TRUE(array_inside != NULL, "array_inside shouldn't be null");
+      ASSERT_TRUE(array_inside == &empty_array, "data should be the same");
+    }
+  }
+
+  printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -485,13 +251,10 @@ void
 box_array_test()
 {
   printf("%s()\r\n", __FUNCTION__);
-  box_array_test_basic();
-  box_array_test_int<int16_t>(BOX_DATA_SHORT);
-  box_array_test_int<int32_t>(BOX_DATA_INT);
-  box_array_test_int<int64_t>(BOX_DATA_LONG);
-  box_array_test_float();
-  box_array_test_double();
-  box_array_test_char();
-  box_array_test_string();
+
+  virtual_memory = (box_virtual_memory *)orm::get_first("box_virtual_memory");
+
+  BOX_TEST(box_array_test_basic());
+
   printf("\r\n\r\n");
 }

@@ -1,9 +1,12 @@
 #include "box_monitor.h"
 #include <queue>
+#include <memory>
 
 #define MAX_BOX_ERROR_QUEUE (32)
 
-static std::queue<box_error *> box_error_queue;
+typedef std::shared_ptr<box_error> box_error_p;
+
+static std::queue<box_error_p> box_error_queue;
 
 /**
  * Add error.
@@ -16,11 +19,10 @@ box_monitor_add_error(const char *func, box_status status)
 {
   if (box_error_queue.size() >= MAX_BOX_ERROR_QUEUE)
   {
-    delete box_error_queue.front();
     box_error_queue.pop();
   }
 
-  box_error_queue.push(new box_error(status, func));
+  box_error_queue.push(box_error_p(new box_error(status, func)));
 }
 
 /**
@@ -44,7 +46,7 @@ box_monitor_last_error()
 {
   return box_monitor_ok() ?
         BOX_STATUS_OK :
-        box_error_queue.back()->get_status();
+        box_error_queue.back().get()->get_status();
 }
 
 /**
@@ -57,7 +59,7 @@ box_monitor_last_error_string()
 {
   return box_monitor_ok() ?
         "BOX_STATUS_OK" :
-        box_error_queue.back()->get_status_str();
+        box_error_queue.back().get()->get_status_str();
 }
 
 /**
@@ -68,8 +70,6 @@ box_monitor_clear()
 {
   while (!box_error_queue.empty())
   {
-    box_error *p = box_error_queue.front();
-    delete p;
     box_error_queue.pop();
   }
 }

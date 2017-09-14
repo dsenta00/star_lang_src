@@ -1,30 +1,21 @@
 #include "box_data.h"
 #include "box_virtual_memory.h"
 #include "memory.h"
+#include "ORM/relationship.h"
+#include "ORM/orm.h"
+#include "box_monitor.h"
 #include <cstring>
 #include <iostream>
 
-extern box_virtual_memory virtual_memory;
-
-/**
- * Default constructor.
- */
-box_data::box_data()
-{
-  type = BOX_DATA_INVALID;
-  mem = NULL;
-
-  BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
-  BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-}
-
 /**
  * The constructor.
  *
  * @param type - data type.
  */
-box_data::box_data(box_data_type type)
+box_data::box_data(std::string id, box_data_type type, const void *value) : entity::entity("box_data", id)
 {
+  this->addRelationship("box_data_memory", ONE_TO_MANY);
+  this->vm = (box_virtual_memory *)orm::get_first("box_virtual_memory");
   this->type = type;
 
   if (type >= BOX_DATA_INVALID)
@@ -33,53 +24,40 @@ box_data::box_data(box_data_type type)
     return;
   }
 
-  mem = virtual_memory.alloc(BOX_DATA_TYPE_SIZE[type]);
-
-  if (!mem)
+  if (value == NULL)
   {
-    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
-    return;
+    memory *mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[type]);
+
+    if (!mem)
+    {
+      BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+      return;
+    }
+
+    entity::addEntity("box_data_memory", (entity *)mem);
+    mem->addEntity("box_data_memory", (entity *)this);
+
+    default_value();
   }
-
-  default_value();
-}
-
-/**
- * The constructor.
- *
- * @param type - data type.
- * @param value - initial value.
- */
-box_data::box_data(box_data_type type, const void *value)
-{
-  if (!value)
+  else
   {
-    mem = NULL;
-    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
-    return;
+    size_t size = (type == BOX_DATA_STRING) ?
+                    strlen((const char *)value) + 1 :
+                    BOX_DATA_TYPE_SIZE[type];
+
+    memory *mem = vm->alloc(size);
+
+    if (!mem)
+    {
+      BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+      return;
+    }
+
+    entity::addEntity("box_data_memory", (entity *)mem);
+    mem->addEntity("box_data_memory", (entity *)this);
+
+    memcpy(mem->get_pointer<void *>(), value, size);
   }
-
-  this->type = type;
-
-  if (type >= BOX_DATA_INVALID)
-  {
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return;
-  }
-
-  size_t size = (type == BOX_DATA_STRING) ?
-        strlen((const char *)value) + 1 :
-        BOX_DATA_TYPE_SIZE[type];
-
-  mem = virtual_memory.alloc(size);
-
-  if (!mem)
-  {
-    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
-    return;
-  }
-
-  memcpy(mem->get_pointer<void *>(), value, size);
 }
 
 /**
@@ -87,9 +65,13 @@ box_data::box_data(box_data_type type, const void *value)
  *
  * @param data - box data.
  */
-box_data::box_data(const box_data &data)
+box_data::box_data(std::string id, box_data &data) : entity::entity("box_data", id)
 {
-  if (!data.mem)
+  this->addRelationship("box_data_memory", ONE_TO_MANY);
+
+  memory *data_mem = data.get_memory();
+
+  if (!data_mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
     return;
@@ -101,10 +83,16 @@ box_data::box_data(const box_data &data)
     return;
   }
 
-  mem = data.mem;
-  type = data.type;
+  this->type = data.type;
+  this->vm = data.vm;
 
-  mem->increase_ref();
+  memory *mem = this->vm->alloc(data_mem->get_size());
+  memcpy(mem->get_pointer<void *>(),
+         data_mem->get_pointer<void *>(),
+         data_mem->get_size());
+
+  this->addEntity("box_data_memory", (entity *)mem);
+  mem->addEntity("box_data_memory", (entity *)this);
 }
 
 /**
@@ -117,31 +105,31 @@ box_data::get_type_str()
 {
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return "BOX_DATA_CHAR";
-    break;
-  case BOX_DATA_SHORT:
-    return "BOX_DATA_SHORT";
-    break;
-  case BOX_DATA_INT:
-    return "BOX_DATA_INT";
-    break;
-  case BOX_DATA_FLOAT:
-    return "BOX_DATA_FLOAT";
-    break;
-  case BOX_DATA_LONG:
-    return "BOX_DATA_LONG";
-    break;
-  case BOX_DATA_DOUBLE:
-    return "BOX_DATA_DOUBLE";
-    break;
-  case BOX_DATA_STRING:
-    return "BOX_DATA_STRING";
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    return "BOX_DATA_INVALID";
-    break;
+    case BOX_DATA_CHAR:
+      return "BOX_DATA_CHAR";
+      break;
+    case BOX_DATA_SHORT:
+      return "BOX_DATA_SHORT";
+      break;
+    case BOX_DATA_INT:
+      return "BOX_DATA_INT";
+      break;
+    case BOX_DATA_FLOAT:
+      return "BOX_DATA_FLOAT";
+      break;
+    case BOX_DATA_LONG:
+      return "BOX_DATA_LONG";
+      break;
+    case BOX_DATA_DOUBLE:
+      return "BOX_DATA_DOUBLE";
+      break;
+    case BOX_DATA_STRING:
+      return "BOX_DATA_STRING";
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      return "BOX_DATA_INVALID";
+      break;
   }
 }
 
@@ -154,6 +142,7 @@ int8_t
 box_data::to_char()
 {
   int8_t value = 0;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -163,29 +152,29 @@ box_data::to_char()
 
   switch (type)
   {
-  case BOX_DATA_STRING:
-  case BOX_DATA_CHAR:
-    value = mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    value = (int8_t)mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = (int8_t)mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = (int8_t)mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    value = (int8_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = (int8_t)mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_STRING:
+    case BOX_DATA_CHAR:
+      value = mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = (int8_t)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (int8_t)mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (int8_t)mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = (int8_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (int8_t)mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -200,6 +189,7 @@ int16_t
 box_data::to_short()
 {
   int16_t value = 0;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -209,33 +199,33 @@ box_data::to_short()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    value = (int16_t)mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    value = mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = (int16_t)mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = (int16_t)mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    value = (int16_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = (int16_t)mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_STRING:
-    sscanf(mem->get_pointer<const char *>(),
-           BOX_DATA_TYPE_FORMAT[BOX_DATA_SHORT],
-           &value);
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      value = (int16_t)mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (int16_t)mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (int16_t)mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = (int16_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (int16_t)mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_STRING:
+      sscanf(mem->get_pointer<const char *>(),
+             BOX_DATA_TYPE_FORMAT[BOX_DATA_SHORT],
+             &value);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -250,6 +240,7 @@ int32_t
 box_data::to_int()
 {
   int32_t value = 0;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -259,33 +250,33 @@ box_data::to_int()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    value = (int32_t)mem->get_element<int8_t>();;
-    break;
-  case BOX_DATA_SHORT:
-    value = (int32_t)mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = (int32_t)mem->get_element<float32_t>();;
-    break;
-  case BOX_DATA_LONG:
-    value = (int32_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = (int32_t)mem->get_element<float64_t>();;
-    break;
-  case BOX_DATA_STRING:
-    sscanf(mem->get_pointer<const char *>(),
-           BOX_DATA_TYPE_FORMAT[BOX_DATA_INT],
-           &value);
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      value = (int32_t)mem->get_element<int8_t>();;
+      break;
+    case BOX_DATA_SHORT:
+      value = (int32_t)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (int32_t)mem->get_element<float32_t>();;
+      break;
+    case BOX_DATA_LONG:
+      value = (int32_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (int32_t)mem->get_element<float64_t>();;
+      break;
+    case BOX_DATA_STRING:
+      sscanf(mem->get_pointer<const char *>(),
+             BOX_DATA_TYPE_FORMAT[BOX_DATA_INT],
+             &value);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -300,6 +291,7 @@ float32_t
 box_data::to_float()
 {
   float32_t value = 0.0f;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -309,33 +301,33 @@ box_data::to_float()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    value = (float32_t)mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    value = (float32_t)mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = (float32_t)mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    value = (float32_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = (float32_t)mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_STRING:
-    sscanf(mem->get_pointer<const char *>(),
-           BOX_DATA_TYPE_FORMAT[BOX_DATA_FLOAT],
-           &value);
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      value = (float32_t)mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = (float32_t)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (float32_t)mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = (float32_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (float32_t)mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_STRING:
+      sscanf(mem->get_pointer<const char *>(),
+             BOX_DATA_TYPE_FORMAT[BOX_DATA_FLOAT],
+             &value);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -350,6 +342,7 @@ int64_t
 box_data::to_long()
 {
   int64_t value = 0;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -359,33 +352,33 @@ box_data::to_long()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    value = (int64_t)mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    value = (int64_t)mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = (int64_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = (int64_t)mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    value = mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = (int64_t)mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_STRING:
-    sscanf(mem->get_pointer<const char *>(),
-           BOX_DATA_TYPE_FORMAT[BOX_DATA_LONG],
-           &value);
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      value = (int64_t)mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = (int64_t)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (int64_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (int64_t)mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (int64_t)mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_STRING:
+      sscanf(mem->get_pointer<const char *>(),
+             BOX_DATA_TYPE_FORMAT[BOX_DATA_LONG],
+             &value);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -400,6 +393,7 @@ float64_t
 box_data::to_double()
 {
   float64_t value = 0.0;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -409,33 +403,33 @@ box_data::to_double()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    value = (float64_t)mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    value = (float64_t)mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    value = (float64_t)mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    value = (float64_t)mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    value = (float64_t)mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    value = mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_STRING:
-    sscanf(mem->get_pointer<const char *>(),
-           BOX_DATA_TYPE_FORMAT[BOX_DATA_DOUBLE],
-           &value);
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      value = (float64_t)mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = (float64_t)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (float64_t)mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (float64_t)mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = (float64_t)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_STRING:
+      sscanf(mem->get_pointer<const char *>(),
+             BOX_DATA_TYPE_FORMAT[BOX_DATA_DOUBLE],
+             &value);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return value;
@@ -446,11 +440,15 @@ box_data::to_double()
  *
  * @return the box data string
  */
-box_data
+box_data &
 box_data::to_string()
 {
-  std::string string = get_string();
-  box_data str(BOX_DATA_STRING, string.c_str());
+  std::string string = this->get_string();
+  box_data &str = *(box_data *)orm::create(
+                    (entity *)new box_data(this->id.append(" as string"),
+                                           BOX_DATA_STRING,
+                                           string.c_str())
+                    );
   return str;
 }
 
@@ -462,6 +460,7 @@ box_data::to_string()
 uintptr_t
 box_data::get_address()
 {
+  memory *mem = this->get_memory();
   return (mem != NULL) ? (uintptr_t)mem->get_pointer<void *>() : 0;
 }
 
@@ -473,7 +472,7 @@ box_data::get_address()
 memory *
 box_data::get_memory()
 {
-  return mem;
+  return (memory *)this->getRelationship("box_data_memory")->front();
 }
 
 /**
@@ -495,6 +494,8 @@ box_data::get_type()
 bool
 box_data::default_value()
 {
+  memory *mem = this->get_memory();
+
   if (!mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -503,27 +504,103 @@ box_data::default_value()
 
   switch(type)
   {
-  case BOX_DATA_CHAR:
-  case BOX_DATA_SHORT:
-  case BOX_DATA_INT:
-  case BOX_DATA_LONG:
-  case BOX_DATA_STRING:
-    memset(mem->get_pointer<void *>(), 0, mem->get_size());
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() = 0.0f;
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() = 0.0;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+    case BOX_DATA_SHORT:
+    case BOX_DATA_INT:
+    case BOX_DATA_LONG:
+    case BOX_DATA_STRING:
+      memset(mem->get_pointer<void *>(), 0, mem->get_size());
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() = 0.0f;
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() = 0.0;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
+}
+
+void
+box_data::convert_itself(box_data_type new_type)
+{
+  memory *mem = this->get_memory();
+
+  if (!mem)
+  {
+    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+    return;
+  }
+
+  memory *new_mem;
+
+  switch (new_type)
+  {
+    case BOX_DATA_CHAR:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<int8_t>() = this->to_char();
+      break;
+    }
+    case BOX_DATA_SHORT:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<int16_t>() = this->to_short();
+      break;
+    }
+    case BOX_DATA_INT:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<int32_t>() = this->to_int();
+      break;
+    }
+    case BOX_DATA_LONG:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<int64_t>() = this->to_long();
+      break;
+    }
+    case BOX_DATA_STRING:
+    {
+      std::string str = this->get_string();
+      new_mem = this->vm->alloc(str.size() + 1);
+      strncpy(new_mem->get_pointer<char *>(),
+              str.c_str(),
+              new_mem->get_size());
+      break;
+    }
+    case BOX_DATA_FLOAT:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<float32_t>() = this->to_float();
+      break;
+    }
+    case BOX_DATA_DOUBLE:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<float64_t>() = this->to_double();
+      break;
+    }
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return;
+      break;
+  }
+
+  entity::addEntity("box_data_memory", (entity *)new_mem);
+  new_mem->addEntity("box_data_memory", (entity *)this);
+
+  entity::removeEntity("box_data_memory", (entity *)mem);
+  mem->removeEntity("box_data_memory", (entity *)this);
+
+  this->type = new_type;
 }
 
 /**
@@ -536,6 +613,8 @@ box_data::default_value()
 bool
 box_data::operator = (const void *data)
 {
+  memory *mem = this->get_memory();
+
   if ((!mem) || (!data))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -544,36 +623,50 @@ box_data::operator = (const void *data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>() = *(int8_t *)data;
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>() = *(int16_t *)data;
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>() = *(int32_t *)data;
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() = *(float32_t *)data;
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int64_t>() = *(int64_t *)data;
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() = *(float64_t *)data;
-    break;
-  case BOX_DATA_STRING:
-  {
-    box_data data_string(BOX_DATA_STRING, data);
-    mem->get_element<int8_t>() = 0;
-    return (*this += data_string);
-    break;
-  }
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() = *(int8_t *)data;
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() = *(int16_t *)data;
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() = *(int32_t *)data;
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() = *(float32_t *)data;
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int64_t>() = *(int64_t *)data;
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() = *(float64_t *)data;
+      break;
+    case BOX_DATA_STRING:
+    {
+      const char *str_temp = (const char *)data;
+      uint32_t str_size = strlen(str_temp) + 1;
+
+      if (mem->get_size() < str_size)
+      {
+        memory *new_mem = this->vm->alloc(str_size);
+        entity::addEntity("box_data_memory", (entity *)new_mem);
+        new_mem->addEntity("box_data_memory", (entity *)this);
+
+        entity::removeEntity("box_data_memory", (entity *)mem);
+        mem->removeEntity("box_data_memory", (entity *)this);
+
+        this->vm->free(mem);
+        mem = new_mem;
+      }
+
+      strncpy(mem->get_pointer<char *>(), str_temp, str_size);
+      break;
+    }
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -589,6 +682,8 @@ box_data::operator = (const void *data)
 bool
 box_data::operator = (box_data &data)
 {
+  memory *mem = this->get_memory();
+
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -609,30 +704,30 @@ box_data::operator = (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>() = data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>() = data.to_short();
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>() = data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() = data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int64_t>() = data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() = data.to_double();
-    break;
-  case BOX_DATA_STRING:
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() = data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() = data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() = data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() = data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int64_t>() = data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() = data.to_double();
+      break;
+    case BOX_DATA_STRING:
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -649,13 +744,15 @@ box_data::operator = (box_data &data)
 bool
 box_data::operator += (box_data &data)
 {
+  memory *mem = this->get_memory();
+
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
     return false;
   }
 
-  if (type == BOX_DATA_STRING)
+  if (this->type == BOX_DATA_STRING)
   {
     std::string string = data.get_string();
     uint32_t request_size = strlen(mem->get_pointer<const char *>()) +
@@ -663,12 +760,27 @@ box_data::operator += (box_data &data)
 
     if (mem->get_size() < request_size)
     {
-      mem = virtual_memory.realloc(mem, request_size);
+      memory *new_mem = vm->realloc(mem, request_size);
 
-      if (mem->get_size() != request_size)
+      if (new_mem->get_size() != request_size)
       {
         /* Something really bad happened. */
         return false;
+      }
+
+      if (new_mem != mem)
+      {
+        /*
+         * new_mem is different than mem,
+         * switch relations.
+         */
+        entity::addEntity("box_data_memory", (entity *)new_mem);
+        new_mem->addEntity("box_data_memory", (entity *)this);
+
+        entity::removeEntity("box_data_memory", (entity *)mem);
+        mem->removeEntity("box_data_memory", (entity *)this);
+
+        mem = new_mem;
       }
     }
 
@@ -682,31 +794,31 @@ box_data::operator += (box_data &data)
     return false;
   }
 
-  switch (type)
+  switch (this->type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>() += data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>() += data.to_short();
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>() += data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() += data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int32_t>() += data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() += data.to_double();
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() += data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() += data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() += data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() += data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() += data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() += data.to_double();
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -722,6 +834,7 @@ box_data::operator += (box_data &data)
 bool
 box_data::operator -= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -736,33 +849,33 @@ box_data::operator -= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>() -= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>() -= data.to_short();
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>() -= data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() -= data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int32_t>() -= data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() -= data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_SUBTRACTING_STRING);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() -= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() -= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() -= data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() -= data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() -= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() -= data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_SUBTRACTING_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -778,6 +891,7 @@ box_data::operator -= (box_data &data)
 bool
 box_data::operator *= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -792,33 +906,33 @@ box_data::operator *= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>() *= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>() *= data.to_short();
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>() *= data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() *= data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int32_t>() *= data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() *= data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_MULTIPLYING_STRING);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() *= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() *= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() *= data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() *= data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() *= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() *= data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_MULTIPLYING_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -834,6 +948,7 @@ box_data::operator *= (box_data &data)
 bool
 box_data::operator /= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -848,75 +963,75 @@ box_data::operator /= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
+    case BOX_DATA_CHAR:
 
-    if (data.to_char() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+      if (data.to_char() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<int8_t>() /= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+
+      if (data.to_short() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<int16_t>() /= data.to_short();
+      break;
+    case BOX_DATA_INT:
+
+      if (data.to_int() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<int32_t>() /= data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+
+      if (data.to_float() == 0.0f)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<float32_t>() /= data.to_float();
+      break;
+    case BOX_DATA_LONG:
+
+      if (data.to_long() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<int32_t>() /= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+
+      if (data.to_double() == 0.0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+        return false;
+      }
+
+      mem->get_element<float64_t>() /= data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
       return false;
-    }
-
-    mem->get_element<int8_t>() /= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-
-    if (data.to_short() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
       return false;
-    }
-
-    mem->get_element<int16_t>() /= data.to_short();
-    break;
-  case BOX_DATA_INT:
-
-    if (data.to_int() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
-      return false;
-    }
-
-    mem->get_element<int32_t>() /= data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-
-    if (data.to_float() == 0.0f)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
-      return false;
-    }
-
-    mem->get_element<float32_t>() /= data.to_float();
-    break;
-  case BOX_DATA_LONG:
-
-    if (data.to_long() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
-      return false;
-    }
-
-    mem->get_element<int32_t>() /= data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-
-    if (data.to_double() == 0.0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
-      return false;
-    }
-
-    mem->get_element<float64_t>() /= data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+      break;
   }
 
   return true;
@@ -932,6 +1047,7 @@ box_data::operator /= (box_data &data)
 bool
 box_data::operator %= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -948,55 +1064,55 @@ box_data::operator %= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    if (data.to_char() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+    case BOX_DATA_CHAR:
+      if (data.to_char() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+        return false;
+      }
+
+      mem->get_element<int8_t>() %= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      if (data.to_short() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+        return false;
+      }
+
+      mem->get_element<int16_t>() %= data.to_short();
+      break;
+    case BOX_DATA_INT:
+
+      if (data.to_int() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+        return false;
+      }
+
+      mem->get_element<int32_t>() %= data.to_int();
+      break;
+    case BOX_DATA_LONG:
+
+      if (data.to_long() == 0)
+      {
+        BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+        return false;
+      }
+
+      mem->get_element<int32_t>() %= data.to_long();
+      break;
+    case BOX_DATA_FLOAT:
+    case BOX_DATA_DOUBLE:
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
       return false;
-    }
-
-    mem->get_element<int8_t>() %= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    if (data.to_short() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
       return false;
-    }
-
-    mem->get_element<int16_t>() %= data.to_short();
-    break;
-  case BOX_DATA_INT:
-
-    if (data.to_int() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
-      return false;
-    }
-
-    mem->get_element<int32_t>() %= data.to_int();
-    break;
-  case BOX_DATA_LONG:
-
-    if (data.to_long() == 0)
-    {
-      BOX_ERROR(ERROR_BOX_DATA_MODULUS_ZERO);
-      return false;
-    }
-
-    mem->get_element<int32_t>() %= data.to_long();
-    break;
-  case BOX_DATA_FLOAT:
-  case BOX_DATA_DOUBLE:
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+      break;
   }
 
   return true;
@@ -1010,6 +1126,7 @@ box_data::operator %= (box_data &data)
 bool
 box_data::operator ++ ()
 {
+  memory *mem = this->get_memory();
   if (!mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1018,33 +1135,33 @@ box_data::operator ++ ()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>()++;
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>()++;
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>()++;
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() += 1.0f;
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int32_t>()++;
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() += 1.0;
-    break;
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_INCREMENTING_STRING);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>()++;
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>()++;
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>()++;
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() += 1.0f;
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>()++;
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() += 1.0;
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_INCREMENTING_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1058,6 +1175,7 @@ box_data::operator ++ ()
 bool
 box_data::operator -- ()
 {
+  memory *mem = this->get_memory();
   if (!mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1066,33 +1184,33 @@ box_data::operator -- ()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    mem->get_element<int8_t>()--;
-    break;
-  case BOX_DATA_SHORT:
-    mem->get_element<int16_t>()--;
-    break;
-  case BOX_DATA_INT:
-    mem->get_element<int32_t>()--;
-    break;
-  case BOX_DATA_FLOAT:
-    mem->get_element<float32_t>() -= 1.0f;
-    break;
-  case BOX_DATA_LONG:
-    mem->get_element<int32_t>()--;
-    break;
-  case BOX_DATA_DOUBLE:
-    mem->get_element<float64_t>() -= 1.0;
-    break;
-  case BOX_DATA_STRING:
-    BOX_ERROR(ERROR_BOX_DATA_DECREMENTING_STRING);
-    return false;
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>()--;
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>()--;
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>()--;
+      break;
+    case BOX_DATA_FLOAT:
+      mem->get_element<float32_t>() -= 1.0f;
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>()--;
+      break;
+    case BOX_DATA_DOUBLE:
+      mem->get_element<float64_t>() -= 1.0;
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_DECREMENTING_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1108,6 +1226,7 @@ box_data::operator -- ()
 bool
 box_data::operator == (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1116,43 +1235,43 @@ box_data::operator == (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() == data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() == data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() == data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() == data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() == data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() == data.to_double();
-    break;
-  case BOX_DATA_STRING:
-  {
-    if (data.type == BOX_DATA_STRING)
+    case BOX_DATA_CHAR:
+      return to_char() == data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() == data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() == data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() == data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() == data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() == data.to_double();
+      break;
+    case BOX_DATA_STRING:
     {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) == 0;
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) == 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) == 0;
+      }
+      break;
     }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) == 0;
-    }
-    break;
-  }
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1168,6 +1287,7 @@ box_data::operator == (box_data &data)
 bool
 box_data::operator != (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1176,41 +1296,41 @@ box_data::operator != (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() != data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() != data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() != data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() != data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() != data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() != data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    if (data.type == BOX_DATA_STRING)
-    {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) != 0;
-    }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) != 0;
-    }
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      return to_char() != data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() != data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() != data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() != data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() != data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() != data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) != 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) != 0;
+      }
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1226,6 +1346,7 @@ box_data::operator != (box_data &data)
 bool
 box_data::operator > (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1234,41 +1355,41 @@ box_data::operator > (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() > data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() > data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() > data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() > data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() > data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() > data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    if (data.type == BOX_DATA_STRING)
-    {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) > 0;
-    }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) < 0;
-    }
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      return to_char() > data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() > data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() > data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() > data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() > data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() > data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) > 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) < 0;
+      }
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1284,6 +1405,7 @@ box_data::operator > (box_data &data)
 bool
 box_data::operator < (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1292,41 +1414,41 @@ box_data::operator < (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() < data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() < data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() < data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() < data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() < data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() < data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    if (data.type == BOX_DATA_STRING)
-    {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) < 0;
-    }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) > 0;
-    }
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      return to_char() < data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() < data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() < data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() < data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() < data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() < data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) < 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) > 0;
+      }
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1342,6 +1464,7 @@ box_data::operator < (box_data &data)
 bool
 box_data::operator >= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1350,41 +1473,41 @@ box_data::operator >= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() >= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() >= data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() >= data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() >= data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() >= data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() >= data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    if (data.type == BOX_DATA_STRING)
-    {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) >= 0;
-    }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) <= 0;
-    }
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      return to_char() >= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() >= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() >= data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() >= data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() >= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() >= data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) >= 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) <= 0;
+      }
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1400,6 +1523,7 @@ box_data::operator >= (box_data &data)
 bool
 box_data::operator <= (box_data &data)
 {
+  memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1408,41 +1532,41 @@ box_data::operator <= (box_data &data)
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    return to_char() <= data.to_char();
-    break;
-  case BOX_DATA_SHORT:
-    return to_short() <= data.to_short();
-    break;
-  case BOX_DATA_INT:
-    return to_int() <= data.to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    return to_float() <= data.to_float();
-    break;
-  case BOX_DATA_LONG:
-    return to_long() <= data.to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    return to_double() <= data.to_double();
-    break;
-  case BOX_DATA_STRING:
-    if (data.type == BOX_DATA_STRING)
-    {
-      return strcmp(mem->get_pointer<const char *>(),
-                    (const char *)data.get_address()) <= 0;
-    }
-    else
-    {
-      std::string string = data.get_string();
-      return string.compare(mem->get_pointer<const char *>()) >= 0;
-    }
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      return to_char() <= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      return to_short() <= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      return to_int() <= data.to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      return to_float() <= data.to_float();
+      break;
+    case BOX_DATA_LONG:
+      return to_long() <= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      return to_double() <= data.to_double();
+      break;
+    case BOX_DATA_STRING:
+      if (data.type == BOX_DATA_STRING)
+      {
+        return strcmp(mem->get_pointer<const char *>(),
+                      (const char *)data.get_address()) <= 0;
+      }
+      else
+      {
+        std::string string = data.get_string();
+        return string.compare(mem->get_pointer<const char *>()) >= 0;
+      }
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1456,6 +1580,7 @@ box_data::operator <= (box_data &data)
 bool
 box_data::print()
 {
+  memory *mem = this->get_memory();
   if (!mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1464,32 +1589,32 @@ box_data::print()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    std::cout << to_char();
-    break;
-  case BOX_DATA_SHORT:
-    std::cout << to_short();
-    break;
-  case BOX_DATA_INT:
-    std::cout << to_int();
-    break;
-  case BOX_DATA_FLOAT:
-    std::cout << to_float();
-    break;
-  case BOX_DATA_LONG:
-    std::cout << to_long();
-    break;
-  case BOX_DATA_DOUBLE:
-    std::cout << to_double();
-    break;
-  case BOX_DATA_STRING:
-    std::cout << mem->get_pointer<char *>();
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      std::cout << to_char();
+      break;
+    case BOX_DATA_SHORT:
+      std::cout << to_short();
+      break;
+    case BOX_DATA_INT:
+      std::cout << to_int();
+      break;
+    case BOX_DATA_FLOAT:
+      std::cout << to_float();
+      break;
+    case BOX_DATA_LONG:
+      std::cout << to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+      std::cout << to_double();
+      break;
+    case BOX_DATA_STRING:
+      std::cout << mem->get_pointer<char *>();
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1519,6 +1644,7 @@ bool box_data::println()
 bool
 box_data::scan()
 {
+  memory *mem = this->get_memory();
   if (!mem)
   {
     BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
@@ -1527,32 +1653,32 @@ box_data::scan()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    std::cin >> mem->get_element<int8_t>();
-    break;
-  case BOX_DATA_SHORT:
-    std::cin >> mem->get_element<int16_t>();
-    break;
-  case BOX_DATA_INT:
-    std::cin >> mem->get_element<int32_t>();
-    break;
-  case BOX_DATA_FLOAT:
-    std::cin >> mem->get_element<float32_t>();
-    break;
-  case BOX_DATA_LONG:
-    std::cin >> mem->get_element<int64_t>();
-    break;
-  case BOX_DATA_DOUBLE:
-    std::cin >> mem->get_element<float64_t>();
-    break;
-  case BOX_DATA_STRING:
-    std::cin >> mem->get_pointer<int8_t *>();
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    return false;
-    break;
+    case BOX_DATA_CHAR:
+      std::cin >> mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      std::cin >> mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      std::cin >> mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      std::cin >> mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      std::cin >> mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      std::cin >> mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_STRING:
+      std::cin >> mem->get_pointer<int8_t *>();
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
   }
 
   return true;
@@ -1567,6 +1693,7 @@ std::string
 box_data::get_string()
 {
   std::string str;
+  memory *mem = this->get_memory();
 
   if (!mem)
   {
@@ -1576,31 +1703,31 @@ box_data::get_string()
 
   switch (type)
   {
-  case BOX_DATA_CHAR:
-    str = to_char();
-    break;
-  case BOX_DATA_SHORT:
-    str = std::to_string(to_short());
-    break;
-  case BOX_DATA_LONG:
-    str = std::to_string(to_long());
-    break;
-  case BOX_DATA_INT:
-    str = std::to_string(to_int());
-    break;
-  case BOX_DATA_FLOAT:
-    str = std::to_string(to_float());
-    break;
-  case BOX_DATA_DOUBLE:
-    str = std::to_string(to_double());
-    break;
-  case BOX_DATA_STRING:
-    str.assign(mem->get_pointer<const char *>());
-    break;
-  case BOX_DATA_INVALID:
-  default:
-    BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
-    break;
+    case BOX_DATA_CHAR:
+      str = to_char();
+      break;
+    case BOX_DATA_SHORT:
+      str = std::to_string(to_short());
+      break;
+    case BOX_DATA_LONG:
+      str = std::to_string(to_long());
+      break;
+    case BOX_DATA_INT:
+      str = std::to_string(to_int());
+      break;
+    case BOX_DATA_FLOAT:
+      str = std::to_string(to_float());
+      break;
+    case BOX_DATA_DOUBLE:
+      str = std::to_string(to_double());
+      break;
+    case BOX_DATA_STRING:
+      str.assign(mem->get_pointer<const char *>());
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
   }
 
   return str;
@@ -1611,15 +1738,13 @@ box_data::get_string()
  */
 box_data::~box_data()
 {
+  memory *mem = this->get_memory();
+
   if (!mem)
   {
     return;
   }
 
-  mem->decrease_ref();
-
-  if (mem->ready_to_remove())
-  {
-    virtual_memory.free(mem);
-  }
+  mem->removeEntity("box_data_memory", this);
+  this->vm->free(mem);
 }

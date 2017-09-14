@@ -1,25 +1,23 @@
-#include <iostream>
-#include "box_data_test.h"
-#include "box_array_test.h"
-#include "box_memory_chunk_test.h"
-#include "box_data_member_test.h"
-#include "box_member_collection_test.h"
-#include "box_virtual_memory_test.h"
-
-using namespace std;
+#include "test.h"
+#include "ORM/orm.h"
+#include "box_virtual_memory.h"
+#include <cstdlib>
 
 int main(int argc, char *argv[])
 {
   (void)argc;
   (void)argv;
 
-  box_memory_chunk_test();
-  box_virtual_memory_test();
-  box_data_test();
-  box_array_test();
-  box_data_member_test();
-  box_member_collection_test();
+  orm::addEntityRepostiory("memory");
+  orm::addEntityRepostiory("box_memory_chunk");
+  orm::addEntityRepostiory("box_array");
+  orm::addEntityRepostiory("box_virtual_memory");
+  orm::addEntityRepostiory("box_data");
 
-  return 0;
+  orm::create((entity *)new box_virtual_memory(CHUNK_MINIMUM_CAPACITY));
+
+  run_tests();
+
+  return EXIT_SUCCESS;
 }
 
