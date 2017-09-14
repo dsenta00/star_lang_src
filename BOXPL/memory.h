@@ -3,11 +3,6 @@
 #include <stdint.h>
 #include "ORM/entity.h"
 
-#ifndef MEMORY
-#define MEMORY
-  class memory;
-#endif
-
 /**
  * The memory object.
  *

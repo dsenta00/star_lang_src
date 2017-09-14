@@ -5,6 +5,11 @@
 #include <string>
 #include "../box_monitor.h"
 
+/**
+ * @brief entity::entity
+ * @param type
+ * @param id
+ */
 entity::entity(std::string type, const uint64_t id)
 {
   this->marked = false;
@@ -12,6 +17,11 @@ entity::entity(std::string type, const uint64_t id)
   this->id = std::to_string(id);
 }
 
+/**
+ * @brief entity::entity
+ * @param type
+ * @param id
+ */
 entity::entity(std::string type, std::string id)
 {
   this->marked = false;
@@ -19,6 +29,11 @@ entity::entity(std::string type, std::string id)
   this->id = id;
 }
 
+/**
+ * @brief entity::getRelationship
+ * @param relationship_name
+ * @return
+ */
 relationship *
 entity::getRelationship(std::string relationship_name)
 {
@@ -32,6 +47,11 @@ entity::getRelationship(std::string relationship_name)
   return NULL;
 }
 
+/**
+ * @brief entity::addRelationship
+ * @param relationship_name
+ * @param type
+ */
 void
 entity::addRelationship(std::string relationship_name, relationship_type type)
 {
@@ -45,6 +65,10 @@ entity::addRelationship(std::string relationship_name, relationship_type type)
   this->relation[relationship_name] = rp;
 }
 
+/**
+ * @brief entity::removeRelationship
+ * @param relationship_name
+ */
 void
 entity::removeRelationship(std::string relationship_name)
 {
@@ -56,6 +80,9 @@ entity::removeRelationship(std::string relationship_name)
   }
 }
 
+/**
+ * @brief entity::removeAllRelationships
+ */
 void
 entity::removeAllRelationships()
 {
@@ -75,31 +102,52 @@ entity::removeAllRelationships()
   }
 }
 
+/**
+ * @brief entity::getType
+ * @return
+ */
 std::string
 entity::getType()
 {
   return this->type;
 }
 
+/**
+ * @brief entity::getId
+ * @return
+ */
 std::string
 entity::getId()
 {
   return this->id;
 }
 
+/**
+ * @brief entity::getMarked
+ * @return
+ */
 bool
 entity::getMarked()
 {
   return this->marked;
 }
 
+/**
+ * @brief entity::setMarked
+ * @param marked
+ */
 void
 entity::setMarked(bool marked)
 {
   this->marked = marked;
 }
 
-
+/**
+ * @brief entity::addEntity
+ * @param relationship_name
+ * @param e
+ * @return
+ */
 entity *
 entity::addEntity(std::string relationship_name, entity *e)
 {
@@ -116,6 +164,12 @@ entity::addEntity(std::string relationship_name, entity *e)
   return this;
 }
 
+/**
+ * @brief entity::addEntities
+ * @param relationship_name
+ * @param er
+ * @return
+ */
 entity*
 entity::addEntities(std::string relationship_name, relationship *er)
 {
@@ -132,6 +186,12 @@ entity::addEntities(std::string relationship_name, relationship *er)
   return this;
 }
 
+/**
+ * @brief entity::removeEntity
+ * @param relationship_name
+ * @param e
+ * @return
+ */
 entity *
 entity::removeEntity(std::string relationship_name, entity *e)
 {
@@ -158,7 +218,10 @@ entity::removeEntity(std::string relationship_name, entity *e)
   return this;
 }
 
-
+/**
+ * @brief entity::hasRelations
+ * @return
+ */
 bool
 entity::hasRelations()
 {
@@ -203,6 +266,11 @@ entity::removeEntity(entity *e)
   return this;
 }
 
+/**
+ * @brief entity::notifyRemove
+ * @param relationship_name
+ * @param e
+ */
 void
 entity::notifyRemove(std::string relationship_name, entity *e)
 {
@@ -222,6 +290,11 @@ entity::notifyRemove(std::string relationship_name, entity *e)
   }
 }
 
+/**
+ * @brief entity::back
+ * @param relationship_name
+ * @return
+ */
 entity *
 entity::back(std::string relationship_name)
 {
@@ -238,6 +311,9 @@ entity::back(std::string relationship_name)
   return NULL;
 }
 
+/**
+ * @brief entity::~entity
+ */
 entity::~entity()
 {
   this->removeAllRelationships();

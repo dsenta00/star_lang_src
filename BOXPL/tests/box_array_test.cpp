@@ -1,10 +1,10 @@
 #include "box_array_test.h"
-#include "box_array.h"
-#include "box_assert.h"
-#include "box_virtual_memory.h"
-#include "box_monitor.h"
-#include "box_data.h"
-#include "ORM/orm.h"
+#include "../box_array.h"
+#include "../box_assert.h"
+#include "../box_virtual_memory.h"
+#include "../box_monitor.h"
+#include "../box_data.h"
+#include "../ORM/orm.h"
 #include <limits.h>
 
 static box_virtual_memory *virtual_memory;
@@ -29,12 +29,6 @@ static box_data &
 alloc_box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL)
 {
   return *(box_data *)orm::create((entity *)new box_data(id, type, value));
-}
-
-static box_array &
-alloc_box_array(std::string id, box_array *array = NULL)
-{
-  return *(box_array *)orm::create((entity *)new box_array(id, array));
 }
 
 static void clear_vm()
@@ -83,7 +77,7 @@ box_array_test_basic()
 {
   BOX_ERROR_CLEAR;
   ASSERT_VIRTUAL_MEMORY(0);
-  box_array &empty_array = alloc_box_array("empty_array");
+  box_array &empty_array = *box_array::create("empty_array");
   ASSERT_VIRTUAL_MEMORY(0);
 
   for (uint16_t i = 0; i < USHRT_MAX; i++)
@@ -186,7 +180,7 @@ box_array_test_basic()
               comparision.c_str(),
               (const char *)str2.get_address());
 
-  box_array &array = alloc_box_array("array");
+  box_array &array = *box_array::create("array");
 
   for (uint32_t i = 0; i < ARRAY_SIZE; i++)
   {

@@ -1,10 +1,10 @@
-#include "box_data.h"
-#include "box_data_test.h"
-#include "box_assert.h"
-#include "box_monitor.h"
-#include "box_virtual_memory.h"
-#include "ORM/orm.h"
-#include "memory.h"
+#include "../box_data.h"
+#include "../box_data_test.h"
+#include "../box_assert.h"
+#include "../box_monitor.h"
+#include "../box_virtual_memory.h"
+#include "../ORM/orm.h"
+#include "../memory.h"
 
 static box_virtual_memory *virtual_memory;
 
@@ -380,6 +380,7 @@ box_data_test_string()
 {
   BOX_ERROR_CLEAR;
   ASSERT_VIRTUAL_MEMORY(0);
+
   box_data &empty_string = alloc_box_data("empty_string", BOX_DATA_STRING);
   ASSERT_OK;
   ASSERT_VIRTUAL_MEMORY(BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
@@ -1010,7 +1011,6 @@ box_data_test_int()
   orm::destroy(&string_data);
   BOX_OK;
 
-  printf("total allocated: %u\n", virtual_memory->get_allocated_total());
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 

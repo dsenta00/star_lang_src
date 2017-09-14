@@ -2,17 +2,8 @@
 #define BOX_DATA_H
 #include "ORM/entity.h"
 #include "box_data_type.h"
+#include "box_fw.h"
 #include <string>
-
-#ifndef MEMORY
-#define MEMORY
-  class memory;
-#endif
-
-#ifndef BOX_VIRTUAL_MEMORY
-#define BOX_VIRTUAL_MEMORY
-  class box_virtual_memory;
-#endif
 
 /**
  * The box_data class. Represents data in BOX PL and defines

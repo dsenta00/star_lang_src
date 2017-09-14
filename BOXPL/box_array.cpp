@@ -248,3 +248,15 @@ box_array::~box_array()
 {
   this->clear();
 }
+
+/**
+ * @brief create
+ * @param id
+ * @param array
+ * @return
+ */
+box_array *
+box_array::create(std::string id, box_array *array)
+{
+  return (box_array *)orm::create((entity *)new box_array(id, array));
+}

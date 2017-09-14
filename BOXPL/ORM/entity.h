@@ -13,6 +13,9 @@
 
 typedef std::shared_ptr<relationship> relationship_p;
 
+/**
+ * @brief The entity class
+ */
 class entity {
 protected:
   bool marked;

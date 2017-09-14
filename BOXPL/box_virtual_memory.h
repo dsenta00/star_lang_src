@@ -1,18 +1,9 @@
 #ifndef BOX_VIRTUAL_MEMORY_H
 #define BOX_VIRTUAL_MEMORY_H
 #include "ORM/entity.h"
+#include "box_fw.h"
 #include <cstdint>
 #include <functional>
-
-#ifndef MEMORY
-#define MEMORY
-  class memory;
-#endif
-
-#ifndef MEMORY_CHUNK
-#define MEMORY_CHUNK
-  class memory_chunk;
-#endif
 
 #define CHUNK_MINIMUM_CAPACITY (32768)
 #define CHUNK_MAXIMUM_CAPACITY (134217728)

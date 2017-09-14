@@ -1,14 +1,10 @@
 #ifndef BOX_MEMORY_CHUNK_IF_H
 #define BOX_MEMORY_CHUNK_IF_H
 #include "ORM/entity.h"
+#include "box_fw.h"
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-
-#ifndef MEMORY
-#define MEMORY
-class memory;
-#endif
 
 class memory_chunk_if : public entity {
 protected:

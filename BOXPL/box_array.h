@@ -2,12 +2,8 @@
 #define BOX_ARRAY_H
 #include "ORM/entity.h"
 #include "box_data_type.h"
+#include "box_fw.h"
 #include <string>
-
-#ifndef BOX_DATA
-#define BOX_DATA
-  class box_data;
-#endif
 
 /**
  * Represents data array.
@@ -15,7 +11,6 @@
 class box_array : public entity {
 public:
   box_array(std::string id, box_array *array = NULL);
-
   uint16_t get_noof();
   entity *operator [](uint32_t index);
   entity *operator [](std::string index);
@@ -25,6 +20,8 @@ public:
   box_data &to_string();
   void clear();
   virtual ~box_array();
+
+  static box_array *create(std::string id, box_array *array = NULL);
 protected:
   void remove_data(std::string index);
   void remove_data(entity *e);

@@ -1,19 +1,18 @@
-#include "box_virtual_memory.h"
 #include "box_virtual_memory_test.h"
-#include "box_assert.h"
-#include "box_monitor.h"
-#include "memory.h"
+#include "../box_virtual_memory.h"
+#include "../box_assert.h"
+#include "../box_monitor.h"
+#include "../memory.h"
+#include "../ORM/orm.h"
 #include <limits.h>
 #include <vector>
 #include <ctime>
-#include "ORM/orm.h"
 
 #define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
   ASSERT_TRUE(__VM__.get_allocated_total() == (__BYTES__), \
   "Total allocated should be %u (%u)", \
   (__BYTES__), \
   __VM__.get_allocated_total())
-
 
 static box_virtual_memory &
 alloc_box_virtual_memory(uint32_t capacity)
@@ -64,7 +63,7 @@ box_virtual_memory_test_basic(void)
 
   std::vector<memory *> memory_array;
 
-  for (uint32_t i = 0; i < UINT16_MAX; i++)
+  for (uint32_t i = 0; i < UINT8_MAX; i++)
   {
     size_t size = (rand() % 8192) + 1;
     memory *mem = vm.alloc(size);
@@ -74,13 +73,13 @@ box_virtual_memory_test_basic(void)
     memory_array.push_back(mem);
   }
 
-  for (uint32_t i = 0; i < UINT16_MAX; i += 2)
+  for (uint32_t i = 0; i < UINT8_MAX; i += 2)
   {
     vm.free(memory_array[i]);
     ASSERT_OK;
   }
 
-  for (uint32_t i = 1; i < UINT16_MAX; i += 2)
+  for (uint32_t i = 1; i < UINT8_MAX; i += 2)
   {
     memory *mem = memory_array[i];
     size_t old_size = mem->get_size();
@@ -113,6 +112,9 @@ box_virtual_memory_test_basic(void)
   vm.free(&mem_unkown);
   ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
   BOX_ERROR_CLEAR;
+
+  orm::destroy(&vm);
+  orm::destroy(&vm_zero_cap);
 
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
