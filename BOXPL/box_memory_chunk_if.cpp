@@ -20,7 +20,7 @@ memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
 {
   memory *mem = (memory *)orm::create((entity *)new memory(address, size));
 
-  this->free_memory->addEntity((entity *)mem);
+  this->free_memory->add_entity((entity *)mem);
   mem->add_entity("free_memory", (entity *)this);
 
   this->free += size;
@@ -51,13 +51,13 @@ memory_chunk_if::free_memory_front()
 uint32_t
 memory_chunk_if::free_memory_num()
 {
-  return this->free_memory->numOfEntities();
+  return this->free_memory->num_of_entities();
 }
 
 void
 memory_chunk_if::free_memory_delete_all()
 {
-  while (this->free_memory->numOfEntities())
+  while (this->free_memory->num_of_entities())
   {
     entity *e = this->free_memory_front();
     this->free -= ((memory *)e)->get_size();
@@ -101,7 +101,7 @@ memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 {
   memory *mem = (memory *)orm::create((entity *)new memory(address, size));
 
-  this->reserved_memory->addEntity((entity *)mem);
+  this->reserved_memory->add_entity((entity *)mem);
   mem->add_entity("reserved_memory", (entity *)this);
 
   this->free -= size;
@@ -138,7 +138,7 @@ memory_chunk_if::reserved_memory_back()
 uint32_t
 memory_chunk_if::reserved_memory_num()
 {
-  return this->reserved_memory->numOfEntities();
+  return this->reserved_memory->num_of_entities();
 }
 
 void

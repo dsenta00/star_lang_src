@@ -100,11 +100,11 @@ entity::remove_all_relationships()
   {
     relationship *r = (*it).second.get();
 
-    while (r->numOfEntities())
+    while (r->num_of_entities())
     {
       entity *e = r->front();
 
-      r->removeEntity(e);
+      r->remove_entity(e);
       e->notify_remove(r->get_name(), this);
     }
   }
@@ -171,7 +171,7 @@ entity::add_entity(std::string relationship_name, entity *e)
     return;
   }
 
-  r->addEntity(e);
+  r->add_entity(e);
 }
 
 /**
@@ -193,7 +193,7 @@ entity::add_entities(std::string relationship_name,
     return;
   }
 
-  r->addEntities(er);
+  r->add_entities(er);
 }
 
 /**
@@ -217,7 +217,7 @@ entity::remove_entity(std::string relationship_name, entity *e)
     return;
   }
 
-  r->removeEntity(e);
+  r->remove_entity(e);
   e->notify_remove(r->get_name(), this);
 
   if (!this->have_relations())
@@ -240,7 +240,7 @@ entity::have_relations()
   {
     relationship *r = (*it).second.get();
 
-    if(r->numOfEntities() > 0)
+    if(r->num_of_entities() > 0)
     {
       return true;
     }
@@ -263,7 +263,7 @@ entity::remove_entity(entity *e)
        it++)
   {
     relationship *r = (*it).second.get();
-    r->removeEntity(e);
+    r->remove_entity(e);
     e->notify_remove(r->get_name(), this);
   }
 
@@ -290,7 +290,7 @@ entity::notify_remove(std::string relationship_name, entity *e)
     return;
   }
 
-  r->removeEntity(e);
+  r->remove_entity(e);
 
   if (!this->have_relations())
   {

@@ -32,17 +32,17 @@ public:
   relationship_type get_type();
   entity *get_entity(std::string id = "single");
   entity *find(const std::function<bool(entity *)> &func);
-  relationship *sort(const std::function<bool(entity *, entity *)> &func);
-  relationship *for_each(const std::function<foreach_result(entity *, entity *)> &func);
-  relationship *for_each(const std::function<void(entity *)> &func);
-  relationship *addEntity(entity *e);
-  relationship *addEntities(relationship *r);
-  relationship *removeEntity(entity *e);
-  std::vector<entity *> &getEntities();
+  void sort(const std::function<bool(entity *, entity *)> &func);
+  void for_each(const std::function<foreach_result(entity *, entity *)> &func);
+  void for_each(const std::function<void(entity *)> &func);
+  void add_entity(entity *e);
+  void add_entities(relationship *r);
+  void remove_entity(entity *e);
+  std::vector<entity *> &get_entities();
   entity *front();
   entity *back();
   void delete_all();
-  uint32_t numOfEntities();
+  uint32_t num_of_entities();
 };
 
 #endif // RELATIONSHIP_H

@@ -62,8 +62,8 @@ static void orm_test_basic()
   ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
   ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
   ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-  ASSERT_TRUE(c1_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
-  ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c2_relationship->numOfEntities());
+  ASSERT_TRUE(c1_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)", c1_relationship->num_of_entities());
+  ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)", c2_relationship->num_of_entities());
 
   class2 *c2_1 = (class2 *)c1->back("class1_class2");
   ASSERT_TRUE(c2_1 == c2, "back() should return 0x%X (0x%X)", c2, c2_1);
@@ -95,16 +95,16 @@ void orm_test_advanced()
 
   ASSERT_TRUE(c1_relationship != NULL, "relationship class1_class2 should exist!");
   ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
-  ASSERT_TRUE(c1_relationship->numOfEntities() == 16, "number of entities should be 16! (%u)", c1_relationship->numOfEntities());
+  ASSERT_TRUE(c1_relationship->num_of_entities() == 16, "number of entities should be 16! (%u)", c1_relationship->num_of_entities());
 
-  std::vector<entity *> &entities = c1->get_relationship("class1_class2")->getEntities();
+  std::vector<entity *> &entities = c1->get_relationship("class1_class2")->get_entities();
   for (entity *e : entities)
   {
     relationship *c2_relationship = e->get_relationship("class1_class2");
 
     ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
     ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-    ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
+    ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)", c1_relationship->num_of_entities());
   }
 
   /*
@@ -135,7 +135,7 @@ void orm_test_advanced()
 
   ASSERT_TRUE(c1_relationship != NULL, "relationship class1_class2 should exist!");
   ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
-  ASSERT_TRUE(c1_relationship->numOfEntities() == 8, "number of entities should be 8! (%u)", c1_relationship->numOfEntities());
+  ASSERT_TRUE(c1_relationship->num_of_entities() == 8, "number of entities should be 8! (%u)", c1_relationship->num_of_entities());
 
   for (entity *e : entities)
   {
@@ -145,7 +145,7 @@ void orm_test_advanced()
 
     ASSERT_TRUE(c2_relationship != NULL, "relationship class1_class2 should exist!");
     ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-    ASSERT_TRUE(c2_relationship->numOfEntities() == 1, "number of entities should be 1! (%u)", c1_relationship->numOfEntities());
+    ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)", c1_relationship->num_of_entities());
   }
 
   /*

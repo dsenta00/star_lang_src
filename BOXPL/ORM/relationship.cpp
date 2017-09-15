@@ -77,6 +77,12 @@ relationship::get_entity(std::string id)
   });
 }
 
+/**
+ * Find entity.
+ *
+ * @param func - function rule.
+ * @return entity if found, otherwise return NULL.
+ */
 entity *
 relationship::find(const std::function<bool(entity *)> &func)
 {
@@ -91,14 +97,23 @@ relationship::find(const std::function<bool(entity *)> &func)
   return NULL;
 }
 
-relationship *
+/**
+ * Sort entities.
+ *
+ * @param func - function to sort.
+ */
+void
 relationship::sort(const std::function <bool(entity *, entity *)>& func)
 {
   std::sort(this->entities.begin(), this->entities.end(), func);
-  return this;
 }
 
-relationship *
+/**
+ * foreach two neighbour iterators.
+ *
+ * @param func - function to handle current interators.
+ */
+void
 relationship::for_each(const std::function<foreach_result(entity *, entity *)> &func)
 {
   for (auto it1 = this->entities.begin();
@@ -127,28 +142,33 @@ relationship::for_each(const std::function<foreach_result(entity *, entity *)> &
           it2++;
           break;
         default:
-          return this;
+          return;
       }
     }
   }
-
-  return this;
 }
 
-
-relationship *
+/**
+ * foreach one iterator.
+ *
+ * @param func - function to handle iterator.
+ */
+void
 relationship::for_each(const std::function<void(entity *)> &func)
 {
   for (entity *e : this->entities)
   {
     func(e);
   }
-
-  return this;
 }
 
-relationship *
-relationship::addEntity(entity *e)
+/**
+ * Add entity to this relationship.
+ *
+ * @param e - the entity.
+ */
+void
+relationship::add_entity(entity *e)
 {
   switch (this->type)
   {
@@ -170,29 +190,35 @@ relationship::addEntity(entity *e)
 
   e->set_marked(false);
   this->entities.push_back(e);
-
-  return this;
 }
 
-relationship *
-relationship::addEntities(relationship *r)
+/**
+ * Add entities.
+ *
+ * @param r - relationship that contains entities.
+ */
+void
+relationship::add_entities(relationship *r)
 {
   if (this->type != r->type)
   {
     BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_ENTITIES_WITH_DIFFERENT_RELATIONSHIP_TYPE);
-    return this;
+    return;
   }
 
   for (entity *e : r->entities)
   {
     this->entities.push_back(e);
   }
-
-  return this;
 }
 
-relationship *
-relationship::removeEntity(entity *e)
+/**
+ * Remove entity from this relationship.
+ *
+ * @param e - the entity.
+ */
+void
+relationship::remove_entity(entity *e)
 {
   for (auto it = this->entities.begin();
        it != this->entities.end();
@@ -204,32 +230,56 @@ relationship::removeEntity(entity *e)
       break;
     }
   }
-
-  return this;
 }
 
+/**
+ * Get entites
+ * @return entity vector
+ */
 std::vector<entity *> &
-relationship::getEntities()
+relationship::get_entities()
 {
   return this->entities;
 }
 
-entity *relationship::front()
+/**
+ * Get front entity from this relationship.
+ *
+ * @return entity if exists, otherwise return NULL.
+ */
+entity *
+relationship::front()
 {
   return (this->entities.size()) ? this->entities.front() : NULL;
 }
 
-entity *relationship::back()
+/**
+ * Get back entity from this relationship.
+ *
+ * @return entity if exists, otherwise return NULL.
+ */
+entity *
+relationship::back()
 {
   return (this->entities.size()) ? this->entities.back() : NULL;
 }
 
-void relationship::delete_all()
+/**
+ * Delete all entites from relationship.
+ */
+void
+relationship::delete_all()
 {
   this->entities.clear();
 }
 
-uint32_t relationship::numOfEntities()
+/**
+ * Get number of entities.
+ *
+ * @return number of entities.
+ */
+uint32_t
+relationship::num_of_entities()
 {
   return this->entities.size();
 }

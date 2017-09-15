@@ -46,7 +46,7 @@ next_power_of_2(uint32_t number)
 memory_chunk *
 box_virtual_memory::find_memory_chunk(std::function<bool(memory_chunk *)> func)
 {
-  for (entity *e : this->box_memory_chunk->getEntities())
+  for (entity *e : this->box_memory_chunk->get_entities())
   {
     memory_chunk *chunk = (memory_chunk *)e;
 
@@ -75,7 +75,7 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
   }
 
   memory_chunk *chunk = (memory_chunk *)orm::create((entity *)new memory_chunk(max_allocated_bytes));
-  this->box_memory_chunk->addEntity((entity *)chunk);
+  this->box_memory_chunk->add_entity((entity *)chunk);
 
   return chunk;
 }

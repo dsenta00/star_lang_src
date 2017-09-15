@@ -143,7 +143,7 @@ memory::assign(uintptr_t address,
 bool
 memory::ready_to_remove()
 {
-  return this->get_relationship("box_data_memory")->numOfEntities() == 0;
+  return this->get_relationship("box_data_memory")->num_of_entities() == 0;
 }
 
 /*

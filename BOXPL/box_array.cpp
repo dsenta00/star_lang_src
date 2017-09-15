@@ -171,7 +171,7 @@ box_array::clear()
 {
   relationship *r = this->get_relationship("array");
 
-  while (r->numOfEntities())
+  while (r->num_of_entities())
   {
     this->remove_data(r->front());
   }
@@ -194,7 +194,7 @@ box_array::remove_data(entity *e)
   }
 
   relationship *r = this->get_relationship("array");
-  r->removeEntity(e);
+  r->remove_entity(e);
 
   if (e->get_entity_type() == "box_data")
   {
