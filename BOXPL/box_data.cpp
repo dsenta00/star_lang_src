@@ -105,6 +105,9 @@ box_data::get_type_str()
 {
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      return "BOX_DATA_BOOL";
+      break;
     case BOX_DATA_CHAR:
       return "BOX_DATA_CHAR";
       break;
@@ -134,6 +137,60 @@ box_data::get_type_str()
 }
 
 /**
+ * Convert data to bool and return.
+ *
+ * @return bool value
+ */
+bool
+box_data::to_bool()
+{
+  bool value = false;
+  memory *mem = this->get_memory();
+
+  if (!mem)
+  {
+    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+    return value;
+  }
+
+  switch (type)
+  {
+    case BOX_DATA_BOOL:
+      value = mem->get_element<bool>();
+      break;
+    case BOX_DATA_STRING:
+    {
+      value = (get_string() != "");
+      break;
+    }
+    case BOX_DATA_CHAR:
+      value = (bool)mem->get_element<int8_t>();
+      break;
+    case BOX_DATA_SHORT:
+      value = (bool)mem->get_element<int16_t>();
+      break;
+    case BOX_DATA_INT:
+      value = (bool)mem->get_element<int32_t>();
+      break;
+    case BOX_DATA_FLOAT:
+      value = (bool)mem->get_element<float32_t>();
+      break;
+    case BOX_DATA_LONG:
+      value = (bool)mem->get_element<int64_t>();
+      break;
+    case BOX_DATA_DOUBLE:
+      value = (bool)mem->get_element<float64_t>();
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      break;
+  }
+
+  return value;
+}
+
+/**
  * Convert data to char and return.
  *
  * @return char value if success, otherwise return null terminating character.
@@ -152,6 +209,9 @@ box_data::to_char()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (int8_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_STRING:
     case BOX_DATA_CHAR:
       value = mem->get_element<int8_t>();
@@ -199,6 +259,9 @@ box_data::to_short()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (int16_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       value = (int16_t)mem->get_element<int8_t>();
       break;
@@ -250,6 +313,9 @@ box_data::to_int()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (int32_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       value = (int32_t)mem->get_element<int8_t>();;
       break;
@@ -301,6 +367,9 @@ box_data::to_float()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (float32_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       value = (float32_t)mem->get_element<int8_t>();
       break;
@@ -352,6 +421,9 @@ box_data::to_long()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (int64_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       value = (int64_t)mem->get_element<int8_t>();
       break;
@@ -403,6 +475,9 @@ box_data::to_double()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      value = (float64_t)mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       value = (float64_t)mem->get_element<int8_t>();
       break;
@@ -504,6 +579,7 @@ box_data::default_value()
 
   switch(type)
   {
+    case BOX_DATA_BOOL:
     case BOX_DATA_CHAR:
     case BOX_DATA_SHORT:
     case BOX_DATA_INT:
@@ -542,6 +618,12 @@ box_data::convert_itself(box_data_type new_type)
 
   switch (new_type)
   {
+    case BOX_DATA_BOOL:
+    {
+      new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
+      new_mem->get_element<bool>() = this->to_bool();
+      break;
+    }
     case BOX_DATA_CHAR:
     {
       new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
@@ -599,6 +681,7 @@ box_data::convert_itself(box_data_type new_type)
 
   entity::remove_entity("box_data_memory", (entity *)mem);
   mem->remove_entity("box_data_memory", (entity *)this);
+  this->vm->free(mem);
 
   this->type = new_type;
 }
@@ -623,6 +706,9 @@ box_data::operator = (const void *data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      mem->get_element<bool>() = *(bool *)data;
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>() = *(int8_t *)data;
       break;
@@ -704,6 +790,9 @@ box_data::operator = (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      mem->get_element<bool>() = data.to_bool();
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>() = data.to_char();
       break;
@@ -723,6 +812,180 @@ box_data::operator = (box_data &data)
       mem->get_element<float64_t>() = data.to_double();
       break;
     case BOX_DATA_STRING:
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
+  }
+
+  return true;
+}
+
+/**
+ * Operator &=.
+ *
+ * @param data - the data.
+ *
+ * @return true if success, otherwise return false.
+ */
+bool
+box_data::operator &= (box_data &data)
+{
+  memory *mem = this->get_memory();
+  if ((!mem) || (data.get_address() == 0))
+  {
+    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+    return false;
+  }
+
+  if (data.type == BOX_DATA_STRING)
+  {
+    BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+    return false;
+  }
+
+  switch (type)
+  {
+    case BOX_DATA_BOOL:
+      mem->get_element<bool>() &= data.to_bool();
+      break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() &= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() &= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() &= data.to_int();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() &= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+    case BOX_DATA_FLOAT:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_FLOAT);
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
+  }
+
+  return true;
+}
+
+/**
+ * Operator |=.
+ *
+ * @param data - the data.
+ *
+ * @return true if success, otherwise return false.
+ */
+bool
+box_data::operator |= (box_data &data)
+{
+  memory *mem = this->get_memory();
+  if ((!mem) || (data.get_address() == 0))
+  {
+    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+    return false;
+  }
+
+  if (data.type == BOX_DATA_STRING)
+  {
+    BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+    return false;
+  }
+
+  switch (type)
+  {
+    case BOX_DATA_BOOL:
+      mem->get_element<bool>() |= data.to_bool();
+      break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() |= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() |= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() |= data.to_int();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() |= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+    case BOX_DATA_FLOAT:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_FLOAT);
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+      return false;
+      break;
+    case BOX_DATA_INVALID:
+    default:
+      BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
+      return false;
+      break;
+  }
+
+  return true;
+}
+
+/**
+ * Operator ^=
+ *
+ * @param data - the data.
+ *
+ * @return true if success, otherwise return false.
+ */
+bool
+box_data::operator ^= (box_data &data)
+{
+  memory *mem = this->get_memory();
+  if ((!mem) || (data.get_address() == 0))
+  {
+    BOX_ERROR(ERROR_BOX_DATA_NULL_DATA);
+    return false;
+  }
+
+  if (data.type == BOX_DATA_STRING)
+  {
+    BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+    return false;
+  }
+
+  switch (type)
+  {
+    case BOX_DATA_BOOL:
+      mem->get_element<bool>() ^= data.to_bool();
+      break;
+    case BOX_DATA_CHAR:
+      mem->get_element<int8_t>() ^= data.to_char();
+      break;
+    case BOX_DATA_SHORT:
+      mem->get_element<int16_t>() ^= data.to_short();
+      break;
+    case BOX_DATA_INT:
+      mem->get_element<int32_t>() ^= data.to_int();
+      break;
+    case BOX_DATA_LONG:
+      mem->get_element<int32_t>() ^= data.to_long();
+      break;
+    case BOX_DATA_DOUBLE:
+    case BOX_DATA_FLOAT:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_FLOAT);
+      break;
+    case BOX_DATA_STRING:
+      BOX_ERROR(ERROR_BOX_DATA_LOGICAL_OPERATION_STRING);
+      return false;
+      break;
     case BOX_DATA_INVALID:
     default:
       BOX_ERROR(ERROR_BOX_DATA_INVALID_DATA_TYPE);
@@ -796,6 +1059,9 @@ box_data::operator += (box_data &data)
 
   switch (this->type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true += false */
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>() += data.to_char();
       break;
@@ -849,6 +1115,9 @@ box_data::operator -= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true -= false */
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>() -= data.to_char();
       break;
@@ -906,6 +1175,9 @@ box_data::operator *= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true *= false */
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>() *= data.to_char();
       break;
@@ -963,6 +1235,9 @@ box_data::operator /= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true /= false */
+      break;
     case BOX_DATA_CHAR:
 
       if (data.to_char() == 0)
@@ -1056,7 +1331,8 @@ box_data::operator %= (box_data &data)
 
   if ((data.type == BOX_DATA_FLOAT) ||
       (data.type == BOX_DATA_DOUBLE) ||
-      (data.type == BOX_DATA_STRING))
+      (data.type == BOX_DATA_STRING) ||
+      (data.type == BOX_DATA_BOOL))
   {
     BOX_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
     return false;
@@ -1064,6 +1340,9 @@ box_data::operator %= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true %= false */
+      break;
     case BOX_DATA_CHAR:
       if (data.to_char() == 0)
       {
@@ -1135,6 +1414,9 @@ box_data::operator ++ ()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do true++ */
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>()++;
       break;
@@ -1184,6 +1466,9 @@ box_data::operator -- ()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* Doesn't make any sense to do false-- */
+      break;
     case BOX_DATA_CHAR:
       mem->get_element<int8_t>()--;
       break;
@@ -1235,6 +1520,9 @@ box_data::operator == (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      return to_bool() == data.to_bool();
+      break;
     case BOX_DATA_CHAR:
       return to_char() == data.to_char();
       break;
@@ -1296,6 +1584,9 @@ box_data::operator != (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      return to_bool() != data.to_bool();
+      break;
     case BOX_DATA_CHAR:
       return to_char() != data.to_char();
       break;
@@ -1355,6 +1646,9 @@ box_data::operator > (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* doesn't make any sense "true > false" */
+      break;
     case BOX_DATA_CHAR:
       return to_char() > data.to_char();
       break;
@@ -1414,6 +1708,9 @@ box_data::operator < (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* doesn't make any sense "true < false" */
+      break;
     case BOX_DATA_CHAR:
       return to_char() < data.to_char();
       break;
@@ -1473,6 +1770,9 @@ box_data::operator >= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* doesn't make any sense "true >= false" */
+      break;
     case BOX_DATA_CHAR:
       return to_char() >= data.to_char();
       break;
@@ -1532,6 +1832,9 @@ box_data::operator <= (box_data &data)
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      /* doesn't make any sense "true <= false" */
+      break;
     case BOX_DATA_CHAR:
       return to_char() <= data.to_char();
       break;
@@ -1589,6 +1892,9 @@ box_data::print()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      std::cout << (to_bool() ? "true" : "false");
+      break;
     case BOX_DATA_CHAR:
       std::cout << to_char();
       break;
@@ -1653,6 +1959,9 @@ box_data::scan()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      std::cin >> mem->get_element<bool>();
+      break;
     case BOX_DATA_CHAR:
       std::cin >> mem->get_element<int8_t>();
       break;
@@ -1703,6 +2012,9 @@ box_data::get_string()
 
   switch (type)
   {
+    case BOX_DATA_BOOL:
+      str = to_bool() ? "true" : "false";
+      break;
     case BOX_DATA_CHAR:
       str = to_char();
       break;

@@ -9,6 +9,7 @@ typedef double float64_t;
 /**
  * BOX data type enumeration.
  *
+ * @value BOX_DATA_BOOL    - represents 8 bit boolean.
  * @value BOX_DATA_CHAR    - represents 8 bit character type.
  * @value BOX_DATA_SHORT   - represents 16 bit signed type.
  * @value BOX_DATA_INT     - represents 32 bit signed type.
@@ -20,6 +21,7 @@ typedef double float64_t;
  * @value BOX_DATA_INVALID - invalid type.
  */
 typedef enum {
+  BOX_DATA_BOOL,
   BOX_DATA_CHAR,
   BOX_DATA_SHORT,
   BOX_DATA_INT,
@@ -32,6 +34,7 @@ typedef enum {
 
 const char box_data_type_string[][64] =
 {
+  "BOX_DATA_BOOL"
   "BOX_DATA_CHAR",
   "BOX_DATA_SHORT",
   "BOX_DATA_INT",
@@ -44,6 +47,7 @@ const char box_data_type_string[][64] =
 
 const char BOX_DATA_TYPE_FORMAT[][8] =
 {
+  "%d",  // BOX_DATA_BOOL,
   "%c",  // BOX_DATA_CHAR,
   "%hd", // BOX_DATA_SHORT,
   "%d",  // BOX_DATA_INT,
@@ -56,6 +60,7 @@ const char BOX_DATA_TYPE_FORMAT[][8] =
 
 const uint8_t BOX_DATA_TYPE_SIZE[] =
 {
+  sizeof(bool),      // BOX_DATA_BOOL,
   sizeof(int8_t),    // BOX_DATA_CHAR,
   sizeof(int16_t),   // BOX_DATA_SHORT,
   sizeof(int32_t),   // BOX_DATA_INT,

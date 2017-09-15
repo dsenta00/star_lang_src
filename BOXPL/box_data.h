@@ -16,6 +16,7 @@ public:
 
   const char *get_type_str();
 
+  bool to_bool();
   int8_t to_char();
   int16_t to_short();
   int32_t to_int();
@@ -30,6 +31,9 @@ public:
 
   bool operator =  (const void *data);
   bool operator =  (box_data &data);
+  bool operator &= (box_data &data);
+  bool operator |= (box_data &data);
+  bool operator ^= (box_data &data);
   bool operator += (box_data &data);
   bool operator -= (box_data &data);
   bool operator *= (box_data &data);

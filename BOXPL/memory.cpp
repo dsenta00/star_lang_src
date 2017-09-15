@@ -155,6 +155,7 @@ template int32_t &memory::get_element();
 template int64_t &memory::get_element();
 template float32_t &memory::get_element();
 template float64_t &memory::get_element();
+template bool &memory::get_element();
 template void *memory::get_pointer();
 template char *memory::get_pointer();
 template const char *memory::get_pointer();
