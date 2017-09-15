@@ -2,17 +2,32 @@
 #include "entity.h"
 #include <algorithm>
 
+/**
+ * The constructor.
+ *
+ * @param entity_type - entity type in string.
+ */
 entity_repository::entity_repository(std::string entity_type)
 {
   this->entity_type = entity_type;
 }
 
+/**
+ * @brief entity_repository::get_entity_type
+ * @return entity type.
+ */
 std::string &
-entity_repository::getEntityType()
+entity_repository::get_entity_type()
 {
   return this->entity_type;
 }
 
+/**
+ * Find entity.
+ *
+ * @param func - function rule to find.
+ * @return entity if found, otherwise return NULL.
+ */
 entity *
 entity_repository::find(const std::function <bool(entity *)>& func)
 {
@@ -22,35 +37,45 @@ entity_repository::find(const std::function <bool(entity *)>& func)
 
     if (func(e))
     {
-      return e->getMarked() ? NULL : e;
+      return e->get_marked() ? NULL : e;
     }
   }
 
   return NULL;
 }
 
-entity_repository *
+/**
+ * Add new entity.
+ *
+ * @param e - the entity
+ */
+void
 entity_repository::add(entity *e)
 {
-  if (e->getMarked())
+  if (e->get_marked())
   {
-    e->setMarked(false);
-    return this;
+    e->set_marked(false);
+    return;
   }
 
   this->entities.push_back(std::unique_ptr<entity>(e));
-  return this;
 }
 
-entity_repository *
+/**
+ * Remove entity from repository.
+ *
+ * @param e - the entity.
+ */
+void
 entity_repository::remove(entity *e)
 {
-  e->setMarked(true);
-  e->removeAllRelationships();
-
-  return this;
+  e->set_marked(true);
+  e->remove_all_relationships();
 }
 
+/**
+ * Sweep all entity objects that are marked.
+ */
 void
 entity_repository::sweep()
 {
@@ -59,7 +84,7 @@ entity_repository::sweep()
     auto it = std::find_if(this->entities.begin(),
                            this->entities.end(),
                            [&] (entity_p &ep) {
-              return ep.get()->getMarked();
+              return ep.get()->get_marked();
     });
 
     if (it == this->entities.end())
@@ -71,6 +96,9 @@ entity_repository::sweep()
   }
 }
 
+/**
+ * Clear all entites from repository.
+ */
 void
 entity_repository::clear()
 {

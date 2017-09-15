@@ -16,12 +16,12 @@
  */
 box_array::box_array(std::string id, box_array *array) : entity::entity("box_array", id)
 {
-  this->addRelationship("array", ONE_TO_MANY);
+  this->add_relationship("array", ONE_TO_MANY);
 
   /*
    * array can be subarray of many arrays
    */
-  this->addRelationship("subarray", ONE_TO_MANY);
+  this->add_relationship("subarray", ONE_TO_MANY);
 
   if (array == NULL)
   {
@@ -112,7 +112,7 @@ box_array::to_string()
 {
   box_data &str = *(box_data *)orm::create((entity *)new box_data(this->id.append(" as string"), BOX_DATA_STRING));
 
-  relationship *r = this->getRelationship("array");
+  relationship *r = this->get_relationship("array");
 
   if (!r)
   {
@@ -125,7 +125,7 @@ box_array::to_string()
                                                                             (const void *)&ch));
 
   r->for_each([&] (entity *e) {
-    if (e->getType() == "box_data")
+    if (e->get_entity_type() == "box_data")
     {
       box_data *data = (box_data *)e;
       str += *data;
@@ -141,7 +141,7 @@ box_array::to_string()
         str += separator_char;
       }
     }
-    else if (e->getType() == "box_array")
+    else if (e->get_entity_type() == "box_array")
     {
       box_array *data = (box_array *)e;
       str += data->to_string();
@@ -169,7 +169,7 @@ box_array::to_string()
 void
 box_array::clear()
 {
-  relationship *r = this->getRelationship("array");
+  relationship *r = this->get_relationship("array");
 
   while (r->numOfEntities())
   {
@@ -193,19 +193,19 @@ box_array::remove_data(entity *e)
     return;
   }
 
-  relationship *r = this->getRelationship("array");
+  relationship *r = this->get_relationship("array");
   r->removeEntity(e);
 
-  if (e->getType() == "box_data")
+  if (e->get_entity_type() == "box_data")
   {
-    e->removeEntity("array", (entity *)this);
+    e->remove_entity("array", (entity *)this);
   }
-  else if (e->getType() == "box_array")
+  else if (e->get_entity_type() == "box_array")
   {
-    e->removeEntity("subarray", (entity *)this);
+    e->remove_entity("subarray", (entity *)this);
   }
 
-  this->array.erase(e->getId());
+  this->array.erase(e->get_id());
 }
 
 
@@ -221,20 +221,20 @@ box_array::insert_data(std::string index, entity *e)
     BOX_ERROR(ERROR_BOX_ARRAY_ADDING_NULL_DATA);
   }
 
-  if (e->getType() == "box_data")
+  if (e->get_entity_type() == "box_data")
   {
     entity *new_data = orm::create((entity *)new box_data(index, *(box_data *)e));
-    this->addEntity("array", new_data);
+    this->add_entity("array", new_data);
 
-    new_data->addRelationship("array", MANY_TO_ONE);
-    new_data->addEntity("array", (entity *)this);
+    new_data->add_relationship("array", MANY_TO_ONE);
+    new_data->add_entity("array", (entity *)this);
 
     this->array[index] = new_data;
   }
-  else if (e->getType() == "box_array")
+  else if (e->get_entity_type() == "box_array")
   {
-    this->addEntity("array", e);
-    e->addEntity("subarray", (entity *)this);
+    this->add_entity("array", e);
+    e->add_entity("subarray", (entity *)this);
 
     this->array[index] = e;
   }

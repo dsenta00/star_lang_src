@@ -4,31 +4,63 @@
 #include "../box_monitor.h"
 #include <algorithm>
 
-relationship::relationship(entity *parent_entity, std::string relationship_name, relationship_type type)
+/**
+ * The constructor.
+ *
+ * @param parent_entity - relationship owner.
+ * @param relationship_name - relationship name.
+ * @param type - relationship type.
+ */
+relationship::relationship(entity *parent_entity,
+                           std::string relationship_name,
+                           relationship_type type)
 {
   this->parent_entity = parent_entity;
   this->relationship_name = relationship_name;
   this->type = type;
 }
 
-std::string relationship::getName()
+/**
+ * Get relationsjip name.
+ *
+ * @return relationship name.
+ */
+std::string &
+relationship::get_name()
 {
   return this->relationship_name;
 }
 
-relationship *relationship::setName(std::string relationship_name)
+/**
+ * Set relationship name.
+ *
+ * @param relationship_name
+ */
+void
+relationship::set_name(std::string relationship_name)
 {
   this->relationship_name = relationship_name;
-  return this;
 }
 
-relationship_type relationship::getType()
+/**
+ * Get relationship type.
+ *
+ * @return relationship type.
+ */
+relationship_type
+relationship::get_type()
 {
   return this->type;
 }
 
+/**
+ * Get entity by ID.
+ *
+ * @param id - entity ID.
+ * @return entity if found, otherwise return NULL.
+ */
 entity *
-relationship::getEntity(std::string id)
+relationship::get_entity(std::string id)
 {
   if (id == "single")
   {
@@ -41,7 +73,7 @@ relationship::getEntity(std::string id)
   }
 
   return this->find([&] (entity *e) {
-    return e->getId() == id;
+    return e->get_id() == id;
   });
 }
 
@@ -136,7 +168,7 @@ relationship::addEntity(entity *e)
     }
   }
 
-  e->setMarked(false);
+  e->set_marked(false);
   this->entities.push_back(e);
 
   return this;

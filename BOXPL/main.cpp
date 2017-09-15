@@ -8,11 +8,11 @@ int main(int argc, char *argv[])
   (void)argc;
   (void)argv;
 
-  orm::addEntityRepostiory("memory");
-  orm::addEntityRepostiory("box_memory_chunk");
-  orm::addEntityRepostiory("box_array");
-  orm::addEntityRepostiory("box_virtual_memory");
-  orm::addEntityRepostiory("box_data");
+  orm::add_entity_repostiory("memory");
+  orm::add_entity_repostiory("box_memory_chunk");
+  orm::add_entity_repostiory("box_array");
+  orm::add_entity_repostiory("box_virtual_memory");
+  orm::add_entity_repostiory("box_data");
 
   orm::create((entity *)new box_virtual_memory(CHUNK_MINIMUM_CAPACITY));
 

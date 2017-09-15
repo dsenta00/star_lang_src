@@ -14,7 +14,7 @@
  */
 box_data::box_data(std::string id, box_data_type type, const void *value) : entity::entity("box_data", id)
 {
-  this->addRelationship("box_data_memory", ONE_TO_MANY);
+  this->add_relationship("box_data_memory", ONE_TO_MANY);
   this->vm = (box_virtual_memory *)orm::get_first("box_virtual_memory");
   this->type = type;
 
@@ -34,8 +34,8 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
       return;
     }
 
-    entity::addEntity("box_data_memory", (entity *)mem);
-    mem->addEntity("box_data_memory", (entity *)this);
+    entity::add_entity("box_data_memory", (entity *)mem);
+    mem->add_entity("box_data_memory", (entity *)this);
 
     default_value();
   }
@@ -53,8 +53,8 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
       return;
     }
 
-    entity::addEntity("box_data_memory", (entity *)mem);
-    mem->addEntity("box_data_memory", (entity *)this);
+    entity::add_entity("box_data_memory", (entity *)mem);
+    mem->add_entity("box_data_memory", (entity *)this);
 
     memcpy(mem->get_pointer<void *>(), value, size);
   }
@@ -67,7 +67,7 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
  */
 box_data::box_data(std::string id, box_data &data) : entity::entity("box_data", id)
 {
-  this->addRelationship("box_data_memory", ONE_TO_MANY);
+  this->add_relationship("box_data_memory", ONE_TO_MANY);
 
   memory *data_mem = data.get_memory();
 
@@ -91,8 +91,8 @@ box_data::box_data(std::string id, box_data &data) : entity::entity("box_data", 
          data_mem->get_pointer<void *>(),
          data_mem->get_size());
 
-  this->addEntity("box_data_memory", (entity *)mem);
-  mem->addEntity("box_data_memory", (entity *)this);
+  this->add_entity("box_data_memory", (entity *)mem);
+  mem->add_entity("box_data_memory", (entity *)this);
 }
 
 /**
@@ -472,7 +472,7 @@ box_data::get_address()
 memory *
 box_data::get_memory()
 {
-  return (memory *)this->getRelationship("box_data_memory")->front();
+  return (memory *)this->get_relationship("box_data_memory")->front();
 }
 
 /**
@@ -594,11 +594,11 @@ box_data::convert_itself(box_data_type new_type)
       break;
   }
 
-  entity::addEntity("box_data_memory", (entity *)new_mem);
-  new_mem->addEntity("box_data_memory", (entity *)this);
+  entity::add_entity("box_data_memory", (entity *)new_mem);
+  new_mem->add_entity("box_data_memory", (entity *)this);
 
-  entity::removeEntity("box_data_memory", (entity *)mem);
-  mem->removeEntity("box_data_memory", (entity *)this);
+  entity::remove_entity("box_data_memory", (entity *)mem);
+  mem->remove_entity("box_data_memory", (entity *)this);
 
   this->type = new_type;
 }
@@ -649,11 +649,11 @@ box_data::operator = (const void *data)
       if (mem->get_size() < str_size)
       {
         memory *new_mem = this->vm->alloc(str_size);
-        entity::addEntity("box_data_memory", (entity *)new_mem);
-        new_mem->addEntity("box_data_memory", (entity *)this);
+        entity::add_entity("box_data_memory", (entity *)new_mem);
+        new_mem->add_entity("box_data_memory", (entity *)this);
 
-        entity::removeEntity("box_data_memory", (entity *)mem);
-        mem->removeEntity("box_data_memory", (entity *)this);
+        entity::remove_entity("box_data_memory", (entity *)mem);
+        mem->remove_entity("box_data_memory", (entity *)this);
 
         this->vm->free(mem);
         mem = new_mem;
@@ -774,11 +774,11 @@ box_data::operator += (box_data &data)
          * new_mem is different than mem,
          * switch relations.
          */
-        entity::addEntity("box_data_memory", (entity *)new_mem);
-        new_mem->addEntity("box_data_memory", (entity *)this);
+        entity::add_entity("box_data_memory", (entity *)new_mem);
+        new_mem->add_entity("box_data_memory", (entity *)this);
 
-        entity::removeEntity("box_data_memory", (entity *)mem);
-        mem->removeEntity("box_data_memory", (entity *)this);
+        entity::remove_entity("box_data_memory", (entity *)mem);
+        mem->remove_entity("box_data_memory", (entity *)this);
 
         mem = new_mem;
       }
@@ -1745,6 +1745,6 @@ box_data::~box_data()
     return;
   }
 
-  mem->removeEntity("box_data_memory", this);
+  mem->remove_entity("box_data_memory", this);
   this->vm->free(mem);
 }

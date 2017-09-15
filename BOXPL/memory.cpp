@@ -14,9 +14,9 @@ typedef double float64_t;
  */
 memory::memory(uintptr_t address, uint32_t size) : entity::entity("memory", address)
 {
-  this->addRelationship("free_memory", MANY_TO_ONE);
-  this->addRelationship("reserved_memory", MANY_TO_ONE);
-  this->addRelationship("box_data_memory", ONE_TO_MANY);
+  this->add_relationship("free_memory", MANY_TO_ONE);
+  this->add_relationship("reserved_memory", MANY_TO_ONE);
+  this->add_relationship("box_data_memory", ONE_TO_MANY);
 
   this->address = address;
   this->size = size;
@@ -143,7 +143,7 @@ memory::assign(uintptr_t address,
 bool
 memory::ready_to_remove()
 {
-  return this->getRelationship("box_data_memory")->numOfEntities() == 0;
+  return this->get_relationship("box_data_memory")->numOfEntities() == 0;
 }
 
 /*

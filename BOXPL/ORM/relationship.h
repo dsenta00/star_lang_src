@@ -1,15 +1,11 @@
 #ifndef RELATIONSHIP_H
 #define RELATIONSHIP_H
+#include "orm_fw.h"
+#include "relationship_type.h"
 #include <vector>
 #include <string>
-#include "relationship_type.h"
 #include <functional>
 #include <memory>
-
-#ifndef ENTITY
-#define ENTITY
-  class entity;
-#endif
 
 typedef enum {
   FOREACH_CONTINUE,
@@ -17,6 +13,10 @@ typedef enum {
   FOREACH_IT1_REMOVED
 } foreach_result;
 
+/**
+ * The relationship class.
+ * Contains and manages all entity objects in relationship.
+ */
 class relationship
 {
   std::string relationship_name;
@@ -27,10 +27,10 @@ class relationship
   void notify_removing(entity *entity_to_remove);
 public:
   relationship(entity *parent_entity, std::string relationship_name, relationship_type type);
-  std::string getName();
-  relationship *setName(std::string relationship_name);
-  relationship_type getType();
-  entity *getEntity(std::string id = "single");
+  std::string &get_name();
+  void set_name(std::string relationship_name);
+  relationship_type get_type();
+  entity *get_entity(std::string id = "single");
   entity *find(const std::function<bool(entity *)> &func);
   relationship *sort(const std::function<bool(entity *, entity *)> &func);
   relationship *for_each(const std::function<foreach_result(entity *, entity *)> &func);

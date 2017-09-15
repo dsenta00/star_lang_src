@@ -87,8 +87,8 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
  */
 box_virtual_memory::box_virtual_memory(uint32_t init_capacity) : entity::entity("box_virtual_memory", "MAIN")
 {
-  this->addRelationship("box_memory_chunk", ONE_TO_MANY);
-  this->box_memory_chunk = this->getRelationship("box_memory_chunk");
+  this->add_relationship("box_memory_chunk", ONE_TO_MANY);
+  this->box_memory_chunk = this->get_relationship("box_memory_chunk");
 
   this->allocated_total = 0;
   this->max_allocated_bytes = 0;

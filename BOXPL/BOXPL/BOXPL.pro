@@ -24,7 +24,8 @@ SOURCES += \
     ../tests/box_data_test.cpp \
     ../tests/box_memory_chunk_test.cpp \
     ../tests/box_virtual_memory_test.cpp \
-    ../tests/test.cpp
+    ../tests/test.cpp \
+    ../box_method.cpp
 
 HEADERS += \
     ../ORM/entity.h \
@@ -51,6 +52,8 @@ HEADERS += \
     ../tests/box_memory_chunk_test.h \
     ../tests/box_virtual_memory_test.h \
     ../tests/test.h \
-    ../box_fw.h
+    ../box_fw.h \
+    ../box_method.h \
+    ../ORM/orm_fw.h
 
 DISTFILES +=

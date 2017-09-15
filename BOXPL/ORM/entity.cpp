@@ -6,7 +6,8 @@
 #include "../box_monitor.h"
 
 /**
- * @brief entity::entity
+ * The constructor.
+ *
  * @param type
  * @param id
  */
@@ -18,7 +19,8 @@ entity::entity(std::string type, const uint64_t id)
 }
 
 /**
- * @brief entity::entity
+ * The constructor.
+ *
  * @param type
  * @param id
  */
@@ -30,12 +32,13 @@ entity::entity(std::string type, std::string id)
 }
 
 /**
- * @brief entity::getRelationship
+ * Get relationship.
+ *
  * @param relationship_name
- * @return
+ * @return relationship if exists, otherwise return NULL.
  */
 relationship *
-entity::getRelationship(std::string relationship_name)
+entity::get_relationship(std::string relationship_name)
 {
   auto it = this->relation.find(relationship_name);
 
@@ -48,29 +51,34 @@ entity::getRelationship(std::string relationship_name)
 }
 
 /**
- * @brief entity::addRelationship
+ * Add relationship.
+ *
  * @param relationship_name
  * @param type
  */
 void
-entity::addRelationship(std::string relationship_name, relationship_type type)
+entity::add_relationship(std::string relationship_name,
+                         relationship_type type)
 {
-  if (this->getRelationship(relationship_name))
+  if (this->get_relationship(relationship_name))
   {
     return;
   }
 
-  relationship_p rp(new relationship((entity *)this, relationship_name, type));
+  relationship_p rp(new relationship((entity *)this,
+                                     relationship_name,
+                                     type));
 
   this->relation[relationship_name] = rp;
 }
 
 /**
- * @brief entity::removeRelationship
+ * Remove relationship.
+ *
  * @param relationship_name
  */
 void
-entity::removeRelationship(std::string relationship_name)
+entity::remove_relationship(std::string relationship_name)
 {
   auto it = this->relation.find(relationship_name);
 
@@ -81,10 +89,10 @@ entity::removeRelationship(std::string relationship_name)
 }
 
 /**
- * @brief entity::removeAllRelationships
+ * Remove all relationships.
  */
 void
-entity::removeAllRelationships()
+entity::remove_all_relationships()
 {
   for (auto it = this->relation.begin();
        it != this->relation.end();
@@ -97,133 +105,134 @@ entity::removeAllRelationships()
       entity *e = r->front();
 
       r->removeEntity(e);
-      e->notifyRemove(r->getName(), this);
+      e->notify_remove(r->get_name(), this);
     }
   }
 }
 
 /**
- * @brief entity::getType
- * @return
+ * Get entity type.
+ *
+ * @return entity type.
  */
 std::string
-entity::getType()
+entity::get_entity_type()
 {
   return this->type;
 }
 
 /**
- * @brief entity::getId
- * @return
+ * Get entity ID.
+ *
+ * @return entity ID.
  */
 std::string
-entity::getId()
+entity::get_id()
 {
   return this->id;
 }
 
 /**
- * @brief entity::getMarked
- * @return
+ * Get marked.
+ *
+ * @return marked.
  */
 bool
-entity::getMarked()
+entity::get_marked()
 {
   return this->marked;
 }
 
 /**
- * @brief entity::setMarked
+ * Set marked.
+ *
  * @param marked
  */
 void
-entity::setMarked(bool marked)
+entity::set_marked(bool marked)
 {
   this->marked = marked;
 }
 
 /**
- * @brief entity::addEntity
- * @param relationship_name
- * @param e
- * @return
+ * Add entity to relationship.
+ *
+ * @param relationship_name - relationship name.
+ * @param e - the entity.
  */
-entity *
-entity::addEntity(std::string relationship_name, entity *e)
+void
+entity::add_entity(std::string relationship_name, entity *e)
 {
-  relationship *r = this->getRelationship(relationship_name);
+  relationship *r = this->get_relationship(relationship_name);
 
   if (!r)
   {
     BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return this;
+    return;
   }
 
   r->addEntity(e);
-
-  return this;
 }
 
 /**
- * @brief entity::addEntities
+ * Add entities.
+ *
  * @param relationship_name
  * @param er
  * @return
  */
-entity*
-entity::addEntities(std::string relationship_name, relationship *er)
+void
+entity::add_entities(std::string relationship_name,
+                     relationship *er)
 {
-  relationship *r = this->getRelationship(relationship_name);
+  relationship *r = this->get_relationship(relationship_name);
 
   if (!r)
   {
     BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return this;
+    return;
   }
 
   r->addEntities(er);
-
-  return this;
 }
 
 /**
- * @brief entity::removeEntity
- * @param relationship_name
- * @param e
- * @return
+ * Remove entity from relationship.
+ *
+ * @param relationship_name - relationship name.
+ * @param e - the entity.
  */
-entity *
-entity::removeEntity(std::string relationship_name, entity *e)
+void
+entity::remove_entity(std::string relationship_name, entity *e)
 {
-  relationship *r = this->getRelationship(relationship_name);
+  relationship *r = this->get_relationship(relationship_name);
 
   if (!r)
   {
-    return this;
+    return;
   }
 
   if (!e)
   {
-    return this;
+    return;
   }
 
   r->removeEntity(e);
-  e->notifyRemove(r->getName(), this);
+  e->notify_remove(r->get_name(), this);
 
-  if (!this->hasRelations())
+  if (!this->have_relations())
   {
-    this->setMarked(true);
+    this->set_marked(true);
   }
-
-  return this;
 }
 
 /**
- * @brief entity::hasRelations
- * @return
+ * Check if entity has relations.
+ *
+ * @return true if have, otherwise return false.
  */
 bool
-entity::hasRelations()
+entity::have_relations()
 {
   for (auto it = this->relation.begin();
        it != this->relation.end();
@@ -246,8 +255,8 @@ entity::hasRelations()
  * @param e
  * @return this
  */
-entity *
-entity::removeEntity(entity *e)
+void
+entity::remove_entity(entity *e)
 {
   for (auto it = this->relation.begin();
        it != this->relation.end();
@@ -255,38 +264,37 @@ entity::removeEntity(entity *e)
   {
     relationship *r = (*it).second.get();
     r->removeEntity(e);
-    e->notifyRemove(r->getName(), this);
+    e->notify_remove(r->get_name(), this);
   }
 
-  if (!this->hasRelations())
+  if (!this->have_relations())
   {
-    this->setMarked(true);
+    this->set_marked(true);
   }
-
-  return this;
 }
 
 /**
- * @brief entity::notifyRemove
- * @param relationship_name
- * @param e
+ * Notify this entity that another entity is removing
+ * it from relationship.
+ *
+ * @param relationship_name - relationship name.
+ * @param e - the entity.
  */
 void
-entity::notifyRemove(std::string relationship_name, entity *e)
+entity::notify_remove(std::string relationship_name, entity *e)
 {
-  relationship *r = this->getRelationship(relationship_name);
+  relationship *r = this->get_relationship(relationship_name);
 
   if (!r)
   {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
     return;
   }
 
   r->removeEntity(e);
 
-  if (!this->hasRelations())
+  if (!this->have_relations())
   {
-    this->setMarked(true);
+    this->set_marked(true);
   }
 }
 
@@ -298,17 +306,15 @@ entity::notifyRemove(std::string relationship_name, entity *e)
 entity *
 entity::back(std::string relationship_name)
 {
-  relationship *r = this->getRelationship(relationship_name);
+  relationship *r = this->get_relationship(relationship_name);
 
   if (!r)
   {
     BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return this;
+    return NULL;
   }
 
   return r->back();
-
-  return NULL;
 }
 
 /**
@@ -316,5 +322,5 @@ entity::back(std::string relationship_name)
  */
 entity::~entity()
 {
-  this->removeAllRelationships();
+  this->remove_all_relationships();
 }

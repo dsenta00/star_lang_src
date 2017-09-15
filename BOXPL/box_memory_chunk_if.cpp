@@ -7,11 +7,11 @@
 
 memory_chunk_if::memory_chunk_if() : entity::entity("box_memory_chunk", "chunk")
 {
-  entity::addRelationship("free_memory", ONE_TO_MANY);
-  entity::addRelationship("reserved_memory", ONE_TO_MANY);
+  entity::add_relationship("free_memory", ONE_TO_MANY);
+  entity::add_relationship("reserved_memory", ONE_TO_MANY);
 
-  this->free_memory = entity::getRelationship("free_memory");
-  this->reserved_memory = entity::getRelationship("reserved_memory");
+  this->free_memory = entity::get_relationship("free_memory");
+  this->reserved_memory = entity::get_relationship("reserved_memory");
   this->free = 0;
 }
 
@@ -21,7 +21,7 @@ memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
   memory *mem = (memory *)orm::create((entity *)new memory(address, size));
 
   this->free_memory->addEntity((entity *)mem);
-  mem->addEntity("free_memory", (entity *)this);
+  mem->add_entity("free_memory", (entity *)this);
 
   this->free += size;
 }
@@ -102,7 +102,7 @@ memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
   memory *mem = (memory *)orm::create((entity *)new memory(address, size));
 
   this->reserved_memory->addEntity((entity *)mem);
-  mem->addEntity("reserved_memory", (entity *)this);
+  mem->add_entity("reserved_memory", (entity *)this);
 
   this->free -= size;
   return mem;
