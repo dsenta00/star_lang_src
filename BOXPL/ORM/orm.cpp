@@ -7,9 +7,9 @@
 typedef std::unique_ptr<entity_repository> entity_repository_p;
 
 /**
- * @brief repo - repository list.
+ * @brief repo - repository map.
  */
-static std::list<std::unique_ptr<entity_repository>> repo;
+static std::map<std::string, entity_repository_p> repo;
 
 /**
  * Find entity repository.
@@ -20,14 +20,8 @@ static std::list<std::unique_ptr<entity_repository>> repo;
 entity_repository *
 orm::find_entity_repostiory(std::string entity_type)
 {
-  auto it = std::find_if(repo.begin(),
-                         repo.end(),
-                         [&] (entity_repository_p &ptr) {
-            entity_repository *er = ptr.get();
-            return er->get_entity_type() == entity_type;
-  });
-
-  return (it != repo.end()) ? (*it).get() : NULL;
+  auto it = repo.find(entity_type);
+  return (it != repo.end()) ? (it->second).get() : NULL;
 }
 
 /**
@@ -43,7 +37,7 @@ orm::add_entity_repostiory(std::string entity_type)
     return;
   }
 
-  repo.push_back(entity_repository_p(new entity_repository(entity_type)));
+  repo[entity_type] = entity_repository_p(new entity_repository(entity_type));
 }
 
 /**
@@ -54,13 +48,7 @@ orm::add_entity_repostiory(std::string entity_type)
 void
 orm::remove_entity_repostiory(std::string entity_type)
 {
-  auto it = std::find_if(repo.begin(),
-                         repo.end(),
-                         [&] (entity_repository_p &ptr) {
-            entity_repository *er = ptr.get();
-            return er->get_entity_type() == entity_type;
-  });
-
+  auto it = repo.find(entity_type);
   if (it == repo.end())
   {
     return;
@@ -78,19 +66,20 @@ orm::remove_entity_repostiory(std::string entity_type)
 entity *
 orm::create(entity *e)
 {
-  if (e)
+  if (!e)
   {
-    entity_repository *er = orm::find_entity_repostiory(e->get_entity_type());
-
-    if (!er)
-    {
-      delete e;
-      return NULL;
-    }
-
-    er->add(e);
+    return NULL;
   }
 
+  entity_repository *er = orm::find_entity_repostiory(e->get_entity_type());
+
+  if (!er)
+  {
+    orm::add_entity_repostiory(e->get_entity_type());
+    er = orm::find_entity_repostiory(e->get_entity_type());
+  }
+
+  er->add(e);
   return e;
 }
 
@@ -120,9 +109,11 @@ orm::destroy(entity *e)
 void
 orm::sweep()
 {
-  for (entity_repository_p &erp : repo)
+  for (auto it = repo.begin();
+       it != repo.end();
+       it++)
   {
-    erp.get()->sweep();
+    (it->second).get()->sweep();
   }
 }
 

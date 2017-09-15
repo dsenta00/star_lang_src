@@ -44,8 +44,8 @@ public:
   bool operator >= (box_data &data);
   bool operator <= (box_data &data);
 
-  uintptr_t get_address();
   memory *get_memory();
+  uintptr_t get_address();
   box_data_type get_type();
 
   bool print();
