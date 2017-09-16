@@ -1,6 +1,7 @@
 <h1>Star programming language</h1>
 <img src="StarProgrammingLanguageLogo.png" width="200" height="200" align="middle"/>
-Server side, headless and standalone programming language that should solve following problems:
+
+Server side, headless and standalone programming language that should solve following problems</br>
 
 - Very high abstraction
 - Separation of concerns
