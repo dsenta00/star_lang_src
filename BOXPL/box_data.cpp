@@ -96,6 +96,33 @@ box_data::box_data(std::string id, box_data &data) : entity::entity("box_data", 
 }
 
 /**
+ * @brief box_data::create
+ * @param id
+ * @param type
+ * @param value
+ * @return
+ */
+box_data *
+box_data::create(std::string id,
+                 box_data_type type,
+                 const void *value)
+{
+  return (box_data *)orm::create((entity *)new box_data(id, type, value));
+}
+
+/**
+ * @brief box_data::create
+ * @param id
+ * @param data
+ * @return
+ */
+box_data *
+box_data::create(std::string id, box_data &data)
+{
+  return (box_data *)orm::create((entity *)new box_data(id, data));
+}
+
+/**
  * Get type string.
  *
  * @return type to string.

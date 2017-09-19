@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
   orm::add_entity_repostiory("box_array");
   orm::add_entity_repostiory("box_virtual_memory");
   orm::add_entity_repostiory("box_data");
+  orm::add_entity_repostiory("box_method");
+  orm::add_entity_repostiory("instruction");
 
   orm::create((entity *)new box_virtual_memory(CHUNK_MINIMUM_CAPACITY));
 

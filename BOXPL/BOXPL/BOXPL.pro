@@ -25,7 +25,8 @@ SOURCES += \
     ../tests/box_memory_chunk_test.cpp \
     ../tests/box_virtual_memory_test.cpp \
     ../tests/test.cpp \
-    ../box_method.cpp
+    ../box_method.cpp \
+    ../box_data_type.cpp
 
 HEADERS += \
     ../ORM/entity.h \

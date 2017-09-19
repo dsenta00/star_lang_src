@@ -11,8 +11,17 @@
  */
 class box_data : public entity {
 public:
-  box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL);
+  box_data(std::string id,
+           box_data_type type = BOX_DATA_INVALID,
+           const void *value = NULL);
+
   box_data(std::string id, box_data &data);
+
+  static box_data *create(std::string id,
+                          box_data_type type = BOX_DATA_INVALID,
+                          const void *value = NULL);
+  static box_data *create(std::string id,
+                          box_data &data);
 
   const char *get_type_str();
 

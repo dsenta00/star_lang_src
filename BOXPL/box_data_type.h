@@ -2,6 +2,7 @@
 #define BOX_DATA_TYPE_H
 #include <stdint.h>
 #include <stdbool.h>
+#include <string>
 
 typedef float float32_t;
 typedef double float64_t;
@@ -71,5 +72,6 @@ const uint8_t BOX_DATA_TYPE_SIZE[] =
   0                  // BOX_DATA_INVALID
 };
 
+box_data_type get_from_token(std::string &str);
 
 #endif // BOX_DATA_TYPE_H
