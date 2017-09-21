@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="StarProgrammingLanguageLogo.png" width="400" height="400" align="center"/>
+  <img src="documentation/logo.png" width="400" height="400" align="center"/>
 </p>
 
 Server side, headless and standalone programming language that should solve the following problems:</br>

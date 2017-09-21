@@ -1,6 +1,6 @@
 #include "test.h"
-#include "../ORM/orm_test.h"
-#include "../box_data_test.h"
+#include "ORM/orm_test.h"
+#include "box_data_test.h"
 #include "box_array_test.h"
 #include "box_memory_chunk_test.h"
 #include "box_virtual_memory_test.h"

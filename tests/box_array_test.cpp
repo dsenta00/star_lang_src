@@ -1,10 +1,10 @@
 #include "box_array_test.h"
-#include "../box_array.h"
-#include "../box_assert.h"
-#include "../box_virtual_memory.h"
-#include "../box_monitor.h"
-#include "../box_data.h"
-#include "../ORM/orm.h"
+#include "box_array.h"
+#include "box_assert.h"
+#include "box_virtual_memory.h"
+#include "box_monitor.h"
+#include "box_data.h"
+#include "ORM/orm.h"
 #include <limits.h>
 
 static box_virtual_memory *virtual_memory;

@@ -1,5 +1,5 @@
-#include "orm.h"
-#include "entity.h"
+#include "ORM/orm.h"
+#include "ORM/entity.h"
 #include <string>
 #include <list>
 #include <algorithm>

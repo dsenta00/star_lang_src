@@ -1,10 +1,10 @@
 #include "box_memory_chunk_test.h"
-#include "../box_memory_chunk.h"
-#include "../box_assert.h"
-#include "../memory.h"
+#include "box_memory_chunk.h"
+#include "box_assert.h"
+#include "memory.h"
 #include <limits.h>
 #include <vector>
-#include "../ORM/orm.h"
+#include "ORM/orm.h"
 
 static memory_chunk &
 alloc_memory_chunk(uint32_t capacity)

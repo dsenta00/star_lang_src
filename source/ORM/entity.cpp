@@ -1,9 +1,9 @@
-#include "entity.h"
-#include "relationship.h"
+#include "ORM/entity.h"
+#include "ORM/relationship.h"
 #include <algorithm>
 #include <sstream>
 #include <string>
-#include "../box_monitor.h"
+#include "box_monitor.h"
 
 /**
  * The constructor.

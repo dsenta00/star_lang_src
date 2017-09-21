@@ -1,9 +1,9 @@
-#include "../box_assert.h"
-#include "../box_monitor.h"
-#include "entity.h"
-#include "relationship.h"
-#include "orm_test.h"
-#include "orm.h"
+#include "box_assert.h"
+#include "box_monitor.h"
+#include "ORM/entity.h"
+#include "ORM/relationship.h"
+#include "ORM/orm_test.h"
+#include "ORM/orm.h"
 
 class class2;
 

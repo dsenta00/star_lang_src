@@ -1,9 +1,9 @@
 #include "box_virtual_memory_test.h"
-#include "../box_virtual_memory.h"
-#include "../box_assert.h"
-#include "../box_monitor.h"
-#include "../memory.h"
-#include "../ORM/orm.h"
+#include "box_virtual_memory.h"
+#include "box_assert.h"
+#include "box_monitor.h"
+#include "memory.h"
+#include "ORM/orm.h"
 #include <limits.h>
 #include <vector>
 #include <ctime>
