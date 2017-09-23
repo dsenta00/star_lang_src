@@ -1,3 +1,4 @@
+#include <ORM/orm.h>
 #include "memory.h"
 #include "ORM/relationship.h"
 
@@ -142,6 +143,12 @@ bool
 memory::ready_to_remove()
 {
   return this->get_relationship("box_data_memory")->num_of_entities() == 0;
+}
+
+memory *
+memory::create(uintptr_t address, uint32_t size)
+{
+  return (memory *)orm::create(new memory(address, size));
 }
 
 /*

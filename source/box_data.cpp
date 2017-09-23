@@ -504,12 +504,10 @@ box_data &
 box_data::to_string()
 {
   std::string string = this->get_string();
-  box_data &str = *(box_data *) orm::create(
-    (entity *) new box_data(this->id.append(" as string"),
-                            BOX_DATA_STRING,
-                            string.c_str())
-  );
-  return str;
+
+  return *box_data::create(this->id.append(" as string"),
+                           BOX_DATA_STRING,
+                           string.c_str());
 }
 
 /**

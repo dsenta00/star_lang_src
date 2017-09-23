@@ -4,18 +4,6 @@
 #include "memory.h"
 #include "ORM/orm.h"
 
-static memory_chunk &
-alloc_memory_chunk(uint32_t capacity)
-{
-  return *(memory_chunk *)orm::create((entity *)new memory_chunk(capacity));
-}
-
-static memory &
-alloc_memory(uintptr_t address, uint32_t size)
-{
-  return *(memory *)orm::create((entity *)new memory(address, size));
-}
-
 /**
  * Advanced memory chunk test.
  */
@@ -28,7 +16,7 @@ box_memory_chunk_test_advanced()
   std::vector<memory *> to_keep;
   std::vector<memory *> to_free;
 
-  memory_chunk &chunk = alloc_memory_chunk(BIGGER_CAPACITY);
+  memory_chunk &chunk = *memory_chunk::create(BIGGER_CAPACITY);
 
   for (size_t i = 0; i < BIGGER_CAPACITY / RESERVATION; i++)
   {
@@ -138,7 +126,7 @@ box_memory_chunk_test_basic()
 #define BYTES_FINAL_FREE_CAPACITY (2 * BYTES_RESERVATION_20)
 
   size_t capacity = MEMORY_CHUNK_SIZE;
-  memory_chunk &chunk = alloc_memory_chunk(capacity);
+  memory_chunk &chunk = *memory_chunk::create(capacity);
 
   chunk.defragmentation();
 
@@ -161,7 +149,7 @@ box_memory_chunk_test_basic()
                  i);
   }
 
-  memory &dummy_memory = alloc_memory(0xDEADBEEF, 43);
+  memory &dummy_memory = *memory::create(0xDEADBEEF, 43);
 
   ASSERT_TRUE(chunk.release(&dummy_memory) == MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS,
               "Chunk should return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS");

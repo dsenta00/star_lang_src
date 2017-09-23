@@ -16,7 +16,10 @@ int main(int argc, char *argv[])
   orm::add_entity_repository("box_method");
   orm::add_entity_repository("instruction");
 
-  orm::create((entity *) new box_virtual_memory(CHUNK_MINIMUM_CAPACITY));
+  /*
+   * Create global virtual memory.
+   */
+  box_virtual_memory::create();
 
   run_tests();
 

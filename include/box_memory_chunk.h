@@ -30,6 +30,9 @@ public:
   bool is_fragmented(uint32_t size);
   bool worth_defragmentation();
   void defragmentation();
+
+  static memory_chunk *create(uint32_t capacity = 0);
+
   virtual ~memory_chunk();
 protected:
   uint32_t capacity;

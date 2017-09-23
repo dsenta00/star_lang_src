@@ -11,11 +11,13 @@
 
 class box_virtual_memory : public entity {
 public:
-  box_virtual_memory(uint32_t init_capacity);
+  box_virtual_memory(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
   memory *alloc(uint32_t size);
   memory *realloc(memory *mem, uint32_t new_size);
   void free(memory *mem);
   uint32_t get_allocated_total();
+
+  static box_virtual_memory *create(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
 protected:
   memory *add_new_chunk_and_alloc(uint32_t size);
   memory *solve_defragmentation_and_alloc(uint32_t size);

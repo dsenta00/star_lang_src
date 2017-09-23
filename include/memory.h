@@ -29,6 +29,8 @@ public:
   void operator-=(uint32_t size);
   void assign(uintptr_t address, uint32_t size);
   bool ready_to_remove();
+
+  static memory *create(uintptr_t address, uint32_t size);
 protected:
   uintptr_t address;
   uint32_t size;

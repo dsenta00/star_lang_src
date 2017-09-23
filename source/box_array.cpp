@@ -107,8 +107,7 @@ box_array::operator+=(entity *e)
 box_data &
 box_array::to_string()
 {
-  box_data &str = *(box_data *) orm::create((entity *) new box_data(this->id.append(" as string"), BOX_DATA_STRING));
-
+  box_data &str = *box_data::create(this->id.append(" as string"), BOX_DATA_STRING);
   relationship *r = this->get_relationship("array");
 
   if (!r)
@@ -117,9 +116,7 @@ box_array::to_string()
   }
 
   char ch = ' ';
-  box_data separator_char = *(box_data *) orm::create((entity *) new box_data("<<temp_char>>",
-                                                                              BOX_DATA_CHAR,
-                                                                              (const void *) &ch));
+  box_data &separator_char = *box_data::create("<<temp_char>>", BOX_DATA_CHAR, (const void *) &ch);
 
   r->for_each([&](entity *e) {
     if (e->get_entity_type() == "box_data")
@@ -220,7 +217,7 @@ box_array::insert_data(std::string index, entity *e)
 
   if (e->get_entity_type() == "box_data")
   {
-    entity *new_data = orm::create((entity *) new box_data(index, *(box_data *) e));
+    entity *new_data = box_data::create(index, *(box_data *) e);
     this->add_entity("array", new_data);
 
     new_data->add_relationship("array", MANY_TO_ONE);

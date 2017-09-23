@@ -13,7 +13,6 @@ typedef std::shared_ptr<relationship> relationship_p;
 /**
  * The entity class.
  * Each entity can have relationship with another entity.
- *
  * Usage is to extend objects as entity base class.
  */
 class entity {

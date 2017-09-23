@@ -1,7 +1,7 @@
 #include "ORM/orm.h"
 #include "ORM/entity.h"
 
-typedef std::shared_ptr<entity_repository> entity_repository_p;
+typedef std::unique_ptr<entity_repository> entity_repository_p;
 
 /**
  * @brief repo - repository map.
@@ -18,6 +18,7 @@ entity_repository *
 orm::find_entity_repository(std::string entity_type)
 {
   auto it = repo.find(entity_type);
+
   return (it != repo.end()) ? (it->second).get() : nullptr;
 }
 

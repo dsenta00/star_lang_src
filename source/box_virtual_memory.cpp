@@ -73,7 +73,7 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
     max_allocated_bytes = capacity;
   }
 
-  memory_chunk *chunk = (memory_chunk *) orm::create((entity *) new memory_chunk(max_allocated_bytes));
+  memory_chunk *chunk = memory_chunk::create(max_allocated_bytes);
   this->box_memory_chunk->add_entity((entity *) chunk);
 
   return chunk;
@@ -361,4 +361,10 @@ uint32_t
 box_virtual_memory::get_allocated_total(void)
 {
   return allocated_total;
+}
+
+box_virtual_memory *
+box_virtual_memory::create(uint32_t init_capacity)
+{
+  return (box_virtual_memory *)orm::create(new box_virtual_memory(init_capacity));
 }

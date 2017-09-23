@@ -352,3 +352,9 @@ memory_chunk::~memory_chunk()
 {
   std::free((void *) start_address);
 }
+
+memory_chunk *
+memory_chunk::create(uint32_t capacity)
+{
+  return (memory_chunk *)orm::create(new memory_chunk(capacity));
+}

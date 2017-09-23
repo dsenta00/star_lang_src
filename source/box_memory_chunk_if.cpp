@@ -16,7 +16,7 @@ memory_chunk_if::memory_chunk_if() : entity::entity("box_memory_chunk", "chunk")
 void
 memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
 {
-  memory *mem = (memory *) orm::create((entity *) new memory(address, size));
+  memory *mem = memory::create(address, size);
 
   this->free_memory->add_entity((entity *) mem);
   mem->add_entity("free_memory", (entity *) this);
@@ -95,7 +95,7 @@ memory_chunk_if::free_memory_union()
 memory *
 memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 {
-  memory *mem = (memory *) orm::create((entity *) new memory(address, size));
+  memory *mem = memory::create(address, size);
 
   this->reserved_memory->add_entity((entity *) mem);
   mem->add_entity("reserved_memory", (entity *) this);

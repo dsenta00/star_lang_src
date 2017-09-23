@@ -6,24 +6,6 @@
 #include "ORM/orm.h"
 #include <ctime>
 
-#define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
-  ASSERT_TRUE((__VM__).get_allocated_total() == (__BYTES__), \
-  "Total allocated should be %u (%u)", \
-  (__BYTES__), \
-  (__VM__).get_allocated_total())
-
-static box_virtual_memory &
-alloc_box_virtual_memory(uint32_t capacity)
-{
-  return *(box_virtual_memory *)orm::create((entity *)new box_virtual_memory(capacity));
-}
-
-static memory &
-alloc_memory(uintptr_t address, uint32_t size)
-{
-  return *(memory *)orm::create((entity *)new memory(address, size));
-}
-
 /**
  * Test virtual memory basic.
  */
@@ -32,7 +14,7 @@ box_virtual_memory_test_basic()
 {
   srand((unsigned)time(nullptr));
 
-  box_virtual_memory &vm_zero_cap = alloc_box_virtual_memory(0);
+  box_virtual_memory &vm_zero_cap = *box_virtual_memory::create(0);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
   memory *data1 = vm_zero_cap.alloc(64);
@@ -52,7 +34,7 @@ box_virtual_memory_test_basic()
   vm_zero_cap.free(data2);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
-  box_virtual_memory &vm = alloc_box_virtual_memory(CHUNK_MINIMUM_CAPACITY);
+  box_virtual_memory &vm = *box_virtual_memory::create(CHUNK_MINIMUM_CAPACITY);
 
   ASSERT_TRUE(vm.alloc(0) == nullptr, "should not allocate 0 bytes!");
   ASSERT_TRUE(vm.alloc(UINT32_MAX) == nullptr,
@@ -103,7 +85,7 @@ box_virtual_memory_test_basic()
               size,
               mem->get_size());
 
-  memory &mem_unknown = alloc_memory(0x204, 32);
+  memory &mem_unknown = *memory::create(0x204, 32);
   vm.realloc(&mem_unknown, 32);
   ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
 
