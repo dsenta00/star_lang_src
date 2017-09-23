@@ -2,8 +2,6 @@
 #include "box_memory_chunk.h"
 #include "box_assert.h"
 #include "memory.h"
-#include <limits.h>
-#include <vector>
 #include "ORM/orm.h"
 
 static memory_chunk &
@@ -22,7 +20,7 @@ alloc_memory(uintptr_t address, uint32_t size)
  * Advanced memory chunk test.
  */
 static void
-box_memory_chunk_test_advanced(void)
+box_memory_chunk_test_advanced()
 {
 #define BIGGER_CAPACITY (262144)
 #define RESERVATION     (32768)
@@ -35,7 +33,7 @@ box_memory_chunk_test_advanced(void)
   for (size_t i = 0; i < BIGGER_CAPACITY / RESERVATION; i++)
   {
     memory *mem = chunk.reserve(RESERVATION);
-    ASSERT_TRUE(mem != NULL, "mem should be reserved");
+    ASSERT_TRUE(mem != nullptr, "mem should be reserved");
 
     if ((i % 2) == 1)
     {
@@ -50,7 +48,7 @@ box_memory_chunk_test_advanced(void)
   ASSERT_TRUE(chunk.get_free() == 0, "there should no be enough room for reservation");
   uint32_t free = 0;
 
-  while (to_free.size() > 0)
+  while (!to_free.empty())
   {
     chunk.release(to_free.front());
     to_free.erase(to_free.begin());
@@ -84,7 +82,7 @@ box_memory_chunk_test_advanced(void)
                 RESERVATION, mem2->get_address() - mem1->get_address());
   }
 
-  while (to_keep.size() > 0)
+  while (!to_keep.empty())
   {
     chunk.release(to_keep.front());
     to_keep.erase(to_keep.begin());
@@ -99,7 +97,7 @@ box_memory_chunk_test_advanced(void)
   {
     memory *mem_rand = chunk.reserve(rand() % 72);
 
-    if (mem_rand == NULL)
+    if (mem_rand == nullptr)
     {
       break;
     }
@@ -132,7 +130,7 @@ box_memory_chunk_test_advanced(void)
  * Basic memory chunk test.
  */
 static void
-box_memory_chunk_test_basic(void)
+box_memory_chunk_test_basic()
 {
 #define MEMORY_CHUNK_SIZE         (100)
 #define BYTES_RESERVATION_30      (30)
@@ -149,10 +147,10 @@ box_memory_chunk_test_basic(void)
               "Chunk should be able to reserve %u bytes.",
               capacity);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
-  ASSERT_FALSE(chunk.is_parent_of(NULL), "is_part_of should return false");
-  ASSERT_TRUE(chunk.reserve(0) == NULL, "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+               "Chunk shouldn't be worth defragmentation");
+  ASSERT_FALSE(chunk.is_parent_of(nullptr), "is_part_of should return false");
+  ASSERT_TRUE(chunk.reserve(0) == nullptr, "Chunk shouldn't reserve 0 bytes.");
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve %u bytes.",
               capacity + 1);
 
@@ -167,11 +165,11 @@ box_memory_chunk_test_basic(void)
 
   ASSERT_TRUE(chunk.release(&dummy_memory) == MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS,
               "Chunk should return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS");
-  ASSERT_TRUE(chunk.release(NULL) == MEMORY_CHUNK_RELEASE_NULL_MEMORY,
+  ASSERT_TRUE(chunk.release(nullptr) == MEMORY_CHUNK_RELEASE_NULL_MEMORY,
               "Chunk should return MEMORY_CHUNK_RELEASE_NULL_MEMORY");
   ASSERT_TRUE(chunk.resize(&dummy_memory, 0) == MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS,
               "Chunk should return MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS");
-  ASSERT_TRUE(chunk.resize(NULL, 0) == MEMORY_CHUNK_RESIZE_NULL_MEMORY,
+  ASSERT_TRUE(chunk.resize(nullptr, 0) == MEMORY_CHUNK_RESIZE_NULL_MEMORY,
               "Chunk should return MEMORY_CHUNK_RESIZE_NULL_MEMORY");
 
   /* Reservation #1 */
@@ -180,7 +178,7 @@ box_memory_chunk_test_basic(void)
   capacity -= BYTES_RESERVATION_30;
   memory *mem = chunk.reserve(BYTES_RESERVATION_30);
 
-  ASSERT_TRUE(mem != NULL,
+  ASSERT_TRUE(mem != nullptr,
               "Reserved memory should be different than NULL");
   ASSERT_TRUE(mem->get_address() != 0,
               "Reserved address should be different than NULL");
@@ -191,10 +189,10 @@ box_memory_chunk_test_basic(void)
               "Chunk should be able to reserve %u bytes.",
               capacity);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
+               "Chunk shouldn't be worth defragmentation");
   ASSERT_TRUE(chunk.is_parent_of(mem), "is_part_of should return true");
-  ASSERT_TRUE(chunk.reserve(0) == NULL, "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+  ASSERT_TRUE(chunk.reserve(0) == nullptr, "Chunk shouldn't reserve 0 bytes.");
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   /* Reservation #2 */
@@ -203,7 +201,7 @@ box_memory_chunk_test_basic(void)
   capacity -= BYTES_RESERVATION_20;
   memory *mem2 = chunk.reserve(BYTES_RESERVATION_20);
 
-  ASSERT_TRUE(mem2 != NULL, "Reserved memory should be different than NULL");
+  ASSERT_TRUE(mem2 != nullptr, "Reserved memory should be different than NULL");
   ASSERT_TRUE(mem2->get_address() != 0,
               "Reserved address should be different than NULL");
   ASSERT_TRUE(mem2->get_size() == BYTES_RESERVATION_20,
@@ -212,10 +210,10 @@ box_memory_chunk_test_basic(void)
   ASSERT_TRUE(chunk.can_reserve(capacity),
               "Chunk should be able to reserve %u bytes.", capacity);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
+               "Chunk shouldn't be worth defragmentation");
   ASSERT_TRUE(chunk.is_parent_of(mem2), "is_parent_of should return true");
-  ASSERT_TRUE(chunk.reserve(0) == NULL, "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+  ASSERT_TRUE(chunk.reserve(0) == nullptr, "Chunk shouldn't reserve 0 bytes.");
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   /* Reservation #3 */
@@ -224,7 +222,7 @@ box_memory_chunk_test_basic(void)
   capacity -= BYTES_RESERVATION_30;
   memory *mem3 = chunk.reserve(BYTES_RESERVATION_30);
 
-  ASSERT_TRUE(mem3 != NULL, "Reserved memory should be different than NULL");
+  ASSERT_TRUE(mem3 != nullptr, "Reserved memory should be different than NULL");
   ASSERT_TRUE(mem3->get_address() != 0,
               "Reserved address should be different than NULL");
   ASSERT_TRUE(mem3->get_size() == BYTES_RESERVATION_30,
@@ -234,10 +232,10 @@ box_memory_chunk_test_basic(void)
               "Chunk should be able to reserve %u bytes.",
               capacity);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
+               "Chunk shouldn't be worth defragmentation");
   ASSERT_TRUE(chunk.is_parent_of(mem3), "is_part_of should return true");
-  ASSERT_TRUE(chunk.reserve(0) == NULL, "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+  ASSERT_TRUE(chunk.reserve(0) == nullptr, "Chunk shouldn't reserve 0 bytes.");
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   /* Deletion of #2 */
@@ -250,16 +248,16 @@ box_memory_chunk_test_basic(void)
               "Chunk should be able to reserve %u bytes.",
               BYTES_RESERVATION_20);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
-  ASSERT_TRUE(chunk.reserve(0) == NULL,
+               "Chunk shouldn't be worth defragmentation");
+  ASSERT_TRUE(chunk.reserve(0) == nullptr,
               "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   ASSERT_FALSE(chunk.can_reserve(BYTES_FINAL_FREE_CAPACITY),
                "Chunk should be able to reserve %u bytes.");
   memory *mem4 = chunk.reserve(BYTES_FINAL_FREE_CAPACITY);
-  ASSERT_TRUE(mem4 == NULL, "chunk should not reserve %u memory",
+  ASSERT_TRUE(mem4 == nullptr, "chunk should not reserve %u memory",
               BYTES_FINAL_FREE_CAPACITY);
 
   /*
@@ -300,7 +298,7 @@ box_memory_chunk_test_basic(void)
   ASSERT_TRUE(status == MEMORY_CHUNK_RESIZE_OK,
               "expand should return MEMORY_CHUNK_RESIZE_OK (%u)",
               status);
-  ASSERT_TRUE(mem != NULL, "Reserved memory should be different than NULL");
+  ASSERT_TRUE(mem != nullptr, "Reserved memory should be different than NULL");
   ASSERT_TRUE(mem->get_address() != 0, "Reserved address should be different than NULL");
   ASSERT_TRUE(mem->get_size() == (BYTES_RESERVATION_30 + BYTES_RESERVATION_20),
               "Reserved size should be %u (%u)",
@@ -310,10 +308,10 @@ box_memory_chunk_test_basic(void)
               "Chunk should be able to reserve %u bytes.",
               capacity);
   ASSERT_FALSE(chunk.worth_defragmentation(),
-               "Chunk shouldn't be worth refragmentation");
+               "Chunk shouldn't be worth defragmentation");
   ASSERT_TRUE(chunk.is_parent_of(mem), "is_part_of should return true");
-  ASSERT_TRUE(chunk.reserve(0) == NULL, "Chunk shouldn't reserve 0 bytes.");
-  ASSERT_TRUE(chunk.reserve(capacity + 1) == NULL,
+  ASSERT_TRUE(chunk.reserve(0) == nullptr, "Chunk shouldn't reserve 0 bytes.");
+  ASSERT_TRUE(chunk.reserve(capacity + 1) == nullptr,
               "Chunk shouldn't reserve capacity + 1 bytes.");
 
   printf("\t-> %s()::OK \n", __FUNCTION__);
@@ -323,7 +321,7 @@ box_memory_chunk_test_basic(void)
  * Test memory chunk.
  */
 void
-box_memory_chunk_test(void)
+box_memory_chunk_test()
 {
   printf("%s()\r\n", __FUNCTION__);
   box_memory_chunk_test_basic();

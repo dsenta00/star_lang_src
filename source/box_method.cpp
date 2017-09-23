@@ -13,7 +13,7 @@ box_method::box_method(std::string id,
   for (instruction *i : instructions)
   {
     r->add_entity(i);
-    i->add_entity("box_method", (entity *)this);
+    i->add_entity("box_method", (entity *) this);
   }
 
   this->current_instruction = instructions[0];
@@ -30,7 +30,7 @@ box_method::execute_next()
     return INSTRUCTION_ERROR;
   }
 
-  if (this->current_instruction == NULL)
+  if (this->current_instruction == nullptr)
   {
     return INSTRUCTION_FINISHED;
   }
@@ -54,7 +54,7 @@ box_method::add_local_object(entity *e)
    * object can be used in many methods.
    */
   e->add_relationship("method_objects", ONE_TO_MANY);
-  e->add_entity("method_objects", (entity *)this);
+  e->add_entity("method_objects", (entity *) this);
 }
 
 entity *

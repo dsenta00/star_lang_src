@@ -1,26 +1,5 @@
 #include "ORM/entity_repository.h"
 #include "ORM/entity.h"
-#include <algorithm>
-
-/**
- * The constructor.
- *
- * @param entity_type - entity type in string.
- */
-entity_repository::entity_repository(std::string entity_type)
-{
-  this->entity_type = entity_type;
-}
-
-/**
- * @brief entity_repository::get_entity_type
- * @return entity type.
- */
-std::string &
-entity_repository::get_entity_type()
-{
-  return this->entity_type;
-}
 
 /**
  * Find entity.
@@ -29,7 +8,7 @@ entity_repository::get_entity_type()
  * @return entity if found, otherwise return NULL.
  */
 entity *
-entity_repository::find(const std::function <bool(entity *)>& func)
+entity_repository::find(const std::function<bool(entity *)> &func)
 {
   for (entity_p &ep : this->entities)
   {
@@ -41,7 +20,7 @@ entity_repository::find(const std::function <bool(entity *)>& func)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -83,9 +62,9 @@ entity_repository::sweep()
   {
     auto it = std::find_if(this->entities.begin(),
                            this->entities.end(),
-                           [&] (entity_p &ep) {
-              return ep.get()->get_marked();
-    });
+                           [&](entity_p &ep) {
+                             return ep.get()->get_marked();
+                           });
 
     if (it == this->entities.end())
     {
@@ -96,11 +75,3 @@ entity_repository::sweep()
   }
 }
 
-/**
- * Clear all entites from repository.
- */
-void
-entity_repository::clear()
-{
-  this->entities.clear();
-}

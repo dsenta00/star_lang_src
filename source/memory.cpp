@@ -1,7 +1,5 @@
 #include "memory.h"
 #include "ORM/relationship.h"
-#include <stdint.h>
-#include <cstring>
 
 typedef float float32_t;
 typedef double float64_t;
@@ -27,11 +25,11 @@ memory::memory(uintptr_t address, uint32_t size) : entity::entity("memory", addr
  *
  * @return address.
  */
-template <typename T>
+template<typename T>
 T
 memory::get_pointer()
 {
-  return (T)address;
+  return (T) address;
 }
 
 /**
@@ -50,11 +48,11 @@ memory::get_address() const
  *
  * @return element.
  */
-template <typename T>
+template<typename T>
 T &
 memory::get_element()
 {
-  return *(T *)address;
+  return *(T *) address;
 }
 
 /**
@@ -63,10 +61,10 @@ memory::get_element()
  * @param adjacent_memory - adjacent memory
  */
 void
-memory::allign(memory *adjacent_memory)
+memory::align(memory *adjacent_memory)
 {
-  memmove((void *)(this->address + size),
-          (void *)adjacent_memory->address,
+  memmove((void *) (this->address + size),
+          (void *) adjacent_memory->address,
           adjacent_memory->size);
 
   adjacent_memory->address = this->address + this->size;
@@ -92,7 +90,7 @@ memory::get_size()
  * @return true if this memory address is smaller than another.
  */
 bool
-memory::operator < (const memory& mem) const
+memory::operator<(const memory &mem) const
 {
   return address < mem.address;
 }
@@ -103,9 +101,9 @@ memory::operator < (const memory& mem) const
  * @param size - size to increase.
  */
 void
-memory::operator += (uint32_t size)
+memory::operator+=(uint32_t size)
 {
-  size += size;
+  this->size += size;
 }
 
 /**
@@ -114,9 +112,9 @@ memory::operator += (uint32_t size)
  * @param size - size to ddecrease.
  */
 void
-memory::operator -= (uint32_t size)
+memory::operator-=(uint32_t size)
 {
-  size += size;
+  this->size -= size;
 }
 
 /**
@@ -150,18 +148,33 @@ memory::ready_to_remove()
  * Explicit template instatiation.
  */
 template int8_t &memory::get_element();
+
 template int16_t &memory::get_element();
+
 template int32_t &memory::get_element();
+
 template int64_t &memory::get_element();
+
 template float32_t &memory::get_element();
+
 template float64_t &memory::get_element();
+
 template bool &memory::get_element();
+
 template void *memory::get_pointer();
+
 template char *memory::get_pointer();
+
 template const char *memory::get_pointer();
+
 template int8_t *memory::get_pointer();
+
 template int16_t *memory::get_pointer();
+
 template int32_t *memory::get_pointer();
+
 template int64_t *memory::get_pointer();
+
 template float32_t *memory::get_pointer();
+
 template float64_t *memory::get_pointer();

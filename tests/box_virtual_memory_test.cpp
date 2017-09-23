@@ -4,15 +4,13 @@
 #include "box_monitor.h"
 #include "memory.h"
 #include "ORM/orm.h"
-#include <limits.h>
-#include <vector>
 #include <ctime>
 
 #define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
-  ASSERT_TRUE(__VM__.get_allocated_total() == (__BYTES__), \
+  ASSERT_TRUE((__VM__).get_allocated_total() == (__BYTES__), \
   "Total allocated should be %u (%u)", \
   (__BYTES__), \
-  __VM__.get_allocated_total())
+  (__VM__).get_allocated_total())
 
 static box_virtual_memory &
 alloc_box_virtual_memory(uint32_t capacity)
@@ -30,21 +28,21 @@ alloc_memory(uintptr_t address, uint32_t size)
  * Test virtual memory basic.
  */
 static void
-box_virtual_memory_test_basic(void)
+box_virtual_memory_test_basic()
 {
-  srand((unsigned)time(NULL));
+  srand((unsigned)time(nullptr));
 
   box_virtual_memory &vm_zero_cap = alloc_box_virtual_memory(0);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
   memory *data1 = vm_zero_cap.alloc(64);
-  ASSERT_TRUE(data1 != NULL,
+  ASSERT_TRUE(data1 != nullptr,
               "should allocate %u bytes!",
               64);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 64);
 
-  memory *data2 = vm_zero_cap.realloc(NULL, 64);
-  ASSERT_TRUE(data2 != NULL,
+  memory *data2 = vm_zero_cap.realloc(nullptr, 64);
+  ASSERT_TRUE(data2 != nullptr,
               "should allocate %u bytes!",
               64);
   ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 128);
@@ -56,8 +54,8 @@ box_virtual_memory_test_basic(void)
 
   box_virtual_memory &vm = alloc_box_virtual_memory(CHUNK_MINIMUM_CAPACITY);
 
-  ASSERT_TRUE(vm.alloc(0) == NULL, "should not allocate 0 bytes!");
-  ASSERT_TRUE(vm.alloc(UINT32_MAX) == NULL,
+  ASSERT_TRUE(vm.alloc(0) == nullptr, "should not allocate 0 bytes!");
+  ASSERT_TRUE(vm.alloc(UINT32_MAX) == nullptr,
               "should not allocate %u bytes!",
               UINT32_MAX);
 
@@ -69,7 +67,7 @@ box_virtual_memory_test_basic(void)
     memory *mem = vm.alloc(size);
 
     ASSERT_OK;
-    ASSERT_TRUE(mem != NULL, "failed to allocate %u bytes", size);
+    ASSERT_TRUE(mem != nullptr, "failed to allocate %u bytes", size);
     memory_array.push_back(mem);
   }
 
@@ -88,7 +86,7 @@ box_virtual_memory_test_basic(void)
     mem = vm.realloc(mem, new_size);
 
     ASSERT_OK;
-    ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", new_size);
+    ASSERT_TRUE(mem != nullptr, "memory isn't reallocated! %u", new_size);
     ASSERT_TRUE(mem->get_size() == new_size,
                 "memory should have new size %u (%u) old_size -> %u",
                 new_size,
@@ -97,19 +95,19 @@ box_virtual_memory_test_basic(void)
   }
 
   size_t size = 64;
-  memory *mem = NULL;
+  memory *mem = nullptr;
   mem = vm.realloc(mem, size);
-  ASSERT_TRUE(mem != NULL, "memory isn't reallocated! %u", size);
+  ASSERT_TRUE(mem != nullptr, "memory isn't reallocated! %u", size);
   ASSERT_TRUE(mem->get_size() == size,
               "memory should have new size %u (%u) old_size -> (none)",
               size,
               mem->get_size());
 
-  memory &mem_unkown = alloc_memory(0x204, 32);
-  vm.realloc(&mem_unkown, 32);
+  memory &mem_unknown = alloc_memory(0x204, 32);
+  vm.realloc(&mem_unknown, 32);
   ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
 
-  vm.free(&mem_unkown);
+  vm.free(&mem_unknown);
   ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
   BOX_ERROR_CLEAR;
 
@@ -123,7 +121,7 @@ box_virtual_memory_test_basic(void)
  * Test virtual memory.
  */
 void
-box_virtual_memory_test(void)
+box_virtual_memory_test()
 {
   printf("%s()\r\n", __FUNCTION__);
   box_virtual_memory_test_basic();

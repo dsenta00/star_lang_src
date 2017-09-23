@@ -1,5 +1,6 @@
 #ifndef BOX_DATA_H
 #define BOX_DATA_H
+
 #include "ORM/entity.h"
 #include "box_data_type.h"
 #include "box_fw.h"
@@ -13,18 +14,13 @@ class box_data : public entity {
 public:
   box_data(std::string id,
            box_data_type type = BOX_DATA_INVALID,
-           const void *value = NULL);
-
+           const void *value = nullptr);
   box_data(std::string id, box_data &data);
-
   static box_data *create(std::string id,
                           box_data_type type = BOX_DATA_INVALID,
-                          const void *value = NULL);
+                          const void *value = nullptr);
   static box_data *create(std::string id,
                           box_data &data);
-
-  const char *get_type_str();
-
   bool to_bool();
   int8_t to_char();
   int16_t to_short();
@@ -35,27 +31,25 @@ public:
   box_data &to_string();
 
   void convert_itself(box_data_type new_type = BOX_DATA_INVALID);
-
   bool default_value();
-
-  bool operator =  (const void *data);
-  bool operator =  (box_data &data);
-  bool operator &= (box_data &data);
-  bool operator |= (box_data &data);
-  bool operator ^= (box_data &data);
-  bool operator += (box_data &data);
-  bool operator -= (box_data &data);
-  bool operator *= (box_data &data);
-  bool operator /= (box_data &data);
-  bool operator %= (box_data &data);
-  bool operator ++ ();
-  bool operator -- ();
-  bool operator == (box_data &data);
-  bool operator != (box_data &data);
-  bool operator >  (box_data &data);
-  bool operator <  (box_data &data);
-  bool operator >= (box_data &data);
-  bool operator <= (box_data &data);
+  bool operator=(const void *data);
+  bool operator=(box_data &data);
+  bool operator&=(box_data &data);
+  bool operator|=(box_data &data);
+  bool operator^=(box_data &data);
+  bool operator+=(box_data &data);
+  bool operator-=(box_data &data);
+  bool operator*=(box_data &data);
+  bool operator/=(box_data &data);
+  bool operator%=(box_data &data);
+  bool operator++();
+  bool operator--();
+  bool operator==(box_data &data);
+  bool operator!=(box_data &data);
+  bool operator>(box_data &data);
+  bool operator<(box_data &data);
+  bool operator>=(box_data &data);
+  bool operator<=(box_data &data);
 
   memory *get_memory();
   uintptr_t get_address();
@@ -66,6 +60,7 @@ public:
   bool scan();
 
   virtual ~box_data();
+
 protected:
   box_virtual_memory *vm;
   std::string get_string();

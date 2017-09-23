@@ -1,5 +1,6 @@
 #ifndef BOX_INSTRUCTION_H
 #define BOX_INSTRUCTION_H
+
 #include "ORM/entity.h"
 #include "ORM/orm_fw.h"
 
@@ -27,10 +28,11 @@ protected:
 
 public:
   instruction(box_op_code op_code,
-              instruction *next_instruction = NULL,
-              instruction *branch_result_false = NULL);
+              instruction *next_instruction = nullptr,
+              instruction *branch_result_false = nullptr);
 
   box_op_code &get_op_code();
+
   instruction *execute();
 };
 

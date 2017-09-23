@@ -5,14 +5,11 @@
 #include "box_monitor.h"
 #include "box_data.h"
 #include "ORM/orm.h"
-#include <limits.h>
 
 static box_virtual_memory *virtual_memory;
 
-#define TEST_ARRAY_SIZE (10)
-
 #define ASSERT_VIRTUAL_MEMORY(__BYTES__) \
-  ASSERT_TRUE(virtual_memory->get_allocated_total() == __BYTES__, \
+  ASSERT_TRUE(virtual_memory->get_allocated_total() == (__BYTES__), \
               "Total allocated should be %u (%u)", \
               __BYTES__, \
               virtual_memory->get_allocated_total())
@@ -26,7 +23,9 @@ static box_virtual_memory *virtual_memory;
 #define ARRAY_SIZE (10)
 
 static box_data &
-alloc_box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL)
+alloc_box_data(std::string id,
+               box_data_type type = BOX_DATA_INVALID,
+               const void *value = nullptr)
 {
   return *(box_data *)orm::create((entity *)new box_data(id, type, value));
 }
@@ -82,7 +81,7 @@ box_array_test_basic()
 
   for (uint16_t i = 0; i < USHRT_MAX; i++)
   {
-    ASSERT_TRUE(empty_array[i] == NULL,
+    ASSERT_TRUE(empty_array[i] == nullptr,
                 "Returned reference should be NULL! (0x%X)",
                 empty_array[i]);
   }
@@ -230,7 +229,7 @@ box_array_test_basic()
     {
       box_array *array_inside = (box_array *)array[i];
       ASSERT_OK;
-      ASSERT_TRUE(array_inside != NULL, "array_inside shouldn't be null");
+      ASSERT_TRUE(array_inside != nullptr, "array_inside shouldn't be null");
       ASSERT_TRUE(array_inside == &empty_array, "data should be the same");
     }
   }

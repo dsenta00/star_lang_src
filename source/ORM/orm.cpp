@@ -1,10 +1,7 @@
 #include "ORM/orm.h"
 #include "ORM/entity.h"
-#include <string>
-#include <list>
-#include <algorithm>
 
-typedef std::unique_ptr<entity_repository> entity_repository_p;
+typedef std::shared_ptr<entity_repository> entity_repository_p;
 
 /**
  * @brief repo - repository map.
@@ -15,13 +12,13 @@ static std::map<std::string, entity_repository_p> repo;
  * Find entity repository.
  *
  * @param entity_type - entity type.
- * @return entity_repository if found, otherwise return NULL.
+ * @return entity_repository if found, otherwise return nullptr.
  */
 entity_repository *
-orm::find_entity_repostiory(std::string entity_type)
+orm::find_entity_repository(std::string entity_type)
 {
   auto it = repo.find(entity_type);
-  return (it != repo.end()) ? (it->second).get() : NULL;
+  return (it != repo.end()) ? (it->second).get() : nullptr;
 }
 
 /**
@@ -30,31 +27,14 @@ orm::find_entity_repostiory(std::string entity_type)
  * @param entity_type
  */
 void
-orm::add_entity_repostiory(std::string entity_type)
+orm::add_entity_repository(std::string entity_type)
 {
-  if (orm::find_entity_repostiory(entity_type))
+  if (orm::find_entity_repository(entity_type))
   {
     return;
   }
 
-  repo[entity_type] = entity_repository_p(new entity_repository(entity_type));
-}
-
-/**
- * Remove entity repository.
- *
- * @param entity_type
- */
-void
-orm::remove_entity_repostiory(std::string entity_type)
-{
-  auto it = repo.find(entity_type);
-  if (it == repo.end())
-  {
-    return;
-  }
-
-  repo.erase(it);
+  repo[entity_type] = entity_repository_p(new entity_repository());
 }
 
 /**
@@ -68,15 +48,15 @@ orm::create(entity *e)
 {
   if (!e)
   {
-    return NULL;
+    return nullptr;
   }
 
-  entity_repository *er = orm::find_entity_repostiory(e->get_entity_type());
+  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
 
   if (!er)
   {
-    orm::add_entity_repostiory(e->get_entity_type());
-    er = orm::find_entity_repostiory(e->get_entity_type());
+    orm::add_entity_repository(e->get_entity_type());
+    er = orm::find_entity_repository(e->get_entity_type());
   }
 
   er->add(e);
@@ -92,7 +72,7 @@ orm::create(entity *e)
 void
 orm::destroy(entity *e)
 {
-  entity_repository *er = orm::find_entity_repostiory(e->get_entity_type());
+  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
 
   if (!er)
   {
@@ -126,11 +106,11 @@ orm::sweep()
 entity *
 orm::select(std::string entity_type, std::function<bool(entity *)> where)
 {
-  entity_repository *er = orm::find_entity_repostiory(entity_type);
+  entity_repository *er = orm::find_entity_repository(entity_type);
 
   if (!er)
   {
-    return NULL;
+    return nullptr;
   }
 
   return er->find(where);
@@ -140,17 +120,35 @@ orm::select(std::string entity_type, std::function<bool(entity *)> where)
  * Get first object from entity repository.
  *
  * @param entity_type - entity type.
- * @return first object if exists, otherwise NULL.
+ * @return first object if exists, otherwise nullptr.
  */
 entity *
 orm::get_first(std::string entity_type)
 {
-  entity_repository *er = orm::find_entity_repostiory(entity_type);
+  entity_repository *er = orm::find_entity_repository(entity_type);
 
   if (!er)
   {
-    return NULL;
+    return nullptr;
   }
 
-  return er->find([&] (entity *e) { (void)e; return true; });
+  return er->find([&](entity *e) {
+    (void) e;
+    return true;
+  });
+}
+
+/**
+ * Remove entity repository.
+ *
+ * @param entity_type
+ */
+void
+orm::remove_entity_repository(std::string entity_type)
+{
+  auto it = repo.find(entity_type);
+  if (it != repo.end())
+  {
+    repo.erase(it);
+  }
 }

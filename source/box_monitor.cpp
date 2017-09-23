@@ -5,7 +5,6 @@
 #define MAX_BOX_ERROR_QUEUE (32)
 
 typedef std::shared_ptr<box_error> box_error_p;
-
 static std::queue<box_error_p> box_error_queue;
 
 /**
@@ -45,8 +44,8 @@ box_status
 box_monitor_last_error()
 {
   return box_monitor_ok() ?
-        BOX_STATUS_OK :
-        box_error_queue.back().get()->get_status();
+         BOX_STATUS_OK :
+         box_error_queue.back().get()->get_status();
 }
 
 /**
@@ -58,8 +57,8 @@ const char *
 box_monitor_last_error_string()
 {
   return box_monitor_ok() ?
-        "BOX_STATUS_OK" :
-        box_error_queue.back().get()->get_status_str();
+         "BOX_STATUS_OK" :
+         box_error_queue.back().get()->get_status_str();
 }
 
 /**

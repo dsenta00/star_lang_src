@@ -1,8 +1,6 @@
 #include "ORM/entity.h"
 #include "ORM/relationship.h"
-#include <algorithm>
 #include <sstream>
-#include <string>
 #include "box_monitor.h"
 
 /**
@@ -47,7 +45,7 @@ entity::get_relationship(std::string relationship_name)
     return (*it).second.get();
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -65,27 +63,9 @@ entity::add_relationship(std::string relationship_name,
     return;
   }
 
-  relationship_p rp(new relationship((entity *)this,
-                                     relationship_name,
-                                     type));
+  relationship_p rp(new relationship(relationship_name, type));
 
   this->relation[relationship_name] = rp;
-}
-
-/**
- * Remove relationship.
- *
- * @param relationship_name
- */
-void
-entity::remove_relationship(std::string relationship_name)
-{
-  auto it = this->relation.find(relationship_name);
-
-  if (it != this->relation.end())
-  {
-    this->relation.erase(it);
-  }
 }
 
 /**
@@ -175,28 +155,6 @@ entity::add_entity(std::string relationship_name, entity *e)
 }
 
 /**
- * Add entities.
- *
- * @param relationship_name
- * @param er
- * @return
- */
-void
-entity::add_entities(std::string relationship_name,
-                     relationship *er)
-{
-  relationship *r = this->get_relationship(relationship_name);
-
-  if (!r)
-  {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return;
-  }
-
-  r->add_entities(er);
-}
-
-/**
  * Remove entity from relationship.
  *
  * @param relationship_name - relationship name.
@@ -240,37 +198,13 @@ entity::have_relations()
   {
     relationship *r = (*it).second.get();
 
-    if(r->num_of_entities() > 0)
+    if (r->num_of_entities() > 0)
     {
       return true;
     }
   }
 
   return false;
-}
-
-/**
- * Remove entity from all relationships.
- *
- * @param e
- * @return this
- */
-void
-entity::remove_entity(entity *e)
-{
-  for (auto it = this->relation.begin();
-       it != this->relation.end();
-       it++)
-  {
-    relationship *r = (*it).second.get();
-    r->remove_entity(e);
-    e->notify_remove(r->get_name(), this);
-  }
-
-  if (!this->have_relations())
-  {
-    this->set_marked(true);
-  }
 }
 
 /**
@@ -311,7 +245,7 @@ entity::back(std::string relationship_name)
   if (!r)
   {
     BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return NULL;
+    return nullptr;
   }
 
   return r->back();

@@ -4,7 +4,6 @@
 #include "box_monitor.h"
 #include "box_virtual_memory.h"
 #include "ORM/orm.h"
-#include "memory.h"
 
 static box_virtual_memory *virtual_memory;
 
@@ -21,7 +20,9 @@ static box_virtual_memory *virtual_memory;
   BOX_OK;
 
 static box_data &
-alloc_box_data(std::string id, box_data_type type = BOX_DATA_INVALID, const void *value = NULL)
+alloc_box_data(std::string id,
+               box_data_type type = BOX_DATA_INVALID,
+               const void *value = nullptr)
 {
   return *(box_data *)orm::create((entity *)new box_data(id, type, value));
 }

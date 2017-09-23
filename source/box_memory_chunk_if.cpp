@@ -1,7 +1,5 @@
 #include "box_memory_chunk_if.h"
-#include "box_monitor.h"
 #include "memory.h"
-#include <cstring>
 #include "ORM/relationship.h"
 #include "ORM/orm.h"
 
@@ -18,10 +16,10 @@ memory_chunk_if::memory_chunk_if() : entity::entity("box_memory_chunk", "chunk")
 void
 memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
 {
-  memory *mem = (memory *)orm::create((entity *)new memory(address, size));
+  memory *mem = (memory *) orm::create((entity *) new memory(address, size));
 
-  this->free_memory->add_entity((entity *)mem);
-  mem->add_entity("free_memory", (entity *)this);
+  this->free_memory->add_entity((entity *) mem);
+  mem->add_entity("free_memory", (entity *) this);
 
   this->free += size;
 }
@@ -36,8 +34,8 @@ memory_chunk_if::free_memory_remove(memory *mem)
 memory *
 memory_chunk_if::free_memory_find(std::function<bool(memory *)> foo)
 {
-  return (memory *)this->free_memory->find([&] (entity *e) {
-    memory *m = (memory *)e;
+  return (memory *) this->free_memory->find([&](entity *e) {
+    memory *m = (memory *) e;
     return foo(m);
   });
 }
@@ -45,7 +43,7 @@ memory_chunk_if::free_memory_find(std::function<bool(memory *)> foo)
 memory *
 memory_chunk_if::free_memory_front()
 {
-  return (memory *)this->free_memory->front();
+  return (memory *) this->free_memory->front();
 }
 
 uint32_t
@@ -60,7 +58,7 @@ memory_chunk_if::free_memory_delete_all()
   while (this->free_memory->num_of_entities())
   {
     entity *e = this->free_memory_front();
-    this->free -= ((memory *)e)->get_size();
+    this->free -= ((memory *) e)->get_size();
     orm::destroy(e);
   }
 }
@@ -71,18 +69,16 @@ memory_chunk_if::free_memory_delete_all()
 void
 memory_chunk_if::free_memory_union()
 {
-  this->free_memory->sort([&](entity *e1, entity *e2)
-  {
-    memory *m1 = (memory *)e1;
-    memory *m2 = (memory *)e2;
+  this->free_memory->sort([&](entity *e1, entity *e2) {
+    memory *m1 = (memory *) e1;
+    memory *m2 = (memory *) e2;
 
     return m1->get_address() < m2->get_address();
   });
 
-  this->free_memory->for_each([&] (entity *e1, entity *e2)
-  {
-    memory *m1 = (memory *)e1;
-    memory *m2 = (memory *)e2;
+  this->free_memory->for_each([&](entity *e1, entity *e2) {
+    memory *m1 = (memory *) e1;
+    memory *m2 = (memory *) e2;
 
     if (m2->get_address() == (m1->get_address() + m1->get_size()))
     {
@@ -99,10 +95,10 @@ memory_chunk_if::free_memory_union()
 memory *
 memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 {
-  memory *mem = (memory *)orm::create((entity *)new memory(address, size));
+  memory *mem = (memory *) orm::create((entity *) new memory(address, size));
 
-  this->reserved_memory->add_entity((entity *)mem);
-  mem->add_entity("reserved_memory", (entity *)this);
+  this->reserved_memory->add_entity((entity *) mem);
+  mem->add_entity("reserved_memory", (entity *) this);
 
   this->free -= size;
   return mem;
@@ -117,8 +113,8 @@ memory_chunk_if::reserved_memory_remove(memory *mem)
 memory *
 memory_chunk_if::reserved_memory_find(std::function<bool(memory *)> foo)
 {
-  return (memory *)this->reserved_memory->find([&] (entity *e) {
-    memory *m = (memory *)e;
+  return (memory *) this->reserved_memory->find([&](entity *e) {
+    memory *m = (memory *) e;
     return foo(m);
   });
 }
@@ -126,13 +122,13 @@ memory_chunk_if::reserved_memory_find(std::function<bool(memory *)> foo)
 memory *
 memory_chunk_if::reserved_memory_front()
 {
-  return (memory *)this->reserved_memory->front();
+  return (memory *) this->reserved_memory->front();
 }
 
 memory *
 memory_chunk_if::reserved_memory_back()
 {
-  return (memory *)this->reserved_memory->back();
+  return (memory *) this->reserved_memory->back();
 }
 
 uint32_t
@@ -144,10 +140,9 @@ memory_chunk_if::reserved_memory_num()
 void
 memory_chunk_if::reserved_memory_sort()
 {
-  this->reserved_memory->sort([&] (entity *e1, entity *e2)
-  {
-    memory *m1 = (memory *)e1;
-    memory *m2 = (memory *)e2;
+  this->reserved_memory->sort([&](entity *e1, entity *e2) {
+    memory *m1 = (memory *) e1;
+    memory *m2 = (memory *) e2;
 
     return m1->get_address() < m2->get_address();
   });

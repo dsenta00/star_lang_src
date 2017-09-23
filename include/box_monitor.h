@@ -1,5 +1,6 @@
 #ifndef BOX_MONITOR_H
 #define BOX_MONITOR_H
+
 #include "box_error.h"
 
 void box_monitor_add_error(const char *func, box_status status);

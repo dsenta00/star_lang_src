@@ -1,8 +1,6 @@
 #include "ORM/relationship.h"
 #include "ORM/entity.h"
-#include "stdexcept"
 #include "box_monitor.h"
-#include <algorithm>
 
 /**
  * The constructor.
@@ -11,11 +9,8 @@
  * @param relationship_name - relationship name.
  * @param type - relationship type.
  */
-relationship::relationship(entity *parent_entity,
-                           std::string relationship_name,
-                           relationship_type type)
+relationship::relationship(std::string relationship_name, relationship_type type)
 {
-  this->parent_entity = parent_entity;
   this->relationship_name = relationship_name;
   this->type = type;
 }
@@ -32,17 +27,6 @@ relationship::get_name()
 }
 
 /**
- * Set relationship name.
- *
- * @param relationship_name
- */
-void
-relationship::set_name(std::string relationship_name)
-{
-  this->relationship_name = relationship_name;
-}
-
-/**
  * Get relationship type.
  *
  * @return relationship type.
@@ -51,30 +35,6 @@ relationship_type
 relationship::get_type()
 {
   return this->type;
-}
-
-/**
- * Get entity by ID.
- *
- * @param id - entity ID.
- * @return entity if found, otherwise return NULL.
- */
-entity *
-relationship::get_entity(std::string id)
-{
-  if (id == "single")
-  {
-    if (this->entities.size() == 0)
-    {
-      return NULL;
-    }
-
-    return this->entities.front();
-  }
-
-  return this->find([&] (entity *e) {
-    return e->get_id() == id;
-  });
 }
 
 /**
@@ -94,7 +54,7 @@ relationship::find(const std::function<bool(entity *)> &func)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -103,7 +63,7 @@ relationship::find(const std::function<bool(entity *)> &func)
  * @param func - function to sort.
  */
 void
-relationship::sort(const std::function <bool(entity *, entity *)>& func)
+relationship::sort(const std::function<bool(entity *, entity *)> &func)
 {
   std::sort(this->entities.begin(), this->entities.end(), func);
 }
@@ -193,26 +153,6 @@ relationship::add_entity(entity *e)
 }
 
 /**
- * Add entities.
- *
- * @param r - relationship that contains entities.
- */
-void
-relationship::add_entities(relationship *r)
-{
-  if (this->type != r->type)
-  {
-    BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_ENTITIES_WITH_DIFFERENT_RELATIONSHIP_TYPE);
-    return;
-  }
-
-  for (entity *e : r->entities)
-  {
-    this->entities.push_back(e);
-  }
-}
-
-/**
  * Remove entity from this relationship.
  *
  * @param e - the entity.
@@ -250,7 +190,7 @@ relationship::get_entities()
 entity *
 relationship::front()
 {
-  return (this->entities.size()) ? this->entities.front() : NULL;
+  return (this->entities.size()) ? this->entities.front() : nullptr;
 }
 
 /**
@@ -261,16 +201,7 @@ relationship::front()
 entity *
 relationship::back()
 {
-  return (this->entities.size()) ? this->entities.back() : NULL;
-}
-
-/**
- * Delete all entites from relationship.
- */
-void
-relationship::delete_all()
-{
-  this->entities.clear();
+  return (this->entities.size()) ? this->entities.back() : nullptr;
 }
 
 /**

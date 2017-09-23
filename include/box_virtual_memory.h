@@ -1,5 +1,6 @@
 #ifndef BOX_VIRTUAL_MEMORY_H
 #define BOX_VIRTUAL_MEMORY_H
+
 #include "ORM/entity.h"
 #include "box_fw.h"
 #include <cstdint>
@@ -14,7 +15,7 @@ public:
   memory *alloc(uint32_t size);
   memory *realloc(memory *mem, uint32_t new_size);
   void free(memory *mem);
-  uint32_t get_allocated_total(void);
+  uint32_t get_allocated_total();
 protected:
   memory *add_new_chunk_and_alloc(uint32_t size);
   memory *solve_defragmentation_and_alloc(uint32_t size);

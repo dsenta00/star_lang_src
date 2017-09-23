@@ -4,7 +4,6 @@
 #include "ORM/relationship.h"
 #include "ORM/orm.h"
 #include "box_monitor.h"
-#include <cstring>
 #include <iostream>
 
 /**
@@ -15,7 +14,7 @@
 box_data::box_data(std::string id, box_data_type type, const void *value) : entity::entity("box_data", id)
 {
   this->add_relationship("box_data_memory", ONE_TO_MANY);
-  this->vm = (box_virtual_memory *)orm::get_first("box_virtual_memory");
+  this->vm = (box_virtual_memory *) orm::get_first("box_virtual_memory");
   this->type = type;
 
   if (type >= BOX_DATA_INVALID)
@@ -24,7 +23,7 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
     return;
   }
 
-  if (value == NULL)
+  if (value == nullptr)
   {
     memory *mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[type]);
 
@@ -34,16 +33,16 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
       return;
     }
 
-    entity::add_entity("box_data_memory", (entity *)mem);
-    mem->add_entity("box_data_memory", (entity *)this);
+    entity::add_entity("box_data_memory", (entity *) mem);
+    mem->add_entity("box_data_memory", (entity *) this);
 
     default_value();
   }
   else
   {
     size_t size = (type == BOX_DATA_STRING) ?
-                    strlen((const char *)value) + 1 :
-                    BOX_DATA_TYPE_SIZE[type];
+                  strlen((const char *) value) + 1 :
+                  BOX_DATA_TYPE_SIZE[type];
 
     memory *mem = vm->alloc(size);
 
@@ -53,8 +52,8 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
       return;
     }
 
-    entity::add_entity("box_data_memory", (entity *)mem);
-    mem->add_entity("box_data_memory", (entity *)this);
+    entity::add_entity("box_data_memory", (entity *) mem);
+    mem->add_entity("box_data_memory", (entity *) this);
 
     memcpy(mem->get_pointer<void *>(), value, size);
   }
@@ -91,8 +90,8 @@ box_data::box_data(std::string id, box_data &data) : entity::entity("box_data", 
          data_mem->get_pointer<void *>(),
          data_mem->get_size());
 
-  this->add_entity("box_data_memory", (entity *)mem);
-  mem->add_entity("box_data_memory", (entity *)this);
+  this->add_entity("box_data_memory", (entity *) mem);
+  mem->add_entity("box_data_memory", (entity *) this);
 }
 
 /**
@@ -107,7 +106,7 @@ box_data::create(std::string id,
                  box_data_type type,
                  const void *value)
 {
-  return (box_data *)orm::create((entity *)new box_data(id, type, value));
+  return (box_data *) orm::create((entity *) new box_data(id, type, value));
 }
 
 /**
@@ -119,48 +118,7 @@ box_data::create(std::string id,
 box_data *
 box_data::create(std::string id, box_data &data)
 {
-  return (box_data *)orm::create((entity *)new box_data(id, data));
-}
-
-/**
- * Get type string.
- *
- * @return type to string.
- */
-const char *
-box_data::get_type_str()
-{
-  switch (type)
-  {
-    case BOX_DATA_BOOL:
-      return "BOX_DATA_BOOL";
-      break;
-    case BOX_DATA_CHAR:
-      return "BOX_DATA_CHAR";
-      break;
-    case BOX_DATA_SHORT:
-      return "BOX_DATA_SHORT";
-      break;
-    case BOX_DATA_INT:
-      return "BOX_DATA_INT";
-      break;
-    case BOX_DATA_FLOAT:
-      return "BOX_DATA_FLOAT";
-      break;
-    case BOX_DATA_LONG:
-      return "BOX_DATA_LONG";
-      break;
-    case BOX_DATA_DOUBLE:
-      return "BOX_DATA_DOUBLE";
-      break;
-    case BOX_DATA_STRING:
-      return "BOX_DATA_STRING";
-      break;
-    case BOX_DATA_INVALID:
-    default:
-      return "BOX_DATA_INVALID";
-      break;
-  }
+  return (box_data *) orm::create((entity *) new box_data(id, data));
 }
 
 /**
@@ -191,22 +149,22 @@ box_data::to_bool()
       break;
     }
     case BOX_DATA_CHAR:
-      value = (bool)mem->get_element<int8_t>();
+      value = (bool) mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
-      value = (bool)mem->get_element<int16_t>();
+      value = (bool) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (bool)mem->get_element<int32_t>();
+      value = (bool) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (bool)mem->get_element<float32_t>();
+      value = (bool) mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
-      value = (bool)mem->get_element<int64_t>();
+      value = (bool) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (bool)mem->get_element<float64_t>();
+      value = (bool) mem->get_element<float64_t>();
       break;
     case BOX_DATA_INVALID:
     default:
@@ -237,26 +195,26 @@ box_data::to_char()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (int8_t)mem->get_element<bool>();
+      value = (int8_t) mem->get_element<bool>();
       break;
     case BOX_DATA_STRING:
     case BOX_DATA_CHAR:
       value = mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
-      value = (int8_t)mem->get_element<int16_t>();
+      value = (int8_t) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (int8_t)mem->get_element<int32_t>();
+      value = (int8_t) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int8_t)mem->get_element<float32_t>();
+      value = (int8_t) mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
-      value = (int8_t)mem->get_element<int64_t>();
+      value = (int8_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (int8_t)mem->get_element<float64_t>();
+      value = (int8_t) mem->get_element<float64_t>();
       break;
     case BOX_DATA_INVALID:
     default:
@@ -287,25 +245,25 @@ box_data::to_short()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (int16_t)mem->get_element<bool>();
+      value = (int16_t) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (int16_t)mem->get_element<int8_t>();
+      value = (int16_t) mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
       value = mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (int16_t)mem->get_element<int32_t>();
+      value = (int16_t) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int16_t)mem->get_element<float32_t>();
+      value = (int16_t) mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
-      value = (int16_t)mem->get_element<int64_t>();
+      value = (int16_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (int16_t)mem->get_element<float64_t>();
+      value = (int16_t) mem->get_element<float64_t>();
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -341,25 +299,25 @@ box_data::to_int()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (int32_t)mem->get_element<bool>();
+      value = (int32_t) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (int32_t)mem->get_element<int8_t>();;
+      value = (int32_t) mem->get_element<int8_t>();;
       break;
     case BOX_DATA_SHORT:
-      value = (int32_t)mem->get_element<int16_t>();
+      value = (int32_t) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
       value = mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int32_t)mem->get_element<float32_t>();;
+      value = (int32_t) mem->get_element<float32_t>();;
       break;
     case BOX_DATA_LONG:
-      value = (int32_t)mem->get_element<int64_t>();
+      value = (int32_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (int32_t)mem->get_element<float64_t>();;
+      value = (int32_t) mem->get_element<float64_t>();;
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -395,25 +353,25 @@ box_data::to_float()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (float32_t)mem->get_element<bool>();
+      value = (float32_t) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (float32_t)mem->get_element<int8_t>();
+      value = (float32_t) mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
-      value = (float32_t)mem->get_element<int16_t>();
+      value = (float32_t) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (float32_t)mem->get_element<int32_t>();
+      value = (float32_t) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
       value = mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
-      value = (float32_t)mem->get_element<int64_t>();
+      value = (float32_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (float32_t)mem->get_element<float64_t>();
+      value = (float32_t) mem->get_element<float64_t>();
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -449,25 +407,25 @@ box_data::to_long()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (int64_t)mem->get_element<bool>();
+      value = (int64_t) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (int64_t)mem->get_element<int8_t>();
+      value = (int64_t) mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
-      value = (int64_t)mem->get_element<int16_t>();
+      value = (int64_t) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (int64_t)mem->get_element<int64_t>();
+      value = (int64_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int64_t)mem->get_element<float32_t>();
+      value = (int64_t) mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
       value = mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
-      value = (int64_t)mem->get_element<float64_t>();
+      value = (int64_t) mem->get_element<float64_t>();
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -503,22 +461,22 @@ box_data::to_double()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (float64_t)mem->get_element<bool>();
+      value = (float64_t) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (float64_t)mem->get_element<int8_t>();
+      value = (float64_t) mem->get_element<int8_t>();
       break;
     case BOX_DATA_SHORT:
-      value = (float64_t)mem->get_element<int16_t>();
+      value = (float64_t) mem->get_element<int16_t>();
       break;
     case BOX_DATA_INT:
-      value = (float64_t)mem->get_element<int32_t>();
+      value = (float64_t) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (float64_t)mem->get_element<float32_t>();
+      value = (float64_t) mem->get_element<float32_t>();
       break;
     case BOX_DATA_LONG:
-      value = (float64_t)mem->get_element<int64_t>();
+      value = (float64_t) mem->get_element<int64_t>();
       break;
     case BOX_DATA_DOUBLE:
       value = mem->get_element<float64_t>();
@@ -546,11 +504,11 @@ box_data &
 box_data::to_string()
 {
   std::string string = this->get_string();
-  box_data &str = *(box_data *)orm::create(
-                    (entity *)new box_data(this->id.append(" as string"),
-                                           BOX_DATA_STRING,
-                                           string.c_str())
-                    );
+  box_data &str = *(box_data *) orm::create(
+    (entity *) new box_data(this->id.append(" as string"),
+                            BOX_DATA_STRING,
+                            string.c_str())
+  );
   return str;
 }
 
@@ -563,7 +521,7 @@ uintptr_t
 box_data::get_address()
 {
   memory *mem = this->get_memory();
-  return (mem != NULL) ? (uintptr_t)mem->get_pointer<void *>() : 0;
+  return (mem != nullptr) ? (uintptr_t) mem->get_pointer<void *>() : 0;
 }
 
 /**
@@ -574,7 +532,7 @@ box_data::get_address()
 memory *
 box_data::get_memory()
 {
-  return (memory *)this->get_relationship("box_data_memory")->front();
+  return (memory *) this->get_relationship("box_data_memory")->front();
 }
 
 /**
@@ -604,7 +562,7 @@ box_data::default_value()
     return false;
   }
 
-  switch(type)
+  switch (type)
   {
     case BOX_DATA_BOOL:
     case BOX_DATA_CHAR:
@@ -703,11 +661,11 @@ box_data::convert_itself(box_data_type new_type)
       break;
   }
 
-  entity::add_entity("box_data_memory", (entity *)new_mem);
-  new_mem->add_entity("box_data_memory", (entity *)this);
+  entity::add_entity("box_data_memory", (entity *) new_mem);
+  new_mem->add_entity("box_data_memory", (entity *) this);
 
-  entity::remove_entity("box_data_memory", (entity *)mem);
-  mem->remove_entity("box_data_memory", (entity *)this);
+  entity::remove_entity("box_data_memory", (entity *) mem);
+  mem->remove_entity("box_data_memory", (entity *) this);
   this->vm->free(mem);
 
   this->type = new_type;
@@ -721,7 +679,7 @@ box_data::convert_itself(box_data_type new_type)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator = (const void *data)
+box_data::operator=(const void *data)
 {
   memory *mem = this->get_memory();
 
@@ -734,39 +692,39 @@ box_data::operator = (const void *data)
   switch (type)
   {
     case BOX_DATA_BOOL:
-      mem->get_element<bool>() = *(bool *)data;
+      mem->get_element<bool>() = *(bool *) data;
       break;
     case BOX_DATA_CHAR:
-      mem->get_element<int8_t>() = *(int8_t *)data;
+      mem->get_element<int8_t>() = *(int8_t *) data;
       break;
     case BOX_DATA_SHORT:
-      mem->get_element<int16_t>() = *(int16_t *)data;
+      mem->get_element<int16_t>() = *(int16_t *) data;
       break;
     case BOX_DATA_INT:
-      mem->get_element<int32_t>() = *(int32_t *)data;
+      mem->get_element<int32_t>() = *(int32_t *) data;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float32_t>() = *(float32_t *)data;
+      mem->get_element<float32_t>() = *(float32_t *) data;
       break;
     case BOX_DATA_LONG:
-      mem->get_element<int64_t>() = *(int64_t *)data;
+      mem->get_element<int64_t>() = *(int64_t *) data;
       break;
     case BOX_DATA_DOUBLE:
-      mem->get_element<float64_t>() = *(float64_t *)data;
+      mem->get_element<float64_t>() = *(float64_t *) data;
       break;
     case BOX_DATA_STRING:
     {
-      const char *str_temp = (const char *)data;
+      const char *str_temp = (const char *) data;
       uint32_t str_size = strlen(str_temp) + 1;
 
       if (mem->get_size() < str_size)
       {
         memory *new_mem = this->vm->alloc(str_size);
-        entity::add_entity("box_data_memory", (entity *)new_mem);
-        new_mem->add_entity("box_data_memory", (entity *)this);
+        entity::add_entity("box_data_memory", (entity *) new_mem);
+        new_mem->add_entity("box_data_memory", (entity *) this);
 
-        entity::remove_entity("box_data_memory", (entity *)mem);
-        mem->remove_entity("box_data_memory", (entity *)this);
+        entity::remove_entity("box_data_memory", (entity *) mem);
+        mem->remove_entity("box_data_memory", (entity *) this);
 
         this->vm->free(mem);
         mem = new_mem;
@@ -793,7 +751,7 @@ box_data::operator = (const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator = (box_data &data)
+box_data::operator=(box_data &data)
 {
   memory *mem = this->get_memory();
 
@@ -857,7 +815,7 @@ box_data::operator = (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator &= (box_data &data)
+box_data::operator&=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -915,7 +873,7 @@ box_data::operator &= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator |= (box_data &data)
+box_data::operator|=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -973,7 +931,7 @@ box_data::operator |= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator ^= (box_data &data)
+box_data::operator^=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1032,7 +990,7 @@ box_data::operator ^= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator += (box_data &data)
+box_data::operator+=(box_data &data)
 {
   memory *mem = this->get_memory();
 
@@ -1064,17 +1022,17 @@ box_data::operator += (box_data &data)
          * new_mem is different than mem,
          * switch relations.
          */
-        entity::add_entity("box_data_memory", (entity *)new_mem);
-        new_mem->add_entity("box_data_memory", (entity *)this);
+        entity::add_entity("box_data_memory", (entity *) new_mem);
+        new_mem->add_entity("box_data_memory", (entity *) this);
 
-        entity::remove_entity("box_data_memory", (entity *)mem);
-        mem->remove_entity("box_data_memory", (entity *)this);
+        entity::remove_entity("box_data_memory", (entity *) mem);
+        mem->remove_entity("box_data_memory", (entity *) this);
 
         mem = new_mem;
       }
     }
 
-    strcat((char *)mem->get_address(), string.c_str());
+    strcat((char *) mem->get_address(), string.c_str());
     return true;
   }
 
@@ -1125,7 +1083,7 @@ box_data::operator += (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator -= (box_data &data)
+box_data::operator-=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1185,7 +1143,7 @@ box_data::operator -= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator *= (box_data &data)
+box_data::operator*=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1245,7 +1203,7 @@ box_data::operator *= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator /= (box_data &data)
+box_data::operator/=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1347,7 +1305,7 @@ box_data::operator /= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator %= (box_data &data)
+box_data::operator%=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1430,7 +1388,7 @@ box_data::operator %= (box_data &data)
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator ++ ()
+box_data::operator++()
 {
   memory *mem = this->get_memory();
   if (!mem)
@@ -1482,7 +1440,7 @@ box_data::operator ++ ()
  * @return true if success, otherwise return false.
  */
 bool
-box_data::operator -- ()
+box_data::operator--()
 {
   memory *mem = this->get_memory();
   if (!mem)
@@ -1536,7 +1494,7 @@ box_data::operator -- ()
  * @return true if equal, otherwise return false.
  */
 bool
-box_data::operator == (box_data &data)
+box_data::operator==(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1573,7 +1531,7 @@ box_data::operator == (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) == 0;
+                      (const char *) data.get_address()) == 0;
       }
       else
       {
@@ -1600,7 +1558,7 @@ box_data::operator == (box_data &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-box_data::operator != (box_data &data)
+box_data::operator!=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1636,7 +1594,7 @@ box_data::operator != (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) != 0;
+                      (const char *) data.get_address()) != 0;
       }
       else
       {
@@ -1662,7 +1620,7 @@ box_data::operator != (box_data &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-box_data::operator > (box_data &data)
+box_data::operator>(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1698,7 +1656,7 @@ box_data::operator > (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) > 0;
+                      (const char *) data.get_address()) > 0;
       }
       else
       {
@@ -1724,7 +1682,7 @@ box_data::operator > (box_data &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-box_data::operator < (box_data &data)
+box_data::operator<(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1760,7 +1718,7 @@ box_data::operator < (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) < 0;
+                      (const char *) data.get_address()) < 0;
       }
       else
       {
@@ -1786,7 +1744,7 @@ box_data::operator < (box_data &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-box_data::operator >= (box_data &data)
+box_data::operator>=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1822,7 +1780,7 @@ box_data::operator >= (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) >= 0;
+                      (const char *) data.get_address()) >= 0;
       }
       else
       {
@@ -1848,7 +1806,7 @@ box_data::operator >= (box_data &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-box_data::operator <= (box_data &data)
+box_data::operator<=(box_data &data)
 {
   memory *mem = this->get_memory();
   if ((!mem) || (data.get_address() == 0))
@@ -1884,7 +1842,7 @@ box_data::operator <= (box_data &data)
       if (data.type == BOX_DATA_STRING)
       {
         return strcmp(mem->get_pointer<const char *>(),
-                      (const char *)data.get_address()) <= 0;
+                      (const char *) data.get_address()) <= 0;
       }
       else
       {

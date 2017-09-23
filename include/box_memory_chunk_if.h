@@ -1,5 +1,6 @@
 #ifndef BOX_MEMORY_CHUNK_IF_H
 #define BOX_MEMORY_CHUNK_IF_H
+
 #include "ORM/entity.h"
 #include "box_fw.h"
 #include <cstdint>
@@ -29,7 +30,6 @@ public:
   memory *reserved_memory_back();
   uint32_t reserved_memory_num();
   void reserved_memory_sort();
-
   uint32_t get_free();
 };
 

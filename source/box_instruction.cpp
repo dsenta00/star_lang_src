@@ -1,6 +1,5 @@
 #include "box_instruction.h"
 #include "ORM/relationship.h"
-#include "ORM/orm.h"
 #include "box_method.h"
 #include "box_data.h"
 #include "box_monitor.h"
@@ -42,9 +41,9 @@ instruction::get_op_code()
 void
 instruction::create()
 {
-  box_method *method = (box_method *)this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
   box_data *data = box_data::create(this->arg[0], get_from_token(this->arg[1]));
-  method->add_local_object((entity *)data);
+  method->add_local_object((entity *) data);
 }
 
 /**
@@ -53,12 +52,12 @@ instruction::create()
 void
 instruction::create_and_assign_constant()
 {
-  box_method *method = (box_method *)this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
   box_data *data = box_data::create(this->arg[0],
                                     get_from_token(this->arg[1]),
                                     this->arg[2].c_str());
 
-  method->add_local_object((entity *)data);
+  method->add_local_object((entity *) data);
 }
 
 /**
@@ -67,8 +66,8 @@ instruction::create_and_assign_constant()
 void
 instruction::create_and_assign_object()
 {
-  box_method *method = (box_method *)this->get_relationship("method_instructions")->front();
-  box_data *data2 = (box_data *)method->get_local_object(this->arg[1]);
+  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_data *data2 = (box_data *) method->get_local_object(this->arg[1]);
 
   if (!data2)
   {
@@ -77,7 +76,7 @@ instruction::create_and_assign_object()
   }
 
   box_data *data = box_data::create(this->arg[0], *data2);
-  method->add_local_object((entity *)data);
+  method->add_local_object((entity *) data);
 }
 
 /**
@@ -86,8 +85,8 @@ instruction::create_and_assign_object()
 void
 instruction::pop_and_store()
 {
-  box_method *method = (box_method *)this->get_relationship("method_instructions")->front();
-  box_data *data2 = (box_data *)method->pop_stack();
+  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_data *data2 = (box_data *) method->pop_stack();
 
   if (!data2)
   {
@@ -95,7 +94,7 @@ instruction::pop_and_store()
     return;
   }
 
-  box_data *data = (box_data *)method->get_local_object(this->arg[0]);
+  box_data *data = (box_data *) method->get_local_object(this->arg[0]);
 
   if (!data)
   {
@@ -133,5 +132,5 @@ instruction::execute()
       break;
   }
 
-  return (instruction *)this->get_relationship("next_instruction")->front();
+  return (instruction *) this->get_relationship("next_instruction")->front();
 }

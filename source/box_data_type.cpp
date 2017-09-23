@@ -1,5 +1,6 @@
 #ifndef BOX_DATA_TYPE_CPP
 #define BOX_DATA_TYPE_CPP
+
 #include "box_data_type.h"
 
 box_data_type get_from_token(std::string &str)

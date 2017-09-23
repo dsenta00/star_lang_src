@@ -1,10 +1,10 @@
 #ifndef BOX_ASSERT_H
 #define BOX_ASSERT_H
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 void assert_true(bool statement,
                  const char *file,
