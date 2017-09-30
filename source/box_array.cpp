@@ -13,12 +13,7 @@
  */
 box_array::box_array(std::string id, box_array *array) : entity::entity("box_array", id)
 {
-  this->add_relationship("array", ONE_TO_MANY);
-
-  /*
-   * array can be subarray of many arrays
-   */
-  this->add_relationship("subarray", ONE_TO_MANY);
+  this->master_relationship_add("array", ONE_TO_MANY);
 
   if (array == nullptr)
   {
@@ -107,8 +102,10 @@ box_array::operator+=(entity *e)
 box_data &
 box_array::to_string()
 {
-  box_data &str = *box_data::create(this->id.append(" as string"), BOX_DATA_STRING);
-  relationship *r = this->get_relationship("array");
+  box_data &str = *box_data::create(this->id.append(" as string"),
+                                    BOX_DATA_STRING);
+
+  relationship *r = this->master_relationship_get("array");
 
   if (!r)
   {
@@ -116,7 +113,10 @@ box_array::to_string()
   }
 
   char ch = ' ';
-  box_data &separator_char = *box_data::create("<<temp_char>>", BOX_DATA_CHAR, (const void *) &ch);
+  box_data &separator_char = *box_data::create("<<temp_char>>",
+                                               BOX_DATA_CHAR,
+                                               (const void *) &ch);
+
 
   r->for_each([&](entity *e) {
     if (e->get_entity_type() == "box_data")
@@ -163,7 +163,7 @@ box_array::to_string()
 void
 box_array::clear()
 {
-  relationship *r = this->get_relationship("array");
+  relationship *r = this->master_relationship_get("array");
 
   while (r->num_of_entities())
   {
@@ -187,21 +187,9 @@ box_array::remove_data(entity *e)
     return;
   }
 
-  relationship *r = this->get_relationship("array");
-  r->remove_entity(e);
-
-  if (e->get_entity_type() == "box_data")
-  {
-    e->remove_entity("array", (entity *) this);
-  }
-  else if (e->get_entity_type() == "box_array")
-  {
-    e->remove_entity("subarray", (entity *) this);
-  }
-
+  this->master_relationship_remove_entity("array", e);
   this->array.erase(e->get_id());
 }
-
 
 /**
  * @brief box_array::add_data
@@ -217,23 +205,16 @@ box_array::insert_data(std::string index, entity *e)
 
   if (e->get_entity_type() == "box_data")
   {
+    /*
+     * Data is not a reference. Create a new data.
+     */
     entity *new_data = box_data::create(index, *(box_data *) e);
-    this->add_entity("array", new_data);
-
-    new_data->add_relationship("array", MANY_TO_ONE);
-    new_data->add_entity("array", (entity *) this);
-
-    this->array[index] = new_data;
+    e = new_data;
   }
-  else if (e->get_entity_type() == "box_array")
-  {
-    this->add_entity("array", e);
-    e->add_entity("subarray", (entity *) this);
 
-    this->array[index] = e;
-  }
+  this->master_relationship_add_entity("array", e);
+  this->array[index] = e;
 }
-
 
 /**
  * @brief box_array::~box_array

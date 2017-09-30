@@ -3,6 +3,13 @@
 #include "box_virtual_memory.h"
 #include <cstdlib>
 
+/**
+ * Main program.
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char *argv[])
 {
   (void) argc;
@@ -22,6 +29,14 @@ int main(int argc, char *argv[])
   box_virtual_memory::create();
 
   run_tests();
+
+  orm::remove_entity_repository("memory");
+  orm::remove_entity_repository("box_memory_chunk");
+  orm::remove_entity_repository("box_virtual_memory");
+  orm::remove_entity_repository("box_data");
+  orm::remove_entity_repository("box_array");
+  orm::remove_entity_repository("box_method");
+  orm::remove_entity_repository("instruction");
 
   return EXIT_SUCCESS;
 }

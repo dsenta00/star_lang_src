@@ -10,21 +10,20 @@ instruction::instruction(box_op_code op_code,
 {
   this->op_code = op_code;
 
-  this->add_relationship("method_instructions", MANY_TO_ONE);
-  this->add_relationship("next_instruction", ONE_TO_ONE);
-  this->add_relationship("branch_result_false", ONE_TO_ONE);
-  this->add_relationship("first_operand", ONE_TO_ONE);
-  this->add_relationship("second_operand", ONE_TO_ONE);
+  this->master_relationship_add("next_instruction", ONE_TO_ONE);
+  this->master_relationship_add("branch_result_false", ONE_TO_ONE);
+  this->master_relationship_add("first_operand", ONE_TO_ONE);
+  this->master_relationship_add("second_operand", ONE_TO_ONE);
 
   if (next_instruction)
   {
-    relationship *r = this->get_relationship("next_instruction");
+    relationship *r = this->master_relationship_get("next_instruction");
     r->add_entity(next_instruction);
   }
 
   if (branch_result_false)
   {
-    relationship *r = this->get_relationship("branch_result_false");
+    relationship *r = this->master_relationship_get("branch_result_false");
     r->add_entity(branch_result_false);
   }
 }
@@ -41,7 +40,7 @@ instruction::get_op_code()
 void
 instruction::create()
 {
-  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->master_relationship_get("method_instructions")->front();
   box_data *data = box_data::create(this->arg[0], get_from_token(this->arg[1]));
   method->add_local_object((entity *) data);
 }
@@ -52,7 +51,7 @@ instruction::create()
 void
 instruction::create_and_assign_constant()
 {
-  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->master_relationship_get("method_instructions")->front();
   box_data *data = box_data::create(this->arg[0],
                                     get_from_token(this->arg[1]),
                                     this->arg[2].c_str());
@@ -66,7 +65,7 @@ instruction::create_and_assign_constant()
 void
 instruction::create_and_assign_object()
 {
-  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->master_relationship_get("method_instructions")->front();
   box_data *data2 = (box_data *) method->get_local_object(this->arg[1]);
 
   if (!data2)
@@ -85,7 +84,7 @@ instruction::create_and_assign_object()
 void
 instruction::pop_and_store()
 {
-  box_method *method = (box_method *) this->get_relationship("method_instructions")->front();
+  box_method *method = (box_method *) this->master_relationship_get("method_instructions")->front();
   box_data *data2 = (box_data *) method->pop_stack();
 
   if (!data2)
@@ -132,5 +131,5 @@ instruction::execute()
       break;
   }
 
-  return (instruction *) this->get_relationship("next_instruction")->front();
+  return (instruction *) this->master_relationship_get("next_instruction")->front();
 }

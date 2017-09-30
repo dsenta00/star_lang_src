@@ -45,7 +45,14 @@ next_power_of_2(uint32_t number)
 memory_chunk *
 box_virtual_memory::find_memory_chunk(std::function<bool(memory_chunk *)> func)
 {
-  for (entity *e : this->box_memory_chunk->get_entities())
+  auto &entities = this->box_memory_chunk->get_entities();
+
+  if (entities.empty())
+  {
+    return nullptr;
+  }
+
+  for (entity *e : entities)
   {
     memory_chunk *chunk = (memory_chunk *) e;
 
@@ -74,7 +81,7 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
   }
 
   memory_chunk *chunk = memory_chunk::create(max_allocated_bytes);
-  this->box_memory_chunk->add_entity((entity *) chunk);
+  this->master_relationship_add_entity("box_memory_chunk", chunk);
 
   return chunk;
 }
@@ -86,8 +93,8 @@ box_virtual_memory::add_memory_chunk(uint32_t capacity)
  */
 box_virtual_memory::box_virtual_memory(uint32_t init_capacity) : entity::entity("box_virtual_memory", "MAIN")
 {
-  this->add_relationship("box_memory_chunk", ONE_TO_MANY);
-  this->box_memory_chunk = this->get_relationship("box_memory_chunk");
+  this->master_relationship_add("box_memory_chunk", ONE_TO_MANY);
+  this->box_memory_chunk = this->master_relationship_get("box_memory_chunk");
 
   this->allocated_total = 0;
   this->max_allocated_bytes = 0;
@@ -148,7 +155,7 @@ box_virtual_memory::add_new_chunk_and_alloc(uint32_t size)
    * New chunk is not allocated.
    * Remove previously allocated chunk and defragment all memory.
    */
-  orm::destroy((entity *) chunk);
+  this->master_relationship_remove_entity("box_memory_chunk", chunk);
 
   this->box_memory_chunk->for_each([&](entity *entity) {
     memory_chunk *chunk = (memory_chunk *) entity;

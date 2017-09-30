@@ -13,10 +13,6 @@ typedef double float64_t;
  */
 memory::memory(uintptr_t address, uint32_t size) : entity::entity("memory", address)
 {
-  this->add_relationship("free_memory", MANY_TO_ONE);
-  this->add_relationship("reserved_memory", MANY_TO_ONE);
-  this->add_relationship("box_data_memory", ONE_TO_MANY);
-
   this->address = address;
   this->size = size;
 }
@@ -68,8 +64,7 @@ memory::align(memory *adjacent_memory)
           (void *) adjacent_memory->address,
           adjacent_memory->size);
 
-  adjacent_memory->address = this->address + this->size;
-  adjacent_memory->id = std::to_string(adjacent_memory->address);
+  adjacent_memory->assign(this->address + this->size, adjacent_memory->get_size());
 }
 
 /**
@@ -80,7 +75,7 @@ memory::align(memory *adjacent_memory)
 uint32_t
 memory::get_size()
 {
-  return size;
+  return this->size;
 }
 
 /**
@@ -128,7 +123,13 @@ void
 memory::assign(uintptr_t address,
                uint32_t size)
 {
-  this->id = std::to_string(address);
+  std::string new_id = std::to_string(address);
+
+  if (new_id != this->id)
+  {
+    orm::change_id(this, new_id);
+  }
+
   this->address = address;
   this->size = size;
 }
@@ -142,7 +143,14 @@ memory::assign(uintptr_t address,
 bool
 memory::ready_to_remove()
 {
-  return this->get_relationship("box_data_memory")->num_of_entities() == 0;
+  auto r = this->slave_relationship_get("box_data_memory");
+
+  if (!r)
+  {
+    return true;
+  }
+
+  return r->num_of_entities() == 0;
 }
 
 memory *

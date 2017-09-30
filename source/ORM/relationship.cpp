@@ -16,7 +16,7 @@ relationship::relationship(std::string relationship_name, relationship_type type
 }
 
 /**
- * Get relationsjip name.
+ * Get relationship name.
  *
  * @return relationship name.
  */
@@ -46,15 +46,8 @@ relationship::get_type()
 entity *
 relationship::find(const std::function<bool(entity *)> &func)
 {
-  for (entity *e : this->entities)
-  {
-    if (func(e))
-    {
-      return e;
-    }
-  }
-
-  return nullptr;
+  auto it = std::find_if(this->entities.begin(), this->entities.end(), func);
+  return (it != this->entities.end()) ? *it : nullptr;
 }
 
 /**
@@ -130,21 +123,12 @@ relationship::for_each(const std::function<void(entity *)> &func)
 void
 relationship::add_entity(entity *e)
 {
-  switch (this->type)
+  if (this->type == ONE_TO_ONE)
   {
-    case ONE_TO_MANY:
+    if (this->entities.size() != 0)
     {
-      break;
-    }
-    default:
-    case ONE_TO_ONE:
-    case MANY_TO_ONE:
-    {
-      if (this->entities.size() != 0)
-      {
-        BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE);
-      }
-      break;
+      BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE);
+      return;
     }
   }
 
@@ -212,5 +196,5 @@ relationship::back()
 uint32_t
 relationship::num_of_entities()
 {
-  return this->entities.size();
+  return static_cast<uint32_t>(this->entities.size());
 }

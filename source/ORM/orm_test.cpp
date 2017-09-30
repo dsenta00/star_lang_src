@@ -11,16 +11,22 @@ class class1 : public entity {
 public:
   class1() : entity::entity("class1", "class1")
   {
-    this->add_relationship("class1_class2", ONE_TO_MANY);
+    this->master_relationship_add("class1_class2", ONE_TO_MANY);
+    this->master_relationship_add("class1_class1", ONE_TO_ONE);
+  }
+
+  void addClass1(class1 *c1)
+  {
+    this->master_relationship_add_entity("class1_class1", (entity *) c1);
   }
 
   void addClass2(class2 *c2)
   {
-    this->add_entity("class1_class2", (entity *) c2);
-    entity *e = (entity *) c2;
-    e->add_entity("class1_class2", (entity *) this);
+    this->master_relationship_add_entity("class1_class2", (entity *) c2);
   }
 };
+
+class class3;
 
 class class2 : public entity {
 public:
@@ -29,7 +35,30 @@ public:
   class2(int i = 0) : entity::entity("class2", i)
   {
     number = i;
-    this->add_relationship("class1_class2", MANY_TO_ONE);
+    this->master_relationship_add("class2_class3", ONE_TO_MANY);
+  }
+
+  void addClass3(class3 *c3)
+  {
+    this->master_relationship_add_entity("class2_class3", (entity *) c3);
+  }
+};
+
+class class3 : public entity {
+public:
+  int class2_number;
+  int number;
+
+  class3(int i = 0, int class2_number = 0) : entity::entity("class3", i)
+  {
+    this->number = i;
+    this->class2_number = class2_number;
+    this->slave_relationship_add("class3_class1", ONE_TO_MANY);
+  }
+
+  void addClass1(class1 *c1)
+  {
+    this->master_relationship_add_entity("class3_class1", (entity *) c1);
   }
 };
 
@@ -42,7 +71,10 @@ static void orm_test_basic()
   class1 *c1 = (class1 *) orm::create((entity *) new class1());
   ASSERT_OK;
 
-  c1->add_entity("konan", nullptr);
+  ASSERT_EQUALS(c1->get_id(), "class1");
+  ASSERT_FALSE(c1->get_marked(), "get_marked should be false");
+
+  c1->master_relationship_add_entity("konan", nullptr);
   ASSERT_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
   BOX_ERROR_CLEAR;
 
@@ -50,36 +82,38 @@ static void orm_test_basic()
   c1->addClass2(c2);
   ASSERT_OK;
 
-  relationship *c1_relationship = c1->get_relationship("class1_class2");
-  relationship *c2_relationship = c2->get_relationship("class1_class2");
+  relationship *c1_relationship = c1->master_relationship_get("class1_class2");
+  relationship *c2_relationship = c2->slave_relationship_get("class1_class2");
 
-  ASSERT_TRUE(c1_relationship != nullptr, "relationship class1_class2 should exist!");
-  ASSERT_TRUE(c2_relationship != nullptr, "relationship class1_class2 should exist!");
-  ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
-  ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-  ASSERT_TRUE(c1_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)",
-              c1_relationship->num_of_entities());
-  ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)",
-              c2_relationship->num_of_entities());
+  ASSERT_NOT_NULL(c1_relationship);
+  ASSERT_NOT_NULL(c2_relationship);
+  ASSERT_EQUALS(c1_relationship->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(c2_relationship->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(c1_relationship->num_of_entities(), 1);
+  ASSERT_EQUALS(c2_relationship->num_of_entities(), 1);
 
-  class2 *c2_1 = (class2 *) c1->back("class1_class2");
-  ASSERT_TRUE(c2_1 == c2, "back() should return 0x%X (0x%X)", c2, c2_1);
+  ASSERT_EQUALS((class2 *) c1->master_relationship_back("class1_class2"), c2);
+  ASSERT_EQUALS((class1 *) c2->slave_relationship_back("class1_class2"), c1);
 
-  class1 *c1_1 = (class1 *) c2->back("class1_class2");
-  ASSERT_TRUE(c1_1 == c1, "back() should return 0x%X (0x%X)", c1, c1_1);
+  ORM_DESTROY(c2);
 
-  orm::destroy(c2);
   ASSERT_OK;
-  ASSERT_TRUE(orm::get_first("class1") == nullptr, "class1 repository should not have entities");
-  ASSERT_TRUE(orm::get_first("class2") == nullptr, "class2 repository should not have entities");
+  ASSERT_EQUALS(orm::get_first("class1"), c1);
+  ASSERT_NULL(orm::get_first("class2"));
+
+  ORM_DESTROY(c1);
+
+  ASSERT_OK;
+  ASSERT_NULL(orm::get_first("class1"));
+  ASSERT_NULL(orm::get_first("class2"));
 
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
- * @brief orm_test_advanced
+ * @brief orm_test_advanced1
  */
-void orm_test_advanced()
+void orm_test_advanced1()
 {
   class1 *c1 = (class1 *) orm::create((entity *) new class1());
 
@@ -88,23 +122,19 @@ void orm_test_advanced()
     c1->addClass2((class2 *) orm::create((entity *) new class2(i)));
   }
 
-  relationship *c1_relationship = c1->get_relationship("class1_class2");
+  relationship *c1_relationship = c1->master_relationship_get("class1_class2");
 
-  ASSERT_TRUE(c1_relationship != nullptr, "relationship class1_class2 should exist!");
-  ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
-  ASSERT_TRUE(c1_relationship->num_of_entities() == 16, "number of entities should be 16! (%u)",
-              c1_relationship->num_of_entities());
+  ASSERT_NOT_NULL(c1_relationship);
+  ASSERT_EQUALS(c1_relationship->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(c1_relationship->num_of_entities(), 16);
 
-  std::vector<entity *> &entities = c1->get_relationship("class1_class2")->get_entities();
-  for (entity *e : entities)
-  {
-    relationship *c2_relationship = e->get_relationship("class1_class2");
+  c1_relationship->for_each([&](entity *e) {
+    relationship *c2_relationship = e->slave_relationship_get("class1_class2");
 
-    ASSERT_TRUE(c2_relationship != nullptr, "relationship class1_class2 should exist!");
-    ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-    ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)",
-                c1_relationship->num_of_entities());
-  }
+    ASSERT_NOT_NULL(c2_relationship);
+    ASSERT_EQUALS(c2_relationship->get_type(), ONE_TO_MANY);
+    ASSERT_EQUALS(c2_relationship->num_of_entities(), 1);
+  });
 
   /*
    * test foreach with two parameters
@@ -113,8 +143,7 @@ void orm_test_advanced()
     class2 *c2_1 = (class2 *) e1;
     class2 *c2_2 = (class2 *) e2;
 
-    ASSERT_TRUE(c2_2->number == (c2_1->number + 1), "they should follow each other (%u) (%u)", c2_1->number,
-                c2_2->number);
+    ASSERT_EQUALS(c2_2->number, c2_1->number + 1);
     return FOREACH_CONTINUE;
   });
 
@@ -131,24 +160,19 @@ void orm_test_advanced()
     return FOREACH_CONTINUE;
   });
 
-  c1_relationship = c1->get_relationship("class1_class2");
+  c1_relationship = c1->master_relationship_get("class1_class2");
 
-  ASSERT_TRUE(c1_relationship != nullptr, "relationship class1_class2 should exist!");
-  ASSERT_TRUE(c1_relationship->get_type() == ONE_TO_MANY, "relationship should be ONE_TO_MANY");
-  ASSERT_TRUE(c1_relationship->num_of_entities() == 8, "number of entities should be 8! (%u)",
-              c1_relationship->num_of_entities());
+  ASSERT_NOT_NULL(c1_relationship);
+  ASSERT_EQUALS(c1_relationship->num_of_entities(), 8);
 
-  for (entity *e : entities)
-  {
-    ASSERT_TRUE(((class2 *) e)->number % 2 == 0, "number should be pair (%u)", ((class2 *) e)->number);
+  c1_relationship->for_each([&](entity *e) {
+    ASSERT_EQUALS(((class2 *) e)->number % 2, 0);
 
-    relationship *c2_relationship = e->get_relationship("class1_class2");
+    relationship *c2_relationship = e->slave_relationship_get("class1_class2");
 
-    ASSERT_TRUE(c2_relationship != nullptr, "relationship class1_class2 should exist!");
-    ASSERT_TRUE(c2_relationship->get_type() == MANY_TO_ONE, "relationship should be MANY_TO_ONE");
-    ASSERT_TRUE(c2_relationship->num_of_entities() == 1, "number of entities should be 1! (%u)",
-                c1_relationship->num_of_entities());
-  }
+    ASSERT_NOT_NULL(c2_relationship);
+    ASSERT_EQUALS(c2_relationship->num_of_entities(), 1);
+  });
 
   /*
    * test sort
@@ -161,18 +185,319 @@ void orm_test_advanced()
     class2 *c2_1 = (class2 *) e1;
     class2 *c2_2 = (class2 *) e2;
 
-    ASSERT_TRUE(c2_1->number == (c2_2->number + 2), "they should follow each other (%u) (%u)", c2_1->number,
-                c2_2->number);
+    ASSERT_EQUALS(c2_1->number, c2_2->number + 2);
     return FOREACH_CONTINUE;
   });
 
   /*
    * test orm destroy
    */
-  orm::destroy((entity *) c1);
+  ORM_DESTROY(c1);
 
-  ASSERT_TRUE(orm::get_first("class1") == nullptr, "class1 repository should not have entities");
-  ASSERT_TRUE(orm::get_first("class2") == nullptr, "class2 repository should not have entities");
+  ASSERT_NULL(orm::get_first("class1"));
+  ASSERT_NULL(orm::get_first("class2"));
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
+ * @brief orm_test_advanced2
+ */
+static void orm_test_advanced2()
+{
+  class1 *c1 = (class1 *) orm::create((entity *) new class1());
+
+  for (uint32_t i = 0; i < 16; i++)
+  {
+    class2 *c2 = (class2 *) orm::create((entity *) new class2(i));
+
+    for (uint32_t j = 0; j < 16; j++)
+    {
+      class3 *c3 = (class3 *) orm::create((entity *) new class3(j, i));
+      c2->addClass3(c3);
+    }
+
+    c1->addClass2(c2);
+  }
+
+  /*
+   * Check first relations.
+   */
+  relationship *c1_relationship = c1->master_relationship_get("class1_class2");
+
+  ASSERT_NOT_NULL(c1_relationship);
+  ASSERT_EQUALS(c1_relationship->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(c1_relationship->num_of_entities(), 16);
+
+  c1_relationship->for_each([&](entity *class2_entity) {
+    relationship *c2_relationship = class2_entity->slave_relationship_get("class1_class2");
+
+    ASSERT_NOT_NULL(c2_relationship);
+    ASSERT_EQUALS(c2_relationship->get_type(), ONE_TO_MANY);
+    ASSERT_EQUALS(c2_relationship->num_of_entities(), 1);
+
+    relationship *c3_relationship = class2_entity->master_relationship_get("class2_class3");
+
+    ASSERT_NOT_NULL(c3_relationship);
+    ASSERT_EQUALS(c3_relationship->get_type(), ONE_TO_MANY);
+    ASSERT_EQUALS(c3_relationship->num_of_entities(), 16);
+
+    c3_relationship->for_each([&](entity *class3_entity) {
+      relationship *c3_relationship = class2_entity->slave_relationship_get("class1_class2");
+
+      ASSERT_NOT_NULL(c3_relationship);
+      ASSERT_EQUALS(c3_relationship->get_type(), ONE_TO_MANY);
+      ASSERT_EQUALS(c3_relationship->num_of_entities(), 1);
+    });
+  });
+
+  class2 *c2;
+
+  c2 = ORM_SELECT(class2, e->get_id() == "1");
+  ASSERT_NOT_NULL(c2);
+  ASSERT_EQUALS(c2->number, 1);
+
+  ORM_DESTROY(c2);
+  c2 = ORM_SELECT(class2, e->get_id() == "1");
+  ASSERT_NULL(c2);
+
+  class3 *c3;
+  c3 = ORM_SELECT(class3, obj->class2_number == 1);
+  ASSERT_NULL(c3);
+
+  c3 = ORM_SELECT(class3, obj->class2_number == 2);
+  ASSERT_NOT_NULL(c3);
+
+  ORM_DESTROY(c1);
+
+  ASSERT_OK;
+  ASSERT_NULL(orm::get_first("class1"));
+  ASSERT_NULL(orm::get_first("class2"));
+  ASSERT_NULL(orm::get_first("class3"));
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+#define CLASS1_CHECK(__MIDDLE__, __FRONT__, __BACK__) \
+do { \
+ASSERT_TRUE(__MIDDLE__->master_relationship_get("class1_class1")->front() == __FRONT__, "#__FRONT__ should be front!"); \
+ASSERT_TRUE(__MIDDLE__->slave_relationship_get("class1_class1")->front() == __BACK__, "#__BACK__ should be back!"); \
+}while(0)
+
+/**
+ * @brief orm_test_cyclic_relations1
+ */
+static void orm_test_cyclic_relations1()
+{
+  class1 *c1_1 = (class1 *) orm::create((entity *) new class1());
+  class1 *c1_2 = (class1 *) orm::create((entity *) new class1());
+  class1 *c1_3 = (class1 *) orm::create((entity *) new class1());
+
+  c1_1->addClass1(c1_2);
+  c1_2->addClass1(c1_3);
+  c1_3->addClass1(c1_1);
+
+  class1 *c;
+
+  c = ORM_SELECT(class1, obj == c1_1);
+  ASSERT_NOT_NULL(c);
+
+  c = ORM_SELECT(class1, obj == c1_2);
+  ASSERT_NOT_NULL(c);
+
+  c = ORM_SELECT(class1, obj == c1_3);
+  ASSERT_NOT_NULL(c);
+
+  CLASS1_CHECK(c1_1, c1_2, c1_3);
+  CLASS1_CHECK(c1_1, c1_2, c1_3);
+  CLASS1_CHECK(c1_1, c1_2, c1_3);
+
+  ORM_DESTROY(c1_1);
+
+  c = ORM_SELECT(class1, obj == c1_1);
+  ASSERT_NULL(c);
+
+  c = ORM_SELECT(class1, obj == c1_2);
+  ASSERT_NULL(c);
+
+  c = ORM_SELECT(class1, obj == c1_3);
+  ASSERT_NULL(c);
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
+ * @brief orm_test_cyclic_relations2
+ */
+static void orm_test_cyclic_relations2()
+{
+  class1 *c1 = (class1 *) orm::create((entity *) new class1());
+  class2 *c2 = (class2 *) orm::create((entity *) new class2());
+  class3 *c3 = (class3 *) orm::create((entity *) new class3());
+
+  c1->addClass2(c2);
+  c2->addClass3(c3);
+  c3->addClass1(c1);
+
+  c1 = ORM_SELECT(class1, obj == c1);
+  ASSERT_NOT_NULL(c1);
+
+  c2 = ORM_SELECT(class2, obj == c2);
+  ASSERT_NOT_NULL(c2);
+
+  c3 = ORM_SELECT(class3, obj == c3);
+  ASSERT_NOT_NULL(c3);
+
+  ORM_DESTROY(c1);
+
+  c1 = ORM_SELECT(class1, obj == c1);
+  ASSERT_NULL(c1);
+
+  c2 = ORM_SELECT(class2, obj == c2);
+  ASSERT_NULL(c2);
+
+  c3 = ORM_SELECT(class3, obj == c3);
+  ASSERT_NULL(c3);
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
+ * @brief orm_test_change_id
+ */
+static void orm_test_change_id()
+{
+  auto c1 = (class1 *) orm::create((entity *) new class1());
+  auto c2 = (class1 *) orm::create((entity *) new class1());
+  auto c3 = (class1 *) orm::create((entity *) new class1());
+
+  orm::change_id(c1, "miljenko");
+  orm::change_id(c2, "ivan");
+  orm::change_id(c3, "jure");
+
+  ASSERT_EQUALS(c1->get_id(), "miljenko");
+  ASSERT_EQUALS(c2->get_id(), "ivan");
+  ASSERT_EQUALS(c3->get_id(), "jure");
+
+  class1 *c;
+
+  c = (class1 *)orm::select("class1", "class1");
+  ASSERT_NULL(c);
+
+  c = (class1 *)orm::select("class1", "miljenko");
+  ASSERT_EQUALS(c, c1);
+
+  c = (class1 *)orm::select("class1", "ivan");
+  ASSERT_EQUALS(c, c2);
+
+  c = (class1 *)orm::select("class1", "jure");
+  ASSERT_EQUALS(c, c3);
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
+ * @brief orm_test_switch_relations1
+ */
+static void orm_test_switch_relations1()
+{
+  auto c1_1 = (class1 *) orm::create((entity *) new class1());
+  auto c1_2 = (class1 *) orm::create((entity *) new class1());
+
+  orm::change_id(c1_1, "miljenko");
+  orm::change_id(c1_2, "ivan");
+
+  auto c2 = (class2 *) orm::create((entity *)new class2());
+
+  c1_1->addClass2(c2);
+  c1_2->addClass2(c2);
+
+  auto r = c1_1->master_relationship_get("class1_class2");
+  ASSERT_NOT_NULL(r);
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+
+  r = c1_2->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+
+  r = c2->slave_relationship_get("class1_class2");
+  ASSERT_NOT_NULL(r);
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 2);
+
+  ORM_DESTROY(c2);
+
+  c2 = ORM_SELECT(class2, true);
+  ASSERT_NULL(c2);
+
+  r = c1_1->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 0);
+
+  r = c1_2->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 0);
+
+  printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
+ * @brief orm_test_switch_relations2
+ */
+static void orm_test_switch_relations2()
+{
+  auto c1_1 = (class1 *) orm::create((entity *) new class1());
+  auto c1_2 = (class1 *) orm::create((entity *) new class1());
+
+  orm::change_id(c1_1, "miljenko");
+  orm::change_id(c1_2, "ivan");
+
+  auto c2 = (class2 *) orm::create((entity *)new class2());
+
+  c1_1->addClass2(c2);
+  c1_2->addClass2(c2);
+
+  auto r = c1_1->master_relationship_get("class1_class2");
+  ASSERT_NOT_NULL(r);
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+
+  r = c1_2->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+
+  r = c2->slave_relationship_get("class1_class2");
+  ASSERT_NOT_NULL(r);
+  ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
+  ASSERT_EQUALS(r->num_of_entities(), 2);
+
+  c1_2->master_relationship_remove_entity("class1_class2", c2);
+
+  c2 = ORM_SELECT(class2, true);
+  ASSERT_NOT_NULL(c2);
+
+  r = c2->slave_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+  ASSERT_EQUALS(r->front(), c1_1);
+
+  r = c1_1->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->num_of_entities(), 1);
+  ASSERT_EQUALS(r->front(), c2);
+
+  r = c1_2->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->num_of_entities(), 0);
+
+  c1_1->master_relationship_remove_entity("class1_class2", c2);
+
+  c2 = ORM_SELECT(class2, true);
+  ASSERT_NULL(c2);
+
+  r = c1_1->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->num_of_entities(), 0);
+
+  r = c1_2->master_relationship_get("class1_class2");
+  ASSERT_EQUALS(r->num_of_entities(), 0);
 
   printf("\t-> %s()::OK\n", __FUNCTION__);
 }
@@ -182,14 +507,18 @@ void orm_test_advanced()
  */
 void orm_test()
 {
-  orm::add_entity_repository("class1");
-  orm::add_entity_repository("class2");
-
   printf("%s()\r\n", __FUNCTION__);
   orm_test_basic();
-  orm_test_advanced();
+  orm_test_advanced1();
+  orm_test_advanced2();
+  orm_test_cyclic_relations1();
+  orm_test_cyclic_relations2();
+  orm_test_change_id();
+  orm_test_switch_relations1();
+  orm_test_switch_relations2();
   printf("\r\n\r\n");
 
   orm::remove_entity_repository("class1");
   orm::remove_entity_repository("class2");
+  orm::remove_entity_repository("class3");
 }

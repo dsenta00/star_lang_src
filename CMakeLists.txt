@@ -56,6 +56,8 @@ set(SOURCE_FILES
 # Application Tests
 ###################################################################
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+
 set(TEST_FILES
         tests/box_array_test.cpp
         tests/box_array_test.h

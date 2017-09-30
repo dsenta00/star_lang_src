@@ -194,10 +194,13 @@ box_array_test_basic()
     {
       box_array *array_inside = (box_array *) array[i];
       ASSERT_OK;
-      ASSERT_TRUE(array_inside != nullptr, "array_inside shouldn't be null");
+      ASSERT_NOT_NULL(array_inside);
+      ASSERT_EQUALS(array_inside, &empty_array);
       ASSERT_TRUE(array_inside == &empty_array, "data should be the same");
     }
   }
+
+  orm::destroy(&array);
 
   printf("\t-> %s()::OK \n", __FUNCTION__);
 }

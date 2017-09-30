@@ -8,29 +8,23 @@
 #include <functional>
 
 class memory_chunk_if : public entity {
-protected:
-  relationship *free_memory;
-  relationship *reserved_memory;
-  uint32_t free;
 public:
   memory_chunk_if();
-
   void free_memory_add(uintptr_t address, uint32_t size);
+
   void free_memory_remove(memory *mem);
   memory *free_memory_find(std::function<bool(memory *)> foo);
   memory *free_memory_front();
   uint32_t free_memory_num();
   void free_memory_delete_all();
   void free_memory_union();
-
   memory *reserved_memory_add(uintptr_t address, uint32_t size);
+
   void reserved_memory_remove(memory *mem);
-  memory *reserved_memory_find(std::function<bool(memory *)> foo);
   memory *reserved_memory_front();
   memory *reserved_memory_back();
   uint32_t reserved_memory_num();
   void reserved_memory_sort();
-  uint32_t get_free();
 };
 
 #endif // BOX_MEMORY_CHUNK_IF_H

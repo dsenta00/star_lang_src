@@ -64,6 +64,26 @@ orm::create(entity *e)
   return e;
 }
 
+
+void
+orm::change_id(entity *e, std::string new_id)
+{
+  if (!e)
+  {
+    return;
+  }
+
+  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
+
+  if (!er)
+  {
+    orm::add_entity_repository(e->get_entity_type());
+    er = orm::find_entity_repository(e->get_entity_type());
+  }
+
+  er->change_id(e, new_id);
+}
+
 /**
  * Destroy entity and all relationships.
  * If objects remains marked, sweep them also.
@@ -94,7 +114,7 @@ orm::sweep()
        it != repo.end();
        it++)
   {
-    (it->second).get()->sweep();
+    it->second->sweep();
   }
 }
 
@@ -115,6 +135,26 @@ orm::select(std::string entity_type, std::function<bool(entity *)> where)
   }
 
   return er->find(where);
+}
+
+/**
+ * Select id.
+ *
+ * @param entity_type
+ * @param id
+ * @return
+ */
+entity *
+orm::select(std::string entity_type, std::string id)
+{
+  entity_repository *er = orm::find_entity_repository(entity_type);
+
+  if (!er)
+  {
+    return nullptr;
+  }
+
+  return er->get(id);
 }
 
 /**

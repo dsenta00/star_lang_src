@@ -19,9 +19,6 @@ typedef enum {
  * Contains and manages all entity objects in relationship.
  */
 class relationship {
-  std::string relationship_name;
-  relationship_type type;
-  std::vector<entity *> entities;
 public:
   relationship(std::string relationship_name, relationship_type type);
   std::string &get_name();
@@ -36,6 +33,10 @@ public:
   entity *front();
   entity *back();
   uint32_t num_of_entities();
+protected:
+  std::string relationship_name;
+  relationship_type type;
+  std::vector<entity *> entities;
 };
 
 #endif // RELATIONSHIP_H

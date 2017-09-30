@@ -59,8 +59,6 @@ public:
   bool println();
   bool scan();
 
-  virtual ~box_data();
-
 protected:
   box_virtual_memory *vm;
   std::string get_string();

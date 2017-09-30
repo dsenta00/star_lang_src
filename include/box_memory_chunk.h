@@ -5,9 +5,11 @@
 #include <cstdint>
 #include <cstdlib>
 
-#define MEMORY_CHUNK_RELEASE_OK                (0)
-#define MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS   (1)
-#define MEMORY_CHUNK_RELEASE_NULL_MEMORY       (2)
+typedef enum {
+  MEMORY_CHUNK_RELEASE_OK,
+  MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS,
+  MEMORY_CHUNK_RELEASE_NULL_MEMORY
+} memory_chunk_release_result;
 
 typedef enum {
   MEMORY_CHUNK_RESIZE_OK,
@@ -24,17 +26,19 @@ public:
   memory_chunk(uint32_t capacity = 0);
   memory *reserve(uint32_t size);
   memory_chunk_resize_result resize(memory *mem, uint32_t new_size);
-  uint32_t release(memory *mem);
+  memory_chunk_release_result release(memory *mem);
   bool is_parent_of(memory *mem);
   bool can_reserve(uint32_t size);
   bool is_fragmented(uint32_t size);
   bool worth_defragmentation();
   void defragmentation();
+  uint32_t get_free();
 
   static memory_chunk *create(uint32_t capacity = 0);
 
   virtual ~memory_chunk();
 protected:
+  uint32_t free;
   uint32_t capacity;
   uintptr_t start_address;
 };

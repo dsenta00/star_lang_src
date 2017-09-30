@@ -6,14 +6,14 @@
 box_method::box_method(std::string id,
                        std::vector<instruction *> &instructions) : entity::entity("box_method", id)
 {
-  this->add_relationship("method_objects", ONE_TO_MANY);
-  this->add_relationship("method_instructions", ONE_TO_MANY);
-  relationship *r = this->get_relationship("method_instructions");
+  this->master_relationship_add("method_objects", ONE_TO_MANY);
+  this->master_relationship_add("method_instructions", ONE_TO_MANY);
+  relationship *r = this->master_relationship_get("method_instructions");
 
   for (instruction *i : instructions)
   {
     r->add_entity(i);
-    i->add_entity("box_method", (entity *) this);
+    i->master_relationship_add_entity("box_method", (entity *) this);
   }
 
   this->current_instruction = instructions[0];
@@ -48,13 +48,13 @@ box_method::add_local_object(entity *e)
   }
 
   this->local_objects[e->get_id()] = e;
-  this->add_entity("method_objects", e);
+  this->master_relationship_add_entity("method_objects", e);
 
   /*
    * object can be used in many methods.
    */
-  e->add_relationship("method_objects", ONE_TO_MANY);
-  e->add_entity("method_objects", (entity *) this);
+  e->master_relationship_add("method_objects", ONE_TO_MANY);
+  e->master_relationship_add_entity("method_objects", (entity *) this);
 }
 
 entity *
