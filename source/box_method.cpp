@@ -6,8 +6,18 @@
 box_method::box_method(std::string id,
                        std::vector<instruction *> &instructions) : entity::entity("box_method", id)
 {
+  /*
+   * - variable
+   * - array
+   * - function
+   */
   this->master_relationship_add("method_objects", ONE_TO_MANY);
+
+  /*
+   * - instructions
+   */
   this->master_relationship_add("method_instructions", ONE_TO_MANY);
+
   relationship *r = this->master_relationship_get("method_instructions");
 
   for (instruction *i : instructions)

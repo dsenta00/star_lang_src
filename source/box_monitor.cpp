@@ -1,6 +1,5 @@
 #include "box_monitor.h"
 #include <queue>
-#include <memory>
 
 #define MAX_BOX_ERROR_QUEUE (32)
 

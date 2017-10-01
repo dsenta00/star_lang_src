@@ -38,9 +38,9 @@ box_data::box_data(std::string id, box_data_type type, const void *value) : enti
   }
   else
   {
-    size_t size = (type == BOX_DATA_STRING) ?
-                  strlen((const char *) value) + 1 :
-                  BOX_DATA_TYPE_SIZE[type];
+    uint32_t size = (type == BOX_DATA_STRING) ?
+                    (uint32_t)strlen((const char *) value) + 1 :
+                    BOX_DATA_TYPE_SIZE[type];
 
     memory *mem = vm->alloc(size);
 
