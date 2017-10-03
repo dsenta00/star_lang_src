@@ -2,7 +2,6 @@
 #include "memory.h"
 #include "ORM/relationship.h"
 
-typedef float float32_t;
 typedef double float64_t;
 
 /**
@@ -170,8 +169,6 @@ template int32_t &memory::get_element();
 
 template int64_t &memory::get_element();
 
-template float32_t &memory::get_element();
-
 template float64_t &memory::get_element();
 
 template bool &memory::get_element();
@@ -189,7 +186,5 @@ template int16_t *memory::get_pointer();
 template int32_t *memory::get_pointer();
 
 template int64_t *memory::get_pointer();
-
-template float32_t *memory::get_pointer();
 
 template float64_t *memory::get_pointer();

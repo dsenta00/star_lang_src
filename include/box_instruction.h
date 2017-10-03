@@ -3,8 +3,8 @@
 
 #include "ORM/entity.h"
 #include "ORM/orm_fw.h"
-#include "box_fw.h
-#include "box_data_type.h
+#include "box_fw.h"
+#include "box_data_type.h"
 
 typedef enum {
   CREATE,

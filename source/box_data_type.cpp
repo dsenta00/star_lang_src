@@ -13,10 +13,6 @@ box_data_type get_from_token(std::string &str)
   {
     return BOX_DATA_CHAR;
   }
-  else if (str == "short")
-  {
-    return BOX_DATA_SHORT;
-  }
   else if (str == "int")
   {
     return BOX_DATA_INT;
@@ -24,14 +20,6 @@ box_data_type get_from_token(std::string &str)
   else if (str == "float")
   {
     return BOX_DATA_FLOAT;
-  }
-  else if (str == "double")
-  {
-    return BOX_DATA_DOUBLE;
-  }
-  else if (str == "long")
-  {
-    return BOX_DATA_LONG;
   }
   else if (str == "string")
   {

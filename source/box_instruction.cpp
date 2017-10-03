@@ -235,13 +235,9 @@ instruction::detect_data_type(std::string &sample)
   {
     return BOX_DATA_INT;
   }
-  else if (std::regex_match(sample, std::regex("[-+]?[0-9]*\\.?[0-9]*{1,6}")))
-  {
-    return BOX_DATA_FLOAT;
-  }
   else if (std::regex_match(sample, std::regex("[-+]?[0-9]*\\.?[0-9]*")))
   {
-    return BOX_DATA_DOUBLE;
+    return BOX_DATA_FLOAT;
   }
   else if (std::regex_match(sample, std::regex("\'[\\]?(.*)\'")))
   {
@@ -266,11 +262,8 @@ instruction::clean_constant_format(std::string &sample, box_data_type type)
 {
   switch (type)
   {
-    case BOX_DATA_SHORT:
     case BOX_DATA_INT:
-    case BOX_DATA_LONG:
     case BOX_DATA_FLOAT:
-    case BOX_DATA_DOUBLE:
       /*
        * nothing to do.
        */
