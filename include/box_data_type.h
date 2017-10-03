@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <string>
 
-typedef float float32_t;
 typedef double float64_t;
 
 /**
@@ -25,11 +24,8 @@ typedef double float64_t;
 typedef enum {
   BOX_DATA_BOOL,
   BOX_DATA_CHAR,
-  BOX_DATA_SHORT,
   BOX_DATA_INT,
   BOX_DATA_FLOAT,
-  BOX_DATA_LONG,
-  BOX_DATA_DOUBLE,
   BOX_DATA_STRING,
   BOX_DATA_INVALID
 } box_data_type;
@@ -38,11 +34,8 @@ const char BOX_DATA_TYPE_FORMAT[][8] =
   {
     "%d",  // BOX_DATA_BOOL,
     "%c",  // BOX_DATA_CHAR,
-    "%hd", // BOX_DATA_SHORT,
     "%d",  // BOX_DATA_INT,
-    "%f",  // BOX_DATA_FLOAT,
-    "%ld", // BOX_DATA_LONG,
-    "%lf", // BOX_DATA_DOUBLE,
+    "%lf", // BOX_DATA_FLOAT,
     "%s",  // BOX_DATA_STRING,
     ""     // BOX_DATA_INVALID
   };
@@ -51,11 +44,8 @@ const uint8_t BOX_DATA_TYPE_SIZE[] =
   {
     sizeof(bool),      // BOX_DATA_BOOL,
     sizeof(int8_t),    // BOX_DATA_CHAR,
-    sizeof(int16_t),   // BOX_DATA_SHORT,
     sizeof(int32_t),   // BOX_DATA_INT,
-    sizeof(float32_t), // BOX_DATA_FLOAT,
-    sizeof(int64_t),   // BOX_DATA_LONG,
-    sizeof(float64_t), // BOX_DATA_DOUBLE,
+    sizeof(float64_t), // BOX_DATA_FLOAT,
     8,                 // BOX_DATA_STRING, default size
     0                  // BOX_DATA_INVALID
   };

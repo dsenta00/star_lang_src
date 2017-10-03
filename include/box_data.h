@@ -23,11 +23,8 @@ public:
                           box_data &data);
   bool to_bool();
   int8_t to_char();
-  int16_t to_short();
   int32_t to_int();
-  float32_t to_float();
-  int64_t to_long();
-  float64_t to_double();
+  float64_t to_float();
   box_data &to_string();
 
   void convert_itself(box_data_type new_type = BOX_DATA_INVALID);

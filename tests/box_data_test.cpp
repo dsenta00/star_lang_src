@@ -15,9 +15,9 @@ box_data_test_float()
 {
   ASSERT_VIRTUAL_MEMORY(*virtual_memory, 0);
 
-  float fnum = 65.0f;
+  float64_t fnum = 65.0f;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
-  ASSERT_VIRTUAL_MEMORY(*virtual_memory, sizeof(float));
+  ASSERT_VIRTUAL_MEMORY(*virtual_memory, sizeof(float64_t));
 
   ASSERT_OK;
 
@@ -34,24 +34,9 @@ box_data_test_float()
               float_data.to_char(), 'A');
   ASSERT_OK;
 
-  ASSERT_TRUE(float_data.to_short() == 65,
-              "float_data to short() -> %hd instead of %hd",
-              float_data.to_short(), 65);
-  ASSERT_OK;
-
   ASSERT_TRUE(float_data.to_int() == 65,
               "float_data to float() -> %d instead of %d",
               float_data.to_int(), 65);
-  ASSERT_OK;
-
-  ASSERT_TRUE(float_data.to_long() == 65,
-              "float_data to long() -> %ld instead of %ld",
-              float_data.to_int(), 65);
-  ASSERT_OK;
-
-  ASSERT_TRUE(float_data.to_double() == 65.0,
-              "float_data to double() -> %lf instead of %lf",
-              float_data.to_double(), 65.0);
   ASSERT_OK;
 
   box_data &str = float_data.to_string();
@@ -61,14 +46,14 @@ box_data_test_float()
   ASSERT_OK;
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("65.000000"));
 
   int num = 35;
   box_data &int_data = *box_data::create("int_data", BOX_DATA_INT, &num);
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("65.000000") +
                         sizeof(int));
 
@@ -130,14 +115,14 @@ box_data_test_float()
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
-  float fnum2 = 35.0f;
+  float64_t fnum2 = 35.0f;
   box_data &float_data2 = *box_data::create("float_data2", BOX_DATA_FLOAT, &fnum2);
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("65.000000") +
                         sizeof(int) +
-                        sizeof(float));
+                        sizeof(float64_t));
 
   ASSERT_FALSE(float_data == float_data2,
                "float_data and float_data2 should not be equal");
@@ -201,10 +186,10 @@ box_data_test_float()
   box_data &string_data = *box_data::create("string_data", BOX_DATA_STRING, "35");
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("65.000000") +
                         sizeof(int) +
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("35"));
 
   ASSERT_FALSE(float_data == string_data,
@@ -262,10 +247,10 @@ box_data_test_float()
               (const char *)string_data.get_address());
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("65.000000") +
                         sizeof(int) +
-                        sizeof(float) +
+                        sizeof(float64_t) +
                         sizeof("35 Grupa Zana rules!"));
 
   ASSERT_FALSE(float_data == string_data,
@@ -379,26 +364,10 @@ box_data_test_string()
               '3');
   ASSERT_OK;
 
-  ASSERT_TRUE(string_data.to_short() == 32,
-              "int_data to short() -> %hd instead of %hd",
-              string_data.to_short(), 32);
-  ASSERT_OK;
-
   ASSERT_TRUE(string_data.to_float() == 32.0f,
               "int_data to float() -> %f instead of %f",
               string_data.to_float(),
               32.0f);
-  ASSERT_OK;
-
-  ASSERT_TRUE(string_data.to_long() == 32,
-              "int_data to long() -> %ld instead of %ld",
-              string_data.to_long(), 32);
-  ASSERT_OK;
-
-  ASSERT_TRUE(string_data.to_double() == 32.0,
-              "int_data to double() -> %lf instead of %lf",
-              string_data.to_double(),
-              32.0);
   ASSERT_OK;
 
   box_data &str = string_data.to_string();
@@ -563,7 +532,7 @@ box_data_test_string()
   BOX_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
-  float fnum = 31.0f;
+  float64_t fnum = 31.0f;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
@@ -702,28 +671,10 @@ box_data_test_int()
               'A');
   ASSERT_OK;
 
-  ASSERT_TRUE(int_data.to_short() == 65,
-              "int_data to short() -> %hd instead of %hd",
-              int_data.to_short(),
-              65);
-  ASSERT_OK;
-
   ASSERT_TRUE(int_data.to_float() == 65.0f,
               "int_data to float() -> %f instead of %f",
               int_data.to_float(),
               65.0f);
-  ASSERT_OK;
-
-  ASSERT_TRUE(int_data.to_long() == 65,
-              "int_data to long() -> %ld instead of %ld",
-              int_data.to_long(),
-              65);
-  ASSERT_OK;
-
-  ASSERT_TRUE(int_data.to_double() == 65.0,
-              "int_data to double() -> %lf instead of %lf",
-              int_data.to_double(),
-              65.0);
   ASSERT_OK;
 
   box_data &str = int_data.to_string();
@@ -797,7 +748,7 @@ box_data_test_int()
    */
   *(int *)int_data.get_address() = 65;
 
-  float fnum = 35.0f;
+  float64_t fnum = 35.0f;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_FALSE(int_data == float_data,
@@ -825,7 +776,7 @@ box_data_test_int()
   ASSERT_OK;
 
   ASSERT_TRUE(int_data += float_data, "int_data and float_data should add");
-  ASSERT_TRUE(int_data.to_int() == 100, "int_data should be 100!");
+  ASSERT_TRUE(int_data.to_int() == 100, "int_data should be 100! (%u)", int_data.to_int());
 
   ASSERT_TRUE(int_data -= float_data, "int_data and float_data should substract");
   ASSERT_TRUE(int_data.to_int() == 65, "int_data should be 65!");
@@ -839,7 +790,7 @@ box_data_test_int()
   /*
    * setting float_data to zero value
    */
-  *(float *)float_data.get_address() = 0.0f;
+  *(float64_t *)float_data.get_address() = 0.0f;
 
   ASSERT_FALSE(int_data /= float_data,
                "int_data and float_data shouldn't divide");
@@ -1032,27 +983,12 @@ box_data_test_basic()
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
-  ASSERT_TRUE(invalid_box_data.to_short() == 0,
-              "invalid_box_data should return zero!");
-  ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
-  BOX_ERROR_CLEAR;
-
   ASSERT_TRUE(invalid_box_data.to_int() == 0,
               "invalid_box_data should return zero!");
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
   ASSERT_TRUE(invalid_box_data.to_float() == 0.0f,
-              "invalid_box_data should return zero!");
-  ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
-  BOX_ERROR_CLEAR;
-
-  ASSERT_TRUE(invalid_box_data.to_long() == 0,
-              "invalid_box_data should return zero!");
-  ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
-  BOX_ERROR_CLEAR;
-
-  ASSERT_TRUE(invalid_box_data.to_double() == 0.0,
               "invalid_box_data should return zero!");
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
@@ -1097,7 +1033,7 @@ void box_data_test_convert()
 
   string_data.convert_itself(BOX_DATA_FLOAT);
   ASSERT_OK;
-  ASSERT_TRUE(*(float *)string_data.get_address() == 35.0f, "data should be 35.0f!");
+  ASSERT_TRUE(*(float64_t *)string_data.get_address() == 35.0f, "data should be 35.0f!");
 
   string_data.convert_itself(BOX_DATA_STRING);
   ASSERT_OK;
