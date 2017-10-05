@@ -15,7 +15,7 @@ box_data_test_float()
 {
   ASSERT_VIRTUAL_MEMORY(*virtual_memory, 0);
 
-  float64_t fnum = 65.0f;
+  float64_t fnum = 65.0;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
   ASSERT_VIRTUAL_MEMORY(*virtual_memory, sizeof(float64_t));
 
@@ -23,11 +23,11 @@ box_data_test_float()
 
   ASSERT_TRUE(++float_data, "float_data should be incremented!");
   ASSERT_OK;
-  ASSERT_TRUE(float_data.to_float() == 66.0f, "float_data should be 66.0f!");
+  ASSERT_TRUE(float_data.to_float() == 66.0, "float_data should be 66.0!");
 
   ASSERT_TRUE(--float_data, "int_data should be incremented!");
   ASSERT_OK;
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0!");
 
   ASSERT_TRUE(float_data.to_char() == 'A',
               "float_data to char() -> %c instead of %c",
@@ -83,19 +83,19 @@ box_data_test_float()
 
   ASSERT_TRUE(float_data += int_data,
               "float_data and int_data should add");
-  ASSERT_TRUE(float_data.to_float() == 100.0f, "int_data should be 100.0f!");
+  ASSERT_TRUE(float_data.to_float() == 100.0, "int_data should be 100.0");
 
   ASSERT_TRUE(float_data -= int_data, "float_data and int_data should substract");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0!");
 
   ASSERT_TRUE(float_data *= int_data, "float_data and int_data should multiply");
-  ASSERT_TRUE(float_data.to_float() == 2275.0f, "int_data should be 2275.0f!");
+  ASSERT_TRUE(float_data.to_float() == 2275.0, "int_data should be 2275.0!");
 
   ASSERT_TRUE(float_data /= int_data, "float_data and int_data should divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0");
 
   ASSERT_FALSE(float_data %= int_data, "float_data and int_data shouldn't mod");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
@@ -106,16 +106,16 @@ box_data_test_float()
   int_data = &num;
 
   ASSERT_FALSE(float_data /= int_data, "int_data and int_data2 shouldn't divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data %= int_data, "int_data and int_data2 shouldn't mod");
-  ASSERT_TRUE(float_data.to_int() == 65.0f, "int_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_int() == 65.0, "int_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
-  float64_t fnum2 = 35.0f;
+  float64_t fnum2 = 35.0;
   box_data &float_data2 = *box_data::create("float_data2", BOX_DATA_FLOAT, &fnum2);
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
@@ -150,19 +150,19 @@ box_data_test_float()
 
   ASSERT_TRUE(float_data += float_data2,
               "float_data and float_data2 should add");
-  ASSERT_TRUE(float_data.to_float() == 100.0f, "float_data should be 100.0f!");
+  ASSERT_TRUE(float_data.to_float() == 100.0, "float_data should be 100.0!");
 
   ASSERT_TRUE(float_data -= float_data2,
               "float_data and float_data2 should substract");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0");
 
   ASSERT_TRUE(float_data *= float_data2,
               "float_data and float_data2 should multiply");
-  ASSERT_TRUE(float_data.to_float() == 2275.0f, "float_data should be 2275.0f!");
+  ASSERT_TRUE(float_data.to_float() == 2275.0, "float_data should be 2275.0");
 
   ASSERT_TRUE(float_data /= float_data2,
               "float_data and float_data2 should divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0");
 
   /*
    * setting float_data to zero value
@@ -172,12 +172,12 @@ box_data_test_float()
 
   ASSERT_FALSE(float_data /= float_data2,
                "int_data and float_data shouldn't divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data %= float_data, "int_data and float_data shouldn't mod");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "int_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "int_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
@@ -218,25 +218,25 @@ box_data_test_float()
 
   ASSERT_FALSE(float_data += string_data,
                "float_data and string_data shouldn't add");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_ADDING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data -= string_data,
                "float_data and string_data shouldn't subtract");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_SUBTRACTING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data *= string_data,
                "float_data and string_data shouldn't multiply");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_MULTIPLYING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data /= string_data,
                "float_data and string_data shouldn't divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
   BOX_ERROR_CLEAR;
 
@@ -279,25 +279,25 @@ box_data_test_float()
 
   ASSERT_FALSE(float_data += string_data,
                "float_data and string_data shouldn't add");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "string_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "string_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_ADDING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data -= string_data,
                "float_data and string_data shouldn't substract");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65!.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65!.0");
   ASSERT_ERROR(ERROR_BOX_DATA_SUBTRACTING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data *= string_data,
                "float_data and string_data shouldn't multiply");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_MULTIPLYING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data /= string_data,
                "float_data and string_data shouldn't divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f!");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0!");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
   BOX_ERROR_CLEAR;
 
@@ -305,26 +305,26 @@ box_data_test_float()
 
   ASSERT_FALSE(float_data /= string_data,
                "float_data and float_data shouldn't divide");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data %= string_data,
                "float_data and string_data shouldn't mod");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
   ASSERT_FALSE(float_data = string_data,
                "string_data shouldn't assign to float_data");
-  ASSERT_TRUE(float_data.to_float() == 65.0f, "float_data should be 65.0f");
+  ASSERT_TRUE(float_data.to_float() == 65.0, "float_data should be 65.0");
   ASSERT_ERROR(ERROR_BOX_DATA_ASSIGNING_STRING);
   BOX_ERROR_CLEAR;
 
   ASSERT_TRUE(float_data = int_data, "int_data should assign to float_data");
   ASSERT_OK;
 
-  ASSERT_TRUE(float_data.to_float() == 0.0f, "float_data should be 0.0f");
+  ASSERT_TRUE(float_data.to_float() == 0.0, "float_data should be 0.0");
   ASSERT_OK;
 
   printf("\t-> %s()::OK\n", __FUNCTION__);
@@ -364,10 +364,10 @@ box_data_test_string()
               '3');
   ASSERT_OK;
 
-  ASSERT_TRUE(string_data.to_float() == 32.0f,
+  ASSERT_TRUE(string_data.to_float() == 32.0,
               "int_data to float() -> %f instead of %f",
               string_data.to_float(),
-              32.0f);
+              32.0);
   ASSERT_OK;
 
   box_data &str = string_data.to_string();
@@ -532,7 +532,7 @@ box_data_test_string()
   BOX_ERROR(ERROR_BOX_DATA_INVALID_MODULUS);
   BOX_ERROR_CLEAR;
 
-  float64_t fnum = 31.0f;
+  float64_t fnum = 31.0;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_VIRTUAL_MEMORY(*virtual_memory,
@@ -671,10 +671,10 @@ box_data_test_int()
               'A');
   ASSERT_OK;
 
-  ASSERT_TRUE(int_data.to_float() == 65.0f,
+  ASSERT_TRUE(int_data.to_float() == 65.0,
               "int_data to float() -> %f instead of %f",
               int_data.to_float(),
-              65.0f);
+              65.0);
   ASSERT_OK;
 
   box_data &str = int_data.to_string();
@@ -748,7 +748,7 @@ box_data_test_int()
    */
   *(int *)int_data.get_address() = 65;
 
-  float64_t fnum = 35.0f;
+  float64_t fnum = 35.0;
   box_data &float_data = *box_data::create("float_data", BOX_DATA_FLOAT, &fnum);
 
   ASSERT_FALSE(int_data == float_data,
@@ -790,7 +790,7 @@ box_data_test_int()
   /*
    * setting float_data to zero value
    */
-  *(float64_t *)float_data.get_address() = 0.0f;
+  *(float64_t *)float_data.get_address() = 0.0;
 
   ASSERT_FALSE(int_data /= float_data,
                "int_data and float_data shouldn't divide");
@@ -988,7 +988,7 @@ box_data_test_basic()
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
 
-  ASSERT_TRUE(invalid_box_data.to_float() == 0.0f,
+  ASSERT_TRUE(invalid_box_data.to_float() == 0.0,
               "invalid_box_data should return zero!");
   ASSERT_ERROR(ERROR_BOX_DATA_NULL_DATA);
   BOX_ERROR_CLEAR;
@@ -1033,7 +1033,7 @@ void box_data_test_convert()
 
   string_data.convert_itself(BOX_DATA_FLOAT);
   ASSERT_OK;
-  ASSERT_TRUE(*(float64_t *)string_data.get_address() == 35.0f, "data should be 35.0f!");
+  ASSERT_TRUE(*(float64_t *)string_data.get_address() == 35.0, "data should be 35.0!");
 
   string_data.convert_itself(BOX_DATA_STRING);
   ASSERT_OK;
