@@ -248,12 +248,12 @@ box_data::to_int()
 /**
  * Convert data to float and return.
  *
- * @return float value if success, otherwise return 0.0f.
+ * @return float value if success, otherwise return 0.0.
  */
 float64_t
 box_data::to_float()
 {
-  float64_t value = 0.0f;
+  float64_t value = 0.0;
   memory *mem = this->get_memory();
 
   if (!mem)
@@ -927,7 +927,7 @@ box_data::operator/=(box_data &data)
       break;
     case BOX_DATA_FLOAT:
 
-      if (data.to_float() == 0.0f)
+      if (data.to_float() == 0.0)
       {
         BOX_ERROR(ERROR_BOX_DATA_DIVIDING_ZERO);
         return false;
@@ -1036,7 +1036,7 @@ box_data::operator++()
       mem->get_element<int32_t>()++;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() += 1.0f;
+      mem->get_element<float64_t>() += 1.0;
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_INCREMENTING_STRING);
@@ -1077,7 +1077,7 @@ box_data::operator--()
       mem->get_element<int32_t>()--;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() -= 1.0f;
+      mem->get_element<float64_t>() -= 1.0;
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_DECREMENTING_STRING);
