@@ -2,8 +2,6 @@
 #include "memory.h"
 #include "ORM/relationship.h"
 
-typedef double float64_t;
-
 /**
  * The constructor.
  *
@@ -169,7 +167,7 @@ template int32_t &memory::get_element();
 
 template int64_t &memory::get_element();
 
-template float64_t &memory::get_element();
+template double &memory::get_element();
 
 template bool &memory::get_element();
 
@@ -187,4 +185,4 @@ template int32_t *memory::get_pointer();
 
 template int64_t *memory::get_pointer();
 
-template float64_t *memory::get_pointer();
+template double *memory::get_pointer();

@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include <string>
 
-typedef double float64_t;
-
 /**
  * BOX data type enumeration.
  *
@@ -45,7 +43,7 @@ const uint8_t BOX_DATA_TYPE_SIZE[] =
     sizeof(bool),      // BOX_DATA_BOOL,
     sizeof(int8_t),    // BOX_DATA_CHAR,
     sizeof(int32_t),   // BOX_DATA_INT,
-    sizeof(float64_t), // BOX_DATA_FLOAT,
+    sizeof(double), // BOX_DATA_FLOAT,
     8,                 // BOX_DATA_STRING, default size
     0                  // BOX_DATA_INVALID
   };

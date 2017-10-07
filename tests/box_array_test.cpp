@@ -78,7 +78,7 @@ box_array_test_basic()
     }
     else
     {
-      float64_t fi = (float64_t) i;
+      double fi = (double) i;
       box_data &data = *box_data::create("temp_name", BOX_DATA_FLOAT, (const void *) &fi);
       empty_array.insert(i, (entity *) &data);
       ASSERT_OK;
@@ -122,16 +122,16 @@ box_array_test_basic()
     }
     else
     {
-      float64_t fi = (float64_t) i;
+      double fi = (double) i;
       box_data *data = (box_data *) empty_array[i];
 
       ASSERT_TRUE(data->get_type() == BOX_DATA_FLOAT,
                   "data should be BOX_DATA_FLOAT");
 
-      ASSERT_TRUE(*(float64_t *) data->get_address() == fi,
+      ASSERT_TRUE(*(double *) data->get_address() == fi,
                   "data should be %f (%f)",
                   fi,
-                  *(float64_t *) data->get_address());
+                  *(double *) data->get_address());
 
       ASSERT_OK;
     }
