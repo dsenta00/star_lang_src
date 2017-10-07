@@ -148,7 +148,7 @@ box_data::to_bool()
       value = (bool) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (bool) mem->get_element<float64_t>();
+      value = (bool) mem->get_element<double>();
       break;
     case BOX_DATA_INVALID:
     default:
@@ -189,7 +189,7 @@ box_data::to_char()
       value = (int8_t) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int8_t) mem->get_element<float64_t>();
+      value = (int8_t) mem->get_element<double>();
       break;
     case BOX_DATA_INVALID:
     default:
@@ -229,7 +229,7 @@ box_data::to_int()
       value = mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = (int32_t) mem->get_element<float64_t>();
+      value = (int32_t) mem->get_element<double>();
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -250,10 +250,10 @@ box_data::to_int()
  *
  * @return float value if success, otherwise return 0.0.
  */
-float64_t
+double
 box_data::to_float()
 {
-  float64_t value = 0.0;
+  double value = 0.0;
   memory *mem = this->get_memory();
 
   if (!mem)
@@ -265,16 +265,16 @@ box_data::to_float()
   switch (type)
   {
     case BOX_DATA_BOOL:
-      value = (float64_t) mem->get_element<bool>();
+      value = (double) mem->get_element<bool>();
       break;
     case BOX_DATA_CHAR:
-      value = (float64_t) mem->get_element<int8_t>();
+      value = (double) mem->get_element<int8_t>();
       break;
     case BOX_DATA_INT:
-      value = (float64_t) mem->get_element<int32_t>();
+      value = (double) mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      value = mem->get_element<float64_t>();
+      value = mem->get_element<double>();
       break;
     case BOX_DATA_STRING:
       sscanf(mem->get_pointer<const char *>(),
@@ -364,7 +364,7 @@ box_data::default_value()
       memset(mem->get_pointer<void *>(), 0, mem->get_size());
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() = 0.0;
+      mem->get_element<double>() = 0.0;
       break;
     case BOX_DATA_INVALID:
     default:
@@ -420,7 +420,7 @@ box_data::convert_itself(box_data_type new_type)
     case BOX_DATA_FLOAT:
     {
       new_mem = this->vm->alloc(BOX_DATA_TYPE_SIZE[new_type]);
-      new_mem->get_element<float64_t>() = this->to_float();
+      new_mem->get_element<double>() = this->to_float();
       break;
     }
     case BOX_DATA_INVALID:
@@ -466,7 +466,7 @@ box_data::operator=(const void *data)
       mem->get_element<int32_t>() = *(int32_t *) data;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() = *(float64_t *) data;
+      mem->get_element<double>() = *(double *) data;
       break;
     case BOX_DATA_STRING:
     {
@@ -539,7 +539,7 @@ box_data::operator=(box_data &data)
       mem->get_element<int32_t>() = data.to_int();
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() = data.to_float();
+      mem->get_element<double>() = data.to_float();
       break;
     case BOX_DATA_STRING:
     case BOX_DATA_INVALID:
@@ -768,7 +768,7 @@ box_data::operator+=(box_data &data)
       mem->get_element<int32_t>() += data.to_int();
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() += data.to_float();
+      mem->get_element<double>() += data.to_float();
       break;
     case BOX_DATA_INVALID:
     default:
@@ -814,7 +814,7 @@ box_data::operator-=(box_data &data)
       mem->get_element<int32_t>() -= data.to_int();
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() -= data.to_float();
+      mem->get_element<double>() -= data.to_float();
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_SUBTRACTING_STRING);
@@ -863,7 +863,7 @@ box_data::operator*=(box_data &data)
       mem->get_element<int32_t>() *= data.to_int();
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() *= data.to_float();
+      mem->get_element<double>() *= data.to_float();
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_MULTIPLYING_STRING);
@@ -933,7 +933,7 @@ box_data::operator/=(box_data &data)
         return false;
       }
 
-      mem->get_element<float64_t>() /= data.to_float();
+      mem->get_element<double>() /= data.to_float();
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_DIVIDING_STRING);
@@ -1036,7 +1036,7 @@ box_data::operator++()
       mem->get_element<int32_t>()++;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() += 1.0;
+      mem->get_element<double>() += 1.0;
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_INCREMENTING_STRING);
@@ -1077,7 +1077,7 @@ box_data::operator--()
       mem->get_element<int32_t>()--;
       break;
     case BOX_DATA_FLOAT:
-      mem->get_element<float64_t>() -= 1.0;
+      mem->get_element<double>() -= 1.0;
       break;
     case BOX_DATA_STRING:
       BOX_ERROR(ERROR_BOX_DATA_DECREMENTING_STRING);
@@ -1467,7 +1467,7 @@ box_data::scan()
       std::cin >> mem->get_element<int32_t>();
       break;
     case BOX_DATA_FLOAT:
-      std::cin >> mem->get_element<float64_t>();
+      std::cin >> mem->get_element<double>();
       break;
     case BOX_DATA_STRING:
       std::cin >> mem->get_pointer<int8_t *>();
