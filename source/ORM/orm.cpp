@@ -39,9 +39,9 @@ static std::map<std::string, entity_repository_p> repo;
 entity_repository *
 orm::find_entity_repository(std::string entity_type)
 {
-  auto it = repo.find(entity_type);
+    auto it = repo.find(entity_type);
 
-  return (it != repo.end()) ? (it->second).get() : nullptr;
+    return (it != repo.end()) ? (it->second).get() : nullptr;
 }
 
 /**
@@ -52,12 +52,12 @@ orm::find_entity_repository(std::string entity_type)
 void
 orm::add_entity_repository(std::string entity_type)
 {
-  if (orm::find_entity_repository(entity_type))
-  {
-    return;
-  }
+    if (orm::find_entity_repository(entity_type))
+    {
+        return;
+    }
 
-  repo[entity_type] = entity_repository_p(new entity_repository());
+    repo[entity_type] = entity_repository_p(new entity_repository());
 }
 
 /**
@@ -69,41 +69,41 @@ orm::add_entity_repository(std::string entity_type)
 entity *
 orm::create(entity *e)
 {
-  if (!e)
-  {
-    return nullptr;
-  }
+    if (!e)
+    {
+        return nullptr;
+    }
 
-  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
+    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
 
-  if (!er)
-  {
-    orm::add_entity_repository(e->get_entity_type());
-    er = orm::find_entity_repository(e->get_entity_type());
-  }
+    if (!er)
+    {
+        orm::add_entity_repository(e->get_entity_type());
+        er = orm::find_entity_repository(e->get_entity_type());
+    }
 
-  er->add(e);
-  return e;
+    er->add(e);
+    return e;
 }
 
 
 void
 orm::change_id(entity *e, std::string new_id)
 {
-  if (!e)
-  {
-    return;
-  }
+    if (!e)
+    {
+        return;
+    }
 
-  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
+    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
 
-  if (!er)
-  {
-    orm::add_entity_repository(e->get_entity_type());
-    er = orm::find_entity_repository(e->get_entity_type());
-  }
+    if (!er)
+    {
+        orm::add_entity_repository(e->get_entity_type());
+        er = orm::find_entity_repository(e->get_entity_type());
+    }
 
-  er->change_id(e, new_id);
+    er->change_id(e, new_id);
 }
 
 /**
@@ -115,15 +115,15 @@ orm::change_id(entity *e, std::string new_id)
 void
 orm::destroy(entity *e)
 {
-  entity_repository *er = orm::find_entity_repository(e->get_entity_type());
+    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
 
-  if (!er)
-  {
-    return;
-  }
+    if (!er)
+    {
+        return;
+    }
 
-  er->remove(e);
-  orm::sweep();
+    er->remove(e);
+    orm::sweep();
 }
 
 /**
@@ -132,12 +132,12 @@ orm::destroy(entity *e)
 void
 orm::sweep()
 {
-  for (auto it = repo.begin();
-       it != repo.end();
-       it++)
-  {
-    it->second->sweep();
-  }
+    for (auto it = repo.begin();
+         it != repo.end();
+         it++)
+    {
+        it->second->sweep();
+    }
 }
 
 /**
@@ -149,14 +149,14 @@ orm::sweep()
 entity *
 orm::select(std::string entity_type, std::function<bool(entity *)> where)
 {
-  entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(entity_type);
 
-  if (!er)
-  {
-    return nullptr;
-  }
+    if (!er)
+    {
+        return nullptr;
+    }
 
-  return er->find(where);
+    return er->find(where);
 }
 
 /**
@@ -169,14 +169,14 @@ orm::select(std::string entity_type, std::function<bool(entity *)> where)
 entity *
 orm::select(std::string entity_type, std::string id)
 {
-  entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(entity_type);
 
-  if (!er)
-  {
-    return nullptr;
-  }
+    if (!er)
+    {
+        return nullptr;
+    }
 
-  return er->get(id);
+    return er->get(id);
 }
 
 /**
@@ -188,17 +188,17 @@ orm::select(std::string entity_type, std::string id)
 entity *
 orm::get_first(std::string entity_type)
 {
-  entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(entity_type);
 
-  if (!er)
-  {
-    return nullptr;
-  }
+    if (!er)
+    {
+        return nullptr;
+    }
 
-  return er->find([&](entity *e) {
-    (void) e;
-    return true;
-  });
+    return er->find([&](entity *e) {
+        (void) e;
+        return true;
+    });
 }
 
 /**
@@ -209,9 +209,9 @@ orm::get_first(std::string entity_type)
 void
 orm::remove_entity_repository(std::string entity_type)
 {
-  auto it = repo.find(entity_type);
-  if (it != repo.end())
-  {
-    repo.erase(it);
-  }
+    auto it = repo.find(entity_type);
+    if (it != repo.end())
+    {
+        repo.erase(it);
+    }
 }

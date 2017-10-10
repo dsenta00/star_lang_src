@@ -31,9 +31,9 @@
 #include <memory>
 
 typedef enum {
-  FOREACH_CONTINUE,
-  FOREACH_IT2_REMOVED,
-  FOREACH_IT1_REMOVED
+    FOREACH_CONTINUE,
+    FOREACH_IT2_REMOVED,
+    FOREACH_IT1_REMOVED
 } foreach_result;
 
 /**
@@ -42,23 +42,23 @@ typedef enum {
  */
 class relationship {
 public:
-  relationship(std::string relationship_name, relationship_type type);
-  std::string &get_name();
-  relationship_type get_type();
-  entity *find(const std::function<bool(entity *)> &func);
-  void sort(const std::function<bool(entity *, entity *)> &func);
-  void for_each(const std::function<foreach_result(entity *, entity *)> &func);
-  void for_each(const std::function<void(entity *)> &func);
-  void add_entity(entity *e);
-  void remove_entity(entity *e);
-  std::vector<entity *> &get_entities();
-  entity *front();
-  entity *back();
-  uint32_t num_of_entities();
+    relationship(std::string relationship_name, relationship_type type);
+    std::string &get_name();
+    relationship_type get_type();
+    entity *find(const std::function<bool(entity *)> &func);
+    void sort(const std::function<bool(entity *, entity *)> &func);
+    void for_each(const std::function<foreach_result(entity *, entity *)> &func);
+    void for_each(const std::function<void(entity *)> &func);
+    void add_entity(entity *e);
+    void remove_entity(entity *e);
+    std::vector<entity *> &get_entities();
+    entity *front();
+    entity *back();
+    uint32_t num_of_entities();
 protected:
-  std::string relationship_name;
-  relationship_type type;
-  std::vector<entity *> entities;
+    std::string relationship_name;
+    relationship_type type;
+    std::vector<entity *> entities;
 };
 
 #endif // RELATIONSHIP_H

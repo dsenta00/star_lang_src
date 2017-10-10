@@ -40,19 +40,19 @@ typedef std::shared_ptr<entity> entity_p;
  */
 class entity_repository {
 public:
-  entity *find(const std::function<bool(entity *)> &func);
-  entity *get(std::string &id);
-  void add(entity *e);
-  void remove(entity *e);
-  void change_id(entity *e, std::string &new_id);
-  void sweep();
-  ~entity_repository();
+    entity *find(const std::function<bool(entity *)> &func);
+    entity *get(std::string &id);
+    void add(entity *e);
+    void remove(entity *e);
+    void change_id(entity *e, std::string &new_id);
+    void sweep();
+    ~entity_repository();
 protected:
-  /*
-   * key -> entity ID
-   * values array
-   */
-  std::map<std::string, std::vector<entity_p>> entity_map;
+    /*
+     * key -> entity ID
+     * values array
+     */
+    std::map<std::string, std::vector<entity_p>> entity_map;
 };
 
 #endif // ENTITY_REPOSITORY_H

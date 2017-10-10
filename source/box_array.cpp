@@ -35,14 +35,14 @@
  */
 box_array::box_array(std::string id, box_array *array) : entity::entity("box_array", id)
 {
-  this->master_relationship_add("array", ONE_TO_MANY);
+    this->master_relationship_add("array", ONE_TO_MANY);
 
-  if (array == nullptr)
-  {
-    return;
-  }
+    if (array == nullptr)
+    {
+        return;
+    }
 
-  (*this) += (entity *) array;
+    (*this) += (entity *) array;
 }
 
 /**
@@ -53,7 +53,7 @@ box_array::box_array(std::string id, box_array *array) : entity::entity("box_arr
 uint16_t
 box_array::get_noof()
 {
-  return this->array.size();
+    return this->array.size();
 }
 
 /**
@@ -65,7 +65,7 @@ box_array::get_noof()
 entity *
 box_array::operator[](uint32_t index)
 {
-  return (*this)[std::to_string(index)];
+    return (*this)[std::to_string(index)];
 }
 
 /**
@@ -77,7 +77,7 @@ box_array::operator[](uint32_t index)
 entity *
 box_array::operator[](std::string index)
 {
-  return this->array[index];
+    return this->array[index];
 }
 
 /**
@@ -88,8 +88,8 @@ box_array::operator[](std::string index)
 void
 box_array::insert(std::string index, entity *e)
 {
-  this->remove_data(index);
-  this->insert_data(index, e);
+    this->remove_data(index);
+    this->insert_data(index, e);
 }
 
 /**
@@ -100,7 +100,7 @@ box_array::insert(std::string index, entity *e)
 void
 box_array::insert(uint32_t index, entity *e)
 {
-  this->insert(std::to_string(index), e);
+    this->insert(std::to_string(index), e);
 }
 
 /**
@@ -112,8 +112,8 @@ box_array::insert(uint32_t index, entity *e)
 bool
 box_array::operator+=(entity *e)
 {
-  this->insert_data(std::to_string(this->get_noof()), e);
-  return true;
+    this->insert_data(std::to_string(this->get_noof()), e);
+    return true;
 }
 
 /**
@@ -124,93 +124,93 @@ box_array::operator+=(entity *e)
 box_data &
 box_array::to_string()
 {
-  box_data &str = *box_data::create(this->id.append(" as string"),
-                                    BOX_DATA_STRING);
+    box_data &str = *box_data::create(this->id.append(" as string"),
+                                      BOX_DATA_STRING);
 
-  relationship *r = this->master_relationship_get("array");
+    relationship *r = this->master_relationship_get("array");
 
-  if (!r)
-  {
+    if (!r)
+    {
+        return str;
+    }
+
+    char ch = ' ';
+    box_data &separator_char = *box_data::create("<<temp_char>>",
+                                                 BOX_DATA_CHAR,
+                                                 (const void *) &ch);
+
+
+    r->for_each([&](entity *e) {
+        if (e->get_entity_type() == "box_data")
+        {
+            box_data *data = (box_data *) e;
+            str += *data;
+
+            if (!BOX_OK)
+            {
+                str.default_value();
+                return;
+            }
+
+            if (data != r->back())
+            {
+                str += separator_char;
+            }
+        }
+        else if (e->get_entity_type() == "box_array")
+        {
+            box_array *data = (box_array *) e;
+            str += data->to_string();
+
+            if (!BOX_OK)
+            {
+                str.default_value();
+                return;
+            }
+
+            if (data != r->back())
+            {
+                str += separator_char;
+            }
+        }
+    });
+
+    box_virtual_memory *vm = (box_virtual_memory *) orm::get_first("box_virtual_memory");
+    vm->free(separator_char.get_memory());
+    orm::destroy(&separator_char);
+
     return str;
-  }
-
-  char ch = ' ';
-  box_data &separator_char = *box_data::create("<<temp_char>>",
-                                               BOX_DATA_CHAR,
-                                               (const void *) &ch);
-
-
-  r->for_each([&](entity *e) {
-    if (e->get_entity_type() == "box_data")
-    {
-      box_data *data = (box_data *) e;
-      str += *data;
-
-      if (!BOX_OK)
-      {
-        str.default_value();
-        return;
-      }
-
-      if (data != r->back())
-      {
-        str += separator_char;
-      }
-    }
-    else if (e->get_entity_type() == "box_array")
-    {
-      box_array *data = (box_array *) e;
-      str += data->to_string();
-
-      if (!BOX_OK)
-      {
-        str.default_value();
-        return;
-      }
-
-      if (data != r->back())
-      {
-        str += separator_char;
-      }
-    }
-  });
-
-  box_virtual_memory *vm = (box_virtual_memory *) orm::get_first("box_virtual_memory");
-  vm->free(separator_char.get_memory());
-  orm::destroy(&separator_char);
-
-  return str;
 }
 
 void
 box_array::clear()
 {
-  relationship *r = this->master_relationship_get("array");
+    relationship *r = this->master_relationship_get("array");
 
-  while (r->num_of_entities())
-  {
-    this->remove_data(r->front());
-  }
+    while (r->num_of_entities())
+    {
+        this->remove_data(r->front());
+    }
 
-  this->array.clear();
+    this->array.clear();
 }
 
 void
 box_array::remove_data(std::string index)
 {
-  this->remove_data(this->array[index]);
+    this->remove_data(this->array[index]);
 }
 
 void
 box_array::remove_data(entity *e)
 {
-  if (!e)
-  {
-    return;
-  }
+    if (!e)
+    {
+        return;
+    }
 
-  this->master_relationship_remove_entity("array", e);
-  this->array.erase(e->get_id());
+    this->master_relationship_remove_entity("array", e);
+    this->array.erase(e->get_id());
 }
 
 /**
@@ -220,22 +220,22 @@ box_array::remove_data(entity *e)
 void
 box_array::insert_data(std::string index, entity *e)
 {
-  if (e == nullptr)
-  {
-    BOX_ERROR(ERROR_BOX_ARRAY_ADDING_NULL_DATA);
-  }
+    if (e == nullptr)
+    {
+        BOX_ERROR(ERROR_BOX_ARRAY_ADDING_NULL_DATA);
+    }
 
-  if (e->get_entity_type() == "box_data")
-  {
-    /*
-     * Data is not a reference. Create a new data.
-     */
-    entity *new_data = box_data::create(index, *(box_data *) e);
-    e = new_data;
-  }
+    if (e->get_entity_type() == "box_data")
+    {
+        /*
+         * Data is not a reference. Create a new data.
+         */
+        entity *new_data = box_data::create(index, *(box_data *) e);
+        e = new_data;
+    }
 
-  this->master_relationship_add_entity("array", e);
-  this->array[index] = e;
+    this->master_relationship_add_entity("array", e);
+    this->array[index] = e;
 }
 
 /**
@@ -243,7 +243,7 @@ box_array::insert_data(std::string index, entity *e)
  */
 box_array::~box_array()
 {
-  this->clear();
+    this->clear();
 }
 
 /**
@@ -255,5 +255,5 @@ box_array::~box_array()
 box_array *
 box_array::create(std::string id, box_array *array)
 {
-  return (box_array *) orm::create((entity *) new box_array(id, array));
+    return (box_array *) orm::create((entity *) new box_array(id, array));
 }

@@ -32,27 +32,27 @@
 entity *
 entity_repository::find(const std::function<bool(entity *)> &func)
 {
-  for (auto it = this->entity_map.begin();
-       it != this->entity_map.end();
-       it++)
-  {
-    for (const auto &ep : it->second)
+    for (auto it = this->entity_map.begin();
+         it != this->entity_map.end();
+         it++)
     {
-      entity *e = ep.get();
-
-      if (func(e))
-      {
-        if (e->get_marked())
+        for (const auto &ep : it->second)
         {
-          continue;
+            entity *e = ep.get();
+
+            if (func(e))
+            {
+                if (e->get_marked())
+                {
+                    continue;
+                }
+
+                return e;
+            }
         }
-
-        return e;
-      }
     }
-  }
 
-  return nullptr;
+    return nullptr;
 }
 
 /**
@@ -63,17 +63,17 @@ entity_repository::find(const std::function<bool(entity *)> &func)
 void
 entity_repository::add(entity *e)
 {
-  if (e->get_marked())
-  {
-    e->set_marked(false);
-  }
+    if (e->get_marked())
+    {
+        e->set_marked(false);
+    }
 
-  if (this->entity_map.find(e->get_id()) == this->entity_map.end())
-  {
-    this->entity_map[e->get_id()] = std::vector<entity_p>();
-  }
+    if (this->entity_map.find(e->get_id()) == this->entity_map.end())
+    {
+        this->entity_map[e->get_id()] = std::vector<entity_p>();
+    }
 
-  this->entity_map[e->get_id()].push_back(entity_p(e));
+    this->entity_map[e->get_id()].push_back(entity_p(e));
 }
 
 /**
@@ -84,9 +84,9 @@ entity_repository::add(entity *e)
 void
 entity_repository::remove(entity *e)
 {
-  e->set_marked(true);
-  e->master_relationships_clear_entities();
-  e->slave_relationship_notify_destroyed();
+    e->set_marked(true);
+    e->master_relationships_clear_entities();
+    e->slave_relationship_notify_destroyed();
 }
 
 /**
@@ -98,42 +98,42 @@ entity_repository::remove(entity *e)
 void
 entity_repository::change_id(entity *e, std::string &new_id)
 {
-  if (this->entity_map.find(e->get_id()) == this->entity_map.end())
-  {
-    /*
-     * ID doesn't exist, create it and add entity.
-     */
+    if (this->entity_map.find(e->get_id()) == this->entity_map.end())
+    {
+        /*
+         * ID doesn't exist, create it and add entity.
+         */
+        e->set_id(new_id);
+        this->add(e);
+        return;
+    }
+
+    auto &entities = this->entity_map[e->get_id()];
+    auto it = std::find_if(entities.begin(), entities.end(), [&](entity_p &ep) {
+        return ep.get() == e;
+    });
+
+    if (it == entities.end())
+    {
+        /*
+         * Entity is not inserted. Add entity.
+         */
+        e->set_id(new_id);
+        this->add(e);
+        return;
+    }
+
+    if (this->entity_map.find(new_id) == this->entity_map.end())
+    {
+        /*
+         * ID doesn't exist, create it.
+         */
+        this->entity_map[new_id] = std::vector<entity_p>();
+    }
+
+    this->entity_map[new_id].push_back(*it);
     e->set_id(new_id);
-    this->add(e);
-    return;
-  }
-
-  auto &entities = this->entity_map[e->get_id()];
-  auto it = std::find_if(entities.begin(), entities.end(), [&](entity_p &ep) {
-    return ep.get() == e;
-  });
-
-  if (it == entities.end())
-  {
-    /*
-     * Entity is not inserted. Add entity.
-     */
-    e->set_id(new_id);
-    this->add(e);
-    return;
-  }
-
-  if (this->entity_map.find(new_id) == this->entity_map.end())
-  {
-    /*
-     * ID doesn't exist, create it.
-     */
-    this->entity_map[new_id] = std::vector<entity_p>();
-  }
-
-  this->entity_map[new_id].push_back(*it);
-  e->set_id(new_id);
-  entities.erase(it);
+    entities.erase(it);
 }
 
 /**
@@ -142,26 +142,26 @@ entity_repository::change_id(entity *e, std::string &new_id)
 void
 entity_repository::sweep()
 {
-  for (auto it = this->entity_map.begin();
-       it != this->entity_map.end();
-       it++)
-  {
-    auto &entities = it->second;
-
-    while (true)
+    for (auto it = this->entity_map.begin();
+         it != this->entity_map.end();
+         it++)
     {
-      auto it2 = std::find_if(entities.begin(), entities.end(), [&](entity_p &ep) {
-        return ep->get_marked();
-      });
+        auto &entities = it->second;
 
-      if (it2 == entities.end())
-      {
-        break;
-      }
+        while (true)
+        {
+            auto it2 = std::find_if(entities.begin(), entities.end(), [&](entity_p &ep) {
+                return ep->get_marked();
+            });
 
-      entities.erase(it2);
+            if (it2 == entities.end())
+            {
+                break;
+            }
+
+            entities.erase(it2);
+        }
     }
-  }
 }
 
 /**
@@ -173,13 +173,13 @@ entity_repository::sweep()
 entity *
 entity_repository::get(std::string &id)
 {
-  if (this->entity_map.find(id) == this->entity_map.end())
-  {
-    return nullptr;
-  }
+    if (this->entity_map.find(id) == this->entity_map.end())
+    {
+        return nullptr;
+    }
 
-  auto &entities = this->entity_map[id];
-  return (entities.size() > 0) ? entities[0].get() : nullptr;
+    auto &entities = this->entity_map[id];
+    return (entities.size() > 0) ? entities[0].get() : nullptr;
 }
 
 /**
@@ -187,18 +187,18 @@ entity_repository::get(std::string &id)
  */
 entity_repository::~entity_repository()
 {
-  for (auto it = this->entity_map.begin();
-       it != this->entity_map.end();
-       it++)
-  {
-    auto &entities = it->second;
-
-    while (!entities.empty())
+    for (auto it = this->entity_map.begin();
+         it != this->entity_map.end();
+         it++)
     {
-      auto &entity = entities.front();
-      this->remove(entity.get());
-      this->sweep();
+        auto &entities = it->second;
+
+        while (!entities.empty())
+        {
+            auto &entity = entities.front();
+            this->remove(entity.get());
+            this->sweep();
+        }
     }
-  }
 }
 

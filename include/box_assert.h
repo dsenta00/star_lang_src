@@ -66,7 +66,7 @@ void assert_false(bool statement,
   assert_true(__pointer__ == nullptr, __FILE__, __LINE__, "#__pointer__ should be null!")
 
 #define ASSERT_NOT_NULL(__pointer__) \
-  assert_true(__pointer__ != nullptr, __FILE__, __LINE__, "#__pointer__ shouln't be null!")
+  assert_true(__pointer__ != nullptr, __FILE__, __LINE__, "#__pointer__ shouldn't be null!")
 
 #define ASSERT_FALSE(__statement__, __fmt__, ...) \
   assert_false(__statement__, __FILE__, __LINE__, __fmt__, ##__VA_ARGS__)

@@ -33,9 +33,9 @@
  */
 entity::entity(std::string type, const uint64_t id)
 {
-  this->marked = false;
-  this->type = type;
-  this->id = std::to_string(id);
+    this->marked = false;
+    this->type = type;
+    this->id = std::to_string(id);
 }
 
 /**
@@ -46,9 +46,9 @@ entity::entity(std::string type, const uint64_t id)
  */
 entity::entity(std::string type, std::string id)
 {
-  this->marked = false;
-  this->type = type;
-  this->id = id;
+    this->marked = false;
+    this->type = type;
+    this->id = id;
 }
 
 /**
@@ -60,14 +60,14 @@ entity::entity(std::string type, std::string id)
 relationship *
 entity::master_relationship_get(std::string relationship_name)
 {
-  auto it = this->master_relationships.find(relationship_name);
+    auto it = this->master_relationships.find(relationship_name);
 
-  if (it != this->master_relationships.end())
-  {
-    return (*it).second.get();
-  }
+    if (it != this->master_relationships.end())
+    {
+        return (*it).second.get();
+    }
 
-  return nullptr;
+    return nullptr;
 }
 
 /**
@@ -80,14 +80,14 @@ void
 entity::master_relationship_add(std::string relationship_name,
                                 relationship_type type)
 {
-  if (this->master_relationship_get(relationship_name))
-  {
-    return;
-  }
+    if (this->master_relationship_get(relationship_name))
+    {
+        return;
+    }
 
-  relationship_p rp(new relationship(relationship_name, type));
+    relationship_p rp(new relationship(relationship_name, type));
 
-  this->master_relationships[relationship_name] = rp;
+    this->master_relationships[relationship_name] = rp;
 }
 
 /**
@@ -96,20 +96,20 @@ entity::master_relationship_add(std::string relationship_name,
 void
 entity::master_relationships_clear_entities()
 {
-  for (auto it = this->master_relationships.begin();
-       it != this->master_relationships.end();
-       it++)
-  {
-    relationship *r = (*it).second.get();
-
-    while (r->num_of_entities())
+    for (auto it = this->master_relationships.begin();
+         it != this->master_relationships.end();
+         it++)
     {
-      entity *e = r->front();
+        relationship *r = (*it).second.get();
 
-      r->remove_entity(e);
-      e->slave_relationship_remove_entity(r->get_name(), this);
+        while (r->num_of_entities())
+        {
+            entity *e = r->front();
+
+            r->remove_entity(e);
+            e->slave_relationship_remove_entity(r->get_name(), this);
+        }
     }
-  }
 }
 
 /**
@@ -120,7 +120,7 @@ entity::master_relationships_clear_entities()
 std::string
 entity::get_entity_type()
 {
-  return this->type;
+    return this->type;
 }
 
 /**
@@ -131,7 +131,7 @@ entity::get_entity_type()
 std::string
 entity::get_id()
 {
-  return this->id;
+    return this->id;
 }
 
 /**
@@ -142,7 +142,7 @@ entity::get_id()
 void
 entity::set_id(std::string new_id)
 {
-  this->id = new_id;
+    this->id = new_id;
 }
 
 
@@ -154,7 +154,7 @@ entity::set_id(std::string new_id)
 bool
 entity::get_marked()
 {
-  return this->marked;
+    return this->marked;
 }
 
 /**
@@ -165,7 +165,7 @@ entity::get_marked()
 void
 entity::set_marked(bool marked)
 {
-  this->marked = marked;
+    this->marked = marked;
 }
 
 /**
@@ -178,29 +178,29 @@ void
 entity::master_relationship_add_entity(std::string relationship_name,
                                        entity *e)
 {
-  relationship *r = this->master_relationship_get(relationship_name);
+    relationship *r = this->master_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return;
-  }
+    if (!r)
+    {
+        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        return;
+    }
 
-  r->add_entity(e);
+    r->add_entity(e);
 
-  switch (r->get_type())
-  {
-    case ONE_TO_MANY:
-      e->slave_relationship_add(relationship_name, ONE_TO_MANY);
-      break;
-    case ONE_TO_ONE:
-      e->slave_relationship_add(relationship_name, ONE_TO_ONE);
-      break;
-    default:
-      return;
-  }
+    switch (r->get_type())
+    {
+        case ONE_TO_MANY:
+            e->slave_relationship_add(relationship_name, ONE_TO_MANY);
+            break;
+        case ONE_TO_ONE:
+            e->slave_relationship_add(relationship_name, ONE_TO_ONE);
+            break;
+        default:
+            return;
+    }
 
-  e->slave_relationship_add_entity(relationship_name, this);
+    e->slave_relationship_add_entity(relationship_name, this);
 }
 
 /**
@@ -213,20 +213,20 @@ void
 entity::master_relationship_remove_entity(std::string relationship_name,
                                           entity *e)
 {
-  relationship *r = this->master_relationship_get(relationship_name);
+    relationship *r = this->master_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    return;
-  }
+    if (!r)
+    {
+        return;
+    }
 
-  if (!e)
-  {
-    return;
-  }
+    if (!e)
+    {
+        return;
+    }
 
-  r->remove_entity(e);
-  e->slave_relationship_remove_entity(r->get_name(), this);
+    r->remove_entity(e);
+    e->slave_relationship_remove_entity(r->get_name(), this);
 }
 
 /**
@@ -237,19 +237,19 @@ entity::master_relationship_remove_entity(std::string relationship_name,
 bool
 entity::slave_relationship_have_relations()
 {
-  for (auto it = this->slave_relationships.begin();
-       it != this->slave_relationships.end();
-       it++)
-  {
-    relationship *r = (*it).second.get();
-
-    if (r->num_of_entities() > 0)
+    for (auto it = this->slave_relationships.begin();
+         it != this->slave_relationships.end();
+         it++)
     {
-      return true;
-    }
-  }
+        relationship *r = (*it).second.get();
 
-  return false;
+        if (r->num_of_entities() > 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -263,20 +263,20 @@ void
 entity::slave_relationship_remove_entity(std::string relationship_name,
                                          entity *e)
 {
-  relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    return;
-  }
+    if (!r)
+    {
+        return;
+    }
 
-  r->remove_entity(e);
+    r->remove_entity(e);
 
-  if (!this->slave_relationship_have_relations())
-  {
-    this->set_marked(true);
-    this->master_relationships_clear_entities();
-  }
+    if (!this->slave_relationship_have_relations())
+    {
+        this->set_marked(true);
+        this->master_relationships_clear_entities();
+    }
 }
 
 /**
@@ -287,15 +287,15 @@ entity::slave_relationship_remove_entity(std::string relationship_name,
 entity *
 entity::master_relationship_back(std::string relationship_name)
 {
-  relationship *r = this->master_relationship_get(relationship_name);
+    relationship *r = this->master_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return nullptr;
-  }
+    if (!r)
+    {
+        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        return nullptr;
+    }
 
-  return r->back();
+    return r->back();
 }
 
 /**
@@ -306,15 +306,15 @@ entity::master_relationship_back(std::string relationship_name)
 entity *
 entity::slave_relationship_back(std::string relationship_name)
 {
-  relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return nullptr;
-  }
+    if (!r)
+    {
+        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        return nullptr;
+    }
 
-  return r->back();
+    return r->back();
 }
 
 /**
@@ -322,64 +322,64 @@ entity::slave_relationship_back(std::string relationship_name)
  */
 entity::~entity()
 {
-  this->master_relationships_clear_entities();
+    this->master_relationships_clear_entities();
 }
 
 void
 entity::slave_relationship_add(std::string relationship_name, relationship_type type)
 {
-  if (this->slave_relationship_get(relationship_name))
-  {
-    return;
-  }
+    if (this->slave_relationship_get(relationship_name))
+    {
+        return;
+    }
 
-  relationship_p rp(new relationship(relationship_name, type));
-  this->slave_relationships[relationship_name] = rp;
+    relationship_p rp(new relationship(relationship_name, type));
+    this->slave_relationships[relationship_name] = rp;
 }
 
 relationship *
 entity::slave_relationship_get(std::string relationship_name)
 {
-  auto it = this->slave_relationships.find(relationship_name);
+    auto it = this->slave_relationships.find(relationship_name);
 
-  if (it != this->slave_relationships.end())
-  {
-    return (*it).second.get();
-  }
+    if (it != this->slave_relationships.end())
+    {
+        return (*it).second.get();
+    }
 
-  return nullptr;
+    return nullptr;
 }
 
 void
 entity::slave_relationship_add_entity(std::string relationship_name, entity *e)
 {
-  relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(relationship_name);
 
-  if (!r)
-  {
-    BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    return;
-  }
+    if (!r)
+    {
+        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        return;
+    }
 
-  r->add_entity(e);
+    r->add_entity(e);
 }
 
 void
 entity::slave_relationship_notify_destroyed()
 {
-  for (auto it = this->slave_relationships.begin();
-       it != this->slave_relationships.end();
-       it++)
-  {
-    relationship *r = (*it).second.get();
-
-    while (r->num_of_entities())
+    for (auto it = this->slave_relationships.begin();
+         it != this->slave_relationships.end();
+         it++)
     {
-      /*
-       * Tell master entity to remove this entity.
-       */
-      entity *e = r->front();
-      e->master_relationship_remove_entity(r->get_name(), this);
+        relationship *r = (*it).second.get();
+
+        while (r->num_of_entities())
+        {
+            /*
+             * Tell master entity to remove this entity.
+             */
+            entity *e = r->front();
+            e->master_relationship_remove_entity(r->get_name(), this);
+        }
     }
-  }
 }

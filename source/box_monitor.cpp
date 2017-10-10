@@ -37,12 +37,12 @@ static std::queue<box_error_p> box_error_queue;
 void
 box_monitor_add_error(const char *func, box_status status)
 {
-  if (box_error_queue.size() >= MAX_BOX_ERROR_QUEUE)
-  {
-    box_error_queue.pop();
-  }
+    if (box_error_queue.size() >= MAX_BOX_ERROR_QUEUE)
+    {
+        box_error_queue.pop();
+    }
 
-  box_error_queue.push(box_error_p(new box_error(status, func)));
+    box_error_queue.push(box_error_p(new box_error(status, func)));
 }
 
 /**
@@ -53,7 +53,7 @@ box_monitor_add_error(const char *func, box_status status)
 bool
 box_monitor_ok()
 {
-  return box_error_queue.empty();
+    return box_error_queue.empty();
 }
 
 /**
@@ -64,9 +64,9 @@ box_monitor_ok()
 box_status
 box_monitor_last_error()
 {
-  return box_monitor_ok() ?
-         BOX_STATUS_OK :
-         box_error_queue.back().get()->get_status();
+    return box_monitor_ok() ?
+           BOX_STATUS_OK :
+           box_error_queue.back().get()->get_status();
 }
 
 /**
@@ -77,9 +77,9 @@ box_monitor_last_error()
 const char *
 box_monitor_last_error_string()
 {
-  return box_monitor_ok() ?
-         "BOX_STATUS_OK" :
-         box_error_queue.back().get()->get_status_str();
+    return box_monitor_ok() ?
+           "BOX_STATUS_OK" :
+           box_error_queue.back().get()->get_status_str();
 }
 
 /**
@@ -88,10 +88,10 @@ box_monitor_last_error_string()
 void
 box_monitor_clear()
 {
-  while (!box_error_queue.empty())
-  {
-    box_error_queue.pop();
-  }
+    while (!box_error_queue.empty())
+    {
+        box_error_queue.pop();
+    }
 }
 
 
