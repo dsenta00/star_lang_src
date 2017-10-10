@@ -33,8 +33,8 @@
  */
 relationship::relationship(std::string relationship_name, relationship_type type)
 {
-  this->relationship_name = relationship_name;
-  this->type = type;
+    this->relationship_name = relationship_name;
+    this->type = type;
 }
 
 /**
@@ -45,7 +45,7 @@ relationship::relationship(std::string relationship_name, relationship_type type
 std::string &
 relationship::get_name()
 {
-  return this->relationship_name;
+    return this->relationship_name;
 }
 
 /**
@@ -56,7 +56,7 @@ relationship::get_name()
 relationship_type
 relationship::get_type()
 {
-  return this->type;
+    return this->type;
 }
 
 /**
@@ -68,8 +68,8 @@ relationship::get_type()
 entity *
 relationship::find(const std::function<bool(entity *)> &func)
 {
-  auto it = std::find_if(this->entities.begin(), this->entities.end(), func);
-  return (it != this->entities.end()) ? *it : nullptr;
+    auto it = std::find_if(this->entities.begin(), this->entities.end(), func);
+    return (it != this->entities.end()) ? *it : nullptr;
 }
 
 /**
@@ -80,7 +80,7 @@ relationship::find(const std::function<bool(entity *)> &func)
 void
 relationship::sort(const std::function<bool(entity *, entity *)> &func)
 {
-  std::sort(this->entities.begin(), this->entities.end(), func);
+    std::sort(this->entities.begin(), this->entities.end(), func);
 }
 
 /**
@@ -91,36 +91,36 @@ relationship::sort(const std::function<bool(entity *, entity *)> &func)
 void
 relationship::for_each(const std::function<foreach_result(entity *, entity *)> &func)
 {
-  for (auto it1 = this->entities.begin();
-       it1 != this->entities.end();
-       it1++)
-  {
-    auto it2 = it1;
-    it2++;
-
-    while (it2 != this->entities.end())
+    for (auto it1 = this->entities.begin();
+         it1 != this->entities.end();
+         it1++)
     {
-      foreach_result result = func(*it1, *it2);
+        auto it2 = it1;
+        it2++;
 
-      switch (result)
-      {
-        case FOREACH_CONTINUE:
-          it1++;
-          it2++;
-          break;
-        case FOREACH_IT2_REMOVED:
-          it2 = it1;
-          it2++;
-          break;
-        case FOREACH_IT1_REMOVED:
-          it1 = it2;
-          it2++;
-          break;
-        default:
-          return;
-      }
+        while (it2 != this->entities.end())
+        {
+            foreach_result result = func(*it1, *it2);
+
+            switch (result)
+            {
+                case FOREACH_CONTINUE:
+                    it1++;
+                    it2++;
+                    break;
+                case FOREACH_IT2_REMOVED:
+                    it2 = it1;
+                    it2++;
+                    break;
+                case FOREACH_IT1_REMOVED:
+                    it1 = it2;
+                    it2++;
+                    break;
+                default:
+                    return;
+            }
+        }
     }
-  }
 }
 
 /**
@@ -131,10 +131,10 @@ relationship::for_each(const std::function<foreach_result(entity *, entity *)> &
 void
 relationship::for_each(const std::function<void(entity *)> &func)
 {
-  for (entity *e : this->entities)
-  {
-    func(e);
-  }
+    for (entity *e : this->entities)
+    {
+        func(e);
+    }
 }
 
 /**
@@ -145,17 +145,17 @@ relationship::for_each(const std::function<void(entity *)> &func)
 void
 relationship::add_entity(entity *e)
 {
-  if (this->type == ONE_TO_ONE)
-  {
-    if (this->entities.size() != 0)
+    if (this->type == ONE_TO_ONE)
     {
-      BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE);
-      return;
+        if (this->entities.size() != 0)
+        {
+            BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE);
+            return;
+        }
     }
-  }
 
-  e->set_marked(false);
-  this->entities.push_back(e);
+    e->set_marked(false);
+    this->entities.push_back(e);
 }
 
 /**
@@ -166,16 +166,16 @@ relationship::add_entity(entity *e)
 void
 relationship::remove_entity(entity *e)
 {
-  for (auto it = this->entities.begin();
-       it != this->entities.end();
-       it++)
-  {
-    if (*it == e)
+    for (auto it = this->entities.begin();
+         it != this->entities.end();
+         it++)
     {
-      this->entities.erase(it);
-      break;
+        if (*it == e)
+        {
+            this->entities.erase(it);
+            break;
+        }
     }
-  }
 }
 
 /**
@@ -185,7 +185,7 @@ relationship::remove_entity(entity *e)
 std::vector<entity *> &
 relationship::get_entities()
 {
-  return this->entities;
+    return this->entities;
 }
 
 /**
@@ -196,7 +196,7 @@ relationship::get_entities()
 entity *
 relationship::front()
 {
-  return (this->entities.size()) ? this->entities.front() : nullptr;
+    return (this->entities.size()) ? this->entities.front() : nullptr;
 }
 
 /**
@@ -207,7 +207,7 @@ relationship::front()
 entity *
 relationship::back()
 {
-  return (this->entities.size()) ? this->entities.back() : nullptr;
+    return (this->entities.size()) ? this->entities.back() : nullptr;
 }
 
 /**
@@ -218,5 +218,5 @@ relationship::back()
 uint32_t
 relationship::num_of_entities()
 {
-  return static_cast<uint32_t>(this->entities.size());
+    return static_cast<uint32_t>(this->entities.size());
 }

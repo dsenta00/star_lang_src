@@ -31,16 +31,16 @@
  * ORM interface.
  */
 namespace orm {
-  entity_repository *find_entity_repository(std::string entity_type);
-  void add_entity_repository(std::string entity_type);
-  entity *create(entity *data);
-  void change_id(entity *e, std::string new_id);
-  void destroy(entity *e);
-  void sweep();
-  entity *select(std::string entity_type, std::function<bool(entity *)> where);
-  entity *select(std::string entity_type, std::string id);
-  entity *get_first(std::string entity_type);
-  void remove_entity_repository(std::string entity_type);
+    entity_repository *find_entity_repository(std::string entity_type);
+    void add_entity_repository(std::string entity_type);
+    entity *create(entity *data);
+    void change_id(entity *e, std::string new_id);
+    void destroy(entity *e);
+    void sweep();
+    entity *select(std::string entity_type, std::function<bool(entity *)> where);
+    entity *select(std::string entity_type, std::string id);
+    entity *get_first(std::string entity_type);
+    void remove_entity_repository(std::string entity_type);
 }
 
 #define ORM_SELECT(__ENTITY_TYPE__, __WHERE__) \

@@ -30,11 +30,11 @@
 
 void run_tests()
 {
-  orm_test();
-  box_memory_chunk_test();
-  box_virtual_memory_test();
-  box_data_test();
-  box_array_test();
+    orm_test();
+    box_memory_chunk_test();
+    box_virtual_memory_test();
+    box_data_test();
+    box_array_test();
 
-  printf("TESTS ARE OK!\n");
+    printf("TESTS ARE OK!\n");
 }

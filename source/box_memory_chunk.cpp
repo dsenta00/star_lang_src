@@ -35,25 +35,25 @@
  */
 memory_chunk::memory_chunk(uint32_t capacity) : memory_chunk_if::memory_chunk_if()
 {
-  this->free = 0;
-  this->capacity = 0;
-  this->start_address = 0;
+    this->free = 0;
+    this->capacity = 0;
+    this->start_address = 0;
 
-  if (capacity == 0)
-  {
-    return;
-  }
+    if (capacity == 0)
+    {
+        return;
+    }
 
-  this->start_address = (uintptr_t) calloc(capacity, sizeof(uint8_t));
+    this->start_address = (uintptr_t) calloc(capacity, sizeof(uint8_t));
 
-  if (!this->start_address)
-  {
-    return;
-  }
+    if (!this->start_address)
+    {
+        return;
+    }
 
-  this->free = capacity;
-  this->capacity = capacity;
-  this->free_memory_add(start_address, capacity);
+    this->free = capacity;
+    this->capacity = capacity;
+    this->free_memory_add(start_address, capacity);
 }
 
 /**
@@ -65,24 +65,24 @@ memory_chunk::memory_chunk(uint32_t capacity) : memory_chunk_if::memory_chunk_if
 bool
 memory_chunk::is_parent_of(memory *mem)
 {
-  if (!mem)
-  {
-    return false;
-  }
+    if (!mem)
+    {
+        return false;
+    }
 
-  relationship *r = mem->slave_relationship_get("reserved_memory");
+    relationship *r = mem->slave_relationship_get("reserved_memory");
 
-  if (!r)
-  {
-    r = mem->slave_relationship_get("free_memory");
-  }
+    if (!r)
+    {
+        r = mem->slave_relationship_get("free_memory");
+    }
 
-  if (!r)
-  {
-    return false;
-  }
+    if (!r)
+    {
+        return false;
+    }
 
-  return r->find([&](entity *e) { return e == this; }) != nullptr;
+    return r->find([&](entity *e) { return e == this; }) != nullptr;
 }
 
 /**
@@ -95,39 +95,39 @@ memory_chunk::is_parent_of(memory *mem)
 memory *
 memory_chunk::reserve(uint32_t size)
 {
-  if (!this->can_reserve(size))
-  {
-    return nullptr;
-  }
+    if (!this->can_reserve(size))
+    {
+        return nullptr;
+    }
 
-  auto free_mem = this->free_memory_find([&](memory *m) {
-    return m->get_size() >= size;
-  });
+    auto free_mem = this->free_memory_find([&](memory *m) {
+        return m->get_size() >= size;
+    });
 
-  if (!free_mem)
-  {
-    return nullptr;
-  }
+    if (!free_mem)
+    {
+        return nullptr;
+    }
 
-  uintptr_t address = free_mem->get_address();
+    uintptr_t address = free_mem->get_address();
 
-  if (free_mem->get_size() - size == 0)
-  {
-    this->free_memory_remove(free_mem);
-  }
-  else
-  {
-    free_mem->assign(free_mem->get_address() + size, free_mem->get_size() - size);
-  }
+    if (free_mem->get_size() - size == 0)
+    {
+        this->free_memory_remove(free_mem);
+    }
+    else
+    {
+        free_mem->assign(free_mem->get_address() + size, free_mem->get_size() - size);
+    }
 
-  auto mem = this->reserved_memory_add(address, size);
+    auto mem = this->reserved_memory_add(address, size);
 
-  if (mem)
-  {
-    this->free -= size;
-  }
+    if (mem)
+    {
+        this->free -= size;
+    }
 
-  return mem;
+    return mem;
 }
 
 /**
@@ -146,103 +146,103 @@ memory_chunk::reserve(uint32_t size)
 memory_chunk_resize_result
 memory_chunk::resize(memory *mem, uint32_t new_size)
 {
-  if (!mem || (mem->get_address() == 0))
-  {
-    return MEMORY_CHUNK_RESIZE_NULL_MEMORY;
-  }
-
-  if (!this->is_parent_of(mem))
-  {
-    return MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS;
-  }
-
-  if (this->capacity == 0)
-  {
-    return MEMORY_CHUNK_RESIZE_ZERO_CAPACITY;
-  }
-
-  if (new_size == 0)
-  {
-    return MEMORY_CHUNK_RESIZE_ZERO_SIZE;
-  }
-
-  if (new_size == mem->get_size())
-  {
-    return MEMORY_CHUNK_RESIZE_OK;
-  }
-  else if (new_size < mem->get_size())
-  {
-    /* Find free memory after requested memory */
-    memory *free_memory = this->free_memory_find([&](memory *m) {
-      return m->get_address() == (mem->get_address() + mem->get_size());
-    });
-
-    if (free_memory)
+    if (!mem || (mem->get_address() == 0))
     {
-      /*
-       * Found adjacent free_memory.
-       * Spread over free_memory.
-       */
-      this->free -= new_size - mem->get_size();
-      free_memory->assign(free_memory->get_address() - mem->get_size() + new_size,
-                          free_memory->get_size() + mem->get_size() - new_size);
-      mem->assign(mem->get_address(), new_size);
+        return MEMORY_CHUNK_RESIZE_NULL_MEMORY;
+    }
+
+    if (!this->is_parent_of(mem))
+    {
+        return MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS;
+    }
+
+    if (this->capacity == 0)
+    {
+        return MEMORY_CHUNK_RESIZE_ZERO_CAPACITY;
+    }
+
+    if (new_size == 0)
+    {
+        return MEMORY_CHUNK_RESIZE_ZERO_SIZE;
+    }
+
+    if (new_size == mem->get_size())
+    {
+        return MEMORY_CHUNK_RESIZE_OK;
+    }
+    else if (new_size < mem->get_size())
+    {
+        /* Find free memory after requested memory */
+        memory *free_memory = this->free_memory_find([&](memory *m) {
+            return m->get_address() == (mem->get_address() + mem->get_size());
+        });
+
+        if (free_memory)
+        {
+            /*
+             * Found adjacent free_memory.
+             * Spread over free_memory.
+             */
+            this->free -= new_size - mem->get_size();
+            free_memory->assign(free_memory->get_address() - mem->get_size() + new_size,
+                                free_memory->get_size() + mem->get_size() - new_size);
+            mem->assign(mem->get_address(), new_size);
+        }
+        else
+        {
+            /* Not found adjacent free memory, create new free memory */
+            this->free -= new_size - mem->get_size();
+            this->free_memory_add(mem->get_address() + new_size, new_size - mem->get_size());
+            this->free_memory_union();
+            mem->assign(mem->get_address(), new_size);
+        }
+
+        return MEMORY_CHUNK_RESIZE_OK;
     }
     else
     {
-      /* Not found adjacent free memory, create new free memory */
-      this->free -= new_size - mem->get_size();
-      this->free_memory_add(mem->get_address() + new_size, new_size - mem->get_size());
-      this->free_memory_union();
-      mem->assign(mem->get_address(), new_size);
+        if ((new_size - mem->get_size()) > this->free)
+        {
+            return MEMORY_CHUNK_RESIZE_NO_MEMORY;
+        }
+
+        auto free_memory = this->free_memory_find([&](memory *m) {
+            return m->get_address() == (mem->get_address() + mem->get_size());
+        });
+
+        if (!free_memory)
+        {
+            /*
+             * Not found adjacent free memory, memory is fragmented.
+             */
+            return MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY;
+        }
+
+        /*
+         * Found adjacent free memory,
+         * check if new size can spread over free memory
+         */
+        if (new_size > (free_memory->get_size() + mem->get_size()))
+        {
+            return MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY;
+        }
+
+        /*
+         * Adjacent free memory has enough space.
+         * Spread over free memory.
+         */
+        this->free -= new_size - mem->get_size();
+        free_memory->assign(free_memory->get_address() + new_size - mem->get_size(),
+                            free_memory->get_size() - new_size + mem->get_size());
+        mem->assign(mem->get_address(), new_size);
+
+        if (free_memory->get_size() == 0)
+        {
+            this->free_memory_remove(free_memory);
+        }
+
+        return MEMORY_CHUNK_RESIZE_OK;
     }
-
-    return MEMORY_CHUNK_RESIZE_OK;
-  }
-  else
-  {
-    if ((new_size - mem->get_size()) > this->free)
-    {
-      return MEMORY_CHUNK_RESIZE_NO_MEMORY;
-    }
-
-    auto free_memory = this->free_memory_find([&](memory *m) {
-      return m->get_address() == (mem->get_address() + mem->get_size());
-    });
-
-    if (!free_memory)
-    {
-      /*
-       * Not found adjacent free memory, memory is fragmented.
-       */
-      return MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY;
-    }
-
-    /*
-     * Found adjacent free memory,
-     * check if new size can spread over free memory
-     */
-    if (new_size > (free_memory->get_size() + mem->get_size()))
-    {
-      return MEMORY_CHUNK_RESIZE_FRAGMENTED_MEMORY;
-    }
-
-    /*
-     * Adjacent free memory has enough space.
-     * Spread over free memory.
-     */
-    this->free -= new_size - mem->get_size();
-    free_memory->assign(free_memory->get_address() + new_size - mem->get_size(),
-                        free_memory->get_size() - new_size + mem->get_size());
-    mem->assign(mem->get_address(), new_size);
-
-    if (free_memory->get_size() == 0)
-    {
-      this->free_memory_remove(free_memory);
-    }
-
-    return MEMORY_CHUNK_RESIZE_OK;
-  }
 }
 
 /**
@@ -257,31 +257,31 @@ memory_chunk::resize(memory *mem, uint32_t new_size)
 memory_chunk_release_result
 memory_chunk::release(memory *mem)
 {
-  if (!mem)
-  {
-    return MEMORY_CHUNK_RELEASE_NULL_MEMORY;
-  }
+    if (!mem)
+    {
+        return MEMORY_CHUNK_RELEASE_NULL_MEMORY;
+    }
 
-  if (!is_parent_of(mem))
-  {
-    return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS;
-  }
+    if (!is_parent_of(mem))
+    {
+        return MEMORY_CHUNK_RELEASE_UNKNOWN_ADDRESS;
+    }
 
-  if (!mem->ready_to_remove())
-  {
+    if (!mem->ready_to_remove())
+    {
+        return MEMORY_CHUNK_RELEASE_OK;
+    }
+
+    uintptr_t address = mem->get_address();
+    uint32_t size = mem->get_size();
+
+    this->free += size;
+
+    this->reserved_memory_remove(mem);
+    this->free_memory_add(address, size);
+    this->free_memory_union();
+
     return MEMORY_CHUNK_RELEASE_OK;
-  }
-
-  uintptr_t address = mem->get_address();
-  uint32_t size = mem->get_size();
-
-  this->free += size;
-
-  this->reserved_memory_remove(mem);
-  this->free_memory_add(address, size);
-  this->free_memory_union();
-
-  return MEMORY_CHUNK_RELEASE_OK;
 }
 
 /**
@@ -312,13 +312,13 @@ memory_chunk::release(memory *mem)
 bool
 memory_chunk::worth_defragmentation()
 {
-  if (this->free_memory_num() == 1)
-  {
-    return false;
-  }
+    if (this->free_memory_num() == 1)
+    {
+        return false;
+    }
 
-  uint64_t dispersion = free * this->free_memory_num();
-  return (dispersion >= DISPERSION_LOW_THRESHOLD) && (dispersion < DISPERSION_HIGH_THRESHOLD);
+    uint64_t dispersion = free * this->free_memory_num();
+    return (dispersion >= DISPERSION_LOW_THRESHOLD) && (dispersion < DISPERSION_HIGH_THRESHOLD);
 }
 
 /**
@@ -330,28 +330,28 @@ memory_chunk::worth_defragmentation()
 bool
 memory_chunk::can_reserve(uint32_t size)
 {
-  if (size == 0)
-  {
-    return false;
-  }
+    if (size == 0)
+    {
+        return false;
+    }
 
-  if (this->free < size)
-  {
-    return false;
-  }
+    if (this->free < size)
+    {
+        return false;
+    }
 
-  /*
-   * Optimization part.
-   * I'm so damn smart.
-   */
-  if (this->free_memory_num() == 1)
-  {
-    return true;
-  }
+    /*
+     * Optimization part.
+     * I'm so damn smart.
+     */
+    if (this->free_memory_num() == 1)
+    {
+        return true;
+    }
 
-  return this->free_memory_find([&](memory *m) {
-    return m->get_size() >= size;
-  }) != nullptr;
+    return this->free_memory_find([&](memory *m) {
+        return m->get_size() >= size;
+    }) != nullptr;
 }
 
 /**
@@ -363,7 +363,7 @@ memory_chunk::can_reserve(uint32_t size)
 bool
 memory_chunk::is_fragmented(uint32_t size)
 {
-  return (this->free >= size) && (!this->can_reserve(size));
+    return (this->free >= size) && (!this->can_reserve(size));
 }
 
 /**
@@ -372,58 +372,58 @@ memory_chunk::is_fragmented(uint32_t size)
 void
 memory_chunk::defragmentation()
 {
-  if (this->reserved_memory_num() == 0)
-  {
-    return;
-  }
+    if (this->reserved_memory_num() == 0)
+    {
+        return;
+    }
 
-  this->reserved_memory_sort();
-  memory *mem = this->reserved_memory_front();
+    this->reserved_memory_sort();
+    memory *mem = this->reserved_memory_front();
 
-  if (mem->get_address() > this->start_address)
-  {
+    if (mem->get_address() > this->start_address)
+    {
+        /*
+         * Active memory isn't first in memory chunk.
+         * Move it master_relationship_back to start_address.
+         */
+        memmove((void *) this->start_address,
+                (void *) mem->get_address(),
+                mem->get_size());
+        mem->assign(this->start_address, mem->get_size());
+    }
+
     /*
-     * Active memory isn't first in memory chunk.
-     * Move it master_relationship_back to start_address.
+     * Real defragmentation part.
      */
-    memmove((void *) this->start_address,
-            (void *) mem->get_address(),
-            mem->get_size());
-    mem->assign(this->start_address, mem->get_size());
-  }
+    auto reserved_memory = master_relationship_get("reserved_memory");
 
-  /*
-   * Real defragmentation part.
-   */
-  auto reserved_memory = master_relationship_get("reserved_memory");
+    reserved_memory->for_each([&](entity *e1, entity *e2) {
+        memory *mem = (memory *) e1;
+        memory *adjacent_memory = (memory *) e2;
 
-  reserved_memory->for_each([&](entity *e1, entity *e2) {
-    memory *mem = (memory *) e1;
-    memory *adjacent_memory = (memory *) e2;
+        mem->align(adjacent_memory);
+        return FOREACH_CONTINUE;
+    });
 
-    mem->align(adjacent_memory);
-    return FOREACH_CONTINUE;
-  });
-
-  uint32_t free_temp = this->free;
-  this->free_memory_delete_all();
-  memory *back_reserved = this->reserved_memory_back();
-  this->free_memory_add(back_reserved->get_address() + back_reserved->get_size(), free_temp);
+    uint32_t free_temp = this->free;
+    this->free_memory_delete_all();
+    memory *back_reserved = this->reserved_memory_back();
+    this->free_memory_add(back_reserved->get_address() + back_reserved->get_size(), free_temp);
 }
 
 uint32_t
 memory_chunk::get_free()
 {
-  return this->free;
+    return this->free;
 }
 
 memory_chunk::~memory_chunk()
 {
-  std::free((void *) start_address);
+    std::free((void *) start_address);
 }
 
 memory_chunk *
 memory_chunk::create(uint32_t capacity)
 {
-  return (memory_chunk *) orm::create(new memory_chunk(capacity));
+    return (memory_chunk *) orm::create(new memory_chunk(capacity));
 }
