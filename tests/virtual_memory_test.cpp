@@ -20,10 +20,10 @@
  * THE SOFTWARE.
  */
 
-#include "box_virtual_memory_test.h"
-#include "box_virtual_memory.h"
-#include "box_assert.h"
-#include "box_monitor.h"
+#include "virtual_memory_test.h"
+#include "virtual_memory.h"
+#include "test_assert.h"
+#include "error_log.h"
 #include "memory.h"
 #include "ORM/orm.h"
 #include <ctime>
@@ -32,11 +32,11 @@
  * Test virtual memory basic.
  */
 static void
-box_virtual_memory_test_basic()
+virtual_memory_test_basic()
 {
     srand((unsigned) time(nullptr));
 
-    box_virtual_memory &vm_zero_cap = *box_virtual_memory::create(0);
+    virtual_memory &vm_zero_cap = *virtual_memory::create(0);
     ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
     memory *data1 = vm_zero_cap.alloc(64);
@@ -56,7 +56,7 @@ box_virtual_memory_test_basic()
     vm_zero_cap.free(data2);
     ASSERT_VIRTUAL_MEMORY(vm_zero_cap, 0);
 
-    box_virtual_memory &vm = *box_virtual_memory::create(CHUNK_MINIMUM_CAPACITY);
+    virtual_memory &vm = *virtual_memory::create(CHUNK_MINIMUM_CAPACITY);
 
     ASSERT_TRUE(vm.alloc(0) == nullptr, "should not allocate 0 bytes!");
     ASSERT_TRUE(vm.alloc(UINT32_MAX) == nullptr,
@@ -109,11 +109,11 @@ box_virtual_memory_test_basic()
 
     memory &mem_unknown = *memory::create(0x204, 32);
     vm.realloc(&mem_unknown, 32);
-    ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
+    ASSERT_ERROR(ERROR_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
 
     vm.free(&mem_unknown);
-    ASSERT_ERROR(ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
-    BOX_ERROR_CLEAR;
+    ASSERT_ERROR(ERROR_VIRTUAL_MEMORY_UNKNOWN_CHUNK);
+    ERROR_LOG_CLEAR;
 
     orm::destroy(&vm);
     orm::destroy(&vm_zero_cap);
@@ -125,9 +125,9 @@ box_virtual_memory_test_basic()
  * Test virtual memory.
  */
 void
-box_virtual_memory_test()
+virtual_memory_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    box_virtual_memory_test_basic();
+    virtual_memory_test_basic();
     printf("\r\n\r\n");
 }

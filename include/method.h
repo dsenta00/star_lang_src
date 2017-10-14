@@ -20,21 +20,35 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_MONITOR_H
-#define BOX_MONITOR_H
+#ifndef BOX_METHOD_H
+#define BOX_METHOD_H
 
-#include "box_error.h"
+#include "ORM/entity.h"
+#include "data_type.h"
+#include "fw_decl.h"
 
-void box_monitor_add_error(const char *func, box_status status);
-bool box_monitor_ok();
-box_status box_monitor_last_error();
-const char *box_monitor_last_error_string();
-void box_monitor_clear();
+typedef enum {
+    INSTRUCTION_OK,
+    INSTRUCTION_ERROR,
+    INSTRUCTION_FINISHED
+} instruction_result;
 
-#define BOX_ERROR(__stat) (box_monitor_add_error(__func__, __stat))
-#define BOX_OK (box_monitor_ok())
-#define BOX_LAST_ERROR (box_monitor_last_error())
-#define BOX_LAST_ERROR_STRING (box_monitor_last_error_string())
-#define BOX_ERROR_CLEAR (box_monitor_clear())
+/**
+ * @brief The method class
+ */
+class method : public entity {
+protected:
+    entity *result;
+    std::map<std::string, entity *> local_objects;
+    std::vector<entity *> stack;
+    instruction *current_instruction;
+public:
+    method(std::string id, std::vector<instruction *> &instructions);
+    instruction_result execute_next();
+    void add_local_object(entity *e);
+    entity *get_local_object(std::string id);
+    void push_stack(entity *e);
+    entity *pop_stack();
+};
 
-#endif // BOX_MONITOR_H
+#endif // BOX_METHOD_H

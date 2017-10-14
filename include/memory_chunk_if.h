@@ -20,21 +20,33 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_FW_H
-#define BOX_FW_H
+#ifndef BOX_MEMORY_CHUNK_IF_H
+#define BOX_MEMORY_CHUNK_IF_H
 
-class memory;
+#include "ORM/entity.h"
+#include "fw_decl.h"
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
 
-class memory_chunk;
+class memory_chunk_if : public entity {
+public:
+    memory_chunk_if();
+    void free_memory_add(uintptr_t address, uint32_t size);
 
-class box_virtual_memory;
+    void free_memory_remove(memory *mem);
+    memory *free_memory_find(std::function<bool(memory *)> foo);
+    memory *free_memory_front();
+    uint32_t free_memory_num();
+    void free_memory_delete_all();
+    void free_memory_union();
+    memory *reserved_memory_add(uintptr_t address, uint32_t size);
 
-class box_data;
+    void reserved_memory_remove(memory *mem);
+    memory *reserved_memory_front();
+    memory *reserved_memory_back();
+    uint32_t reserved_memory_num();
+    void reserved_memory_sort();
+};
 
-class box_array;
-
-class instruction;
-
-class box_method;
-
-#endif // BOX_FW_H
+#endif // BOX_MEMORY_CHUNK_IF_H

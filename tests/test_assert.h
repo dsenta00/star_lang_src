@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_ASSERT_H
-#define BOX_ASSERT_H
+#ifndef TEST_ASSERT_H
+#define TEST_ASSERT_H
 
 #include <cstdarg>
 #include <cstdio>
@@ -40,18 +40,18 @@ void assert_false(bool statement,
                   const char *fmt,
                   ...);
 
-#define BOX_TEST(__test__) \
+#define RUN_TEST(__test__) \
   printf("\t-> " #__test__ "::Start\r\n"); \
   do \
   { \
-    if (virtual_memory) \
-    { \
-      orm::destroy(virtual_memory); \
-    } \
-    virtual_memory = box_virtual_memory::create(); \
-  } while(false); \
-  __test__; \
-  BOX_OK;
+      if (vm) \
+      { \
+        orm::destroy(vm); \
+      } \
+      vm = virtual_memory::create(); \
+      (__test__); \
+      ERROR_LOG_IS_EMPTY; \
+  } while(false);
 
 #define ASSERT_TRUE(__statement__, __fmt__, ...) \
   assert_true(__statement__, __FILE__, __LINE__, __fmt__, ##__VA_ARGS__)
@@ -63,21 +63,21 @@ void assert_false(bool statement,
   assert_true((__statement__) != (__not_expected__), __FILE__, __LINE__, "#__statement__ and #__not_expected__ are equal!")
 
 #define ASSERT_NULL(__pointer__) \
-  assert_true(__pointer__ == nullptr, __FILE__, __LINE__, "#__pointer__ should be null!")
+  assert_true((__pointer__) == nullptr, __FILE__, __LINE__, "#__pointer__ should be null!")
 
 #define ASSERT_NOT_NULL(__pointer__) \
-  assert_true(__pointer__ != nullptr, __FILE__, __LINE__, "#__pointer__ shouldn't be null!")
+  assert_true((__pointer__) != nullptr, __FILE__, __LINE__, "#__pointer__ shouldn't be null!")
 
 #define ASSERT_FALSE(__statement__, __fmt__, ...) \
   assert_false(__statement__, __FILE__, __LINE__, __fmt__, ##__VA_ARGS__)
 
 #define ASSERT_OK \
-  ASSERT_TRUE(BOX_OK, "BOX should be OK. (%s)", BOX_LAST_ERROR_STRING)
+  ASSERT_TRUE(ERROR_LOG_IS_EMPTY, "Everything should be OK. (%s)", ERROR_LOG_LAST_ERROR_STRING)
 
 #define ASSERT_ERROR(__error__) \
-  ASSERT_TRUE(BOX_LAST_ERROR == __error__, \
-              "BOX_LAST_ERROR != " #__error__ " (%s)", \
-              BOX_LAST_ERROR_STRING)
+  ASSERT_TRUE(ERROR_LOG_LAST_ERROR == (__error__), \
+              "ERROR_LOG_LAST_ERROR != " #__error__ " (%s)", \
+              ERROR_LOG_LAST_ERROR_STRING)
 
 #define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
   ASSERT_TRUE((__VM__).get_allocated_total() == (__BYTES__), \
@@ -85,4 +85,4 @@ void assert_false(bool statement,
   (__BYTES__), \
   (__VM__).get_allocated_total())
 
-#endif // BOX_ASSERT_H
+#endif // TEST_ASSERT_H

@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-#include "box_memory_chunk.h"
+#include "memory_chunk.h"
 #include "ORM/relationship.h"
 #include "memory.h"
 #include "ORM/orm.h"

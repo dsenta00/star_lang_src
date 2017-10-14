@@ -20,18 +20,18 @@
  * THE SOFTWARE.
  */
 
-#include "box_memory_chunk_test.h"
-#include "box_memory_chunk.h"
-#include "box_assert.h"
+#include "memory_chunk_test.h"
+#include "memory_chunk.h"
+#include "test_assert.h"
 #include "memory.h"
-#include "box_monitor.h"
+#include "error_log.h"
 #include "ORM/orm.h"
 
 /**
  * Advanced memory chunk test.
  */
 static void
-box_memory_chunk_test_advanced()
+memory_chunk_test_advanced()
 {
 #define BIGGER_CAPACITY (262144)
 #define RESERVATION     (32768)
@@ -135,7 +135,7 @@ box_memory_chunk_test_advanced()
  * Basic memory chunk test.
  */
 static void
-box_memory_chunk_test_basic()
+memory_chunk_test_basic()
 {
 #define MEMORY_CHUNK_SIZE         (100)
 #define BYTES_RESERVATION_30      (30)
@@ -170,7 +170,7 @@ box_memory_chunk_test_basic()
     ASSERT_EQUALS(chunk.release(nullptr), MEMORY_CHUNK_RELEASE_NULL_MEMORY);
     ASSERT_EQUALS(chunk.resize(&dummy_memory, 0), MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS);
     ASSERT_EQUALS(chunk.resize(nullptr, 0), MEMORY_CHUNK_RESIZE_NULL_MEMORY);
-    BOX_ERROR_CLEAR;
+    ERROR_LOG_CLEAR;
 
     /* Reservation #1 */
     /* Result: [x][x][x][-][-][-][-][-][-][-] */
@@ -296,10 +296,10 @@ box_memory_chunk_test_basic()
  * Test memory chunk.
  */
 void
-box_memory_chunk_test()
+memory_chunk_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    box_memory_chunk_test_basic();
-    box_memory_chunk_test_advanced();
+    memory_chunk_test_basic();
+    memory_chunk_test_advanced();
     printf("\r\n\r\n");
 }

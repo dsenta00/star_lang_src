@@ -32,11 +32,9 @@
 entity *
 entity_repository::find(const std::function<bool(entity *)> &func)
 {
-    for (auto it = this->entity_map.begin();
-         it != this->entity_map.end();
-         it++)
+    for (auto &it : this->entity_map)
     {
-        for (const auto &ep : it->second)
+        for (const auto &ep : it.second)
         {
             entity *e = ep.get();
 
@@ -142,11 +140,9 @@ entity_repository::change_id(entity *e, std::string &new_id)
 void
 entity_repository::sweep()
 {
-    for (auto it = this->entity_map.begin();
-         it != this->entity_map.end();
-         it++)
+    for (auto &it : this->entity_map)
     {
-        auto &entities = it->second;
+        auto &entities = it.second;
 
         while (true)
         {
@@ -179,7 +175,7 @@ entity_repository::get(std::string &id)
     }
 
     auto &entities = this->entity_map[id];
-    return (entities.size() > 0) ? entities[0].get() : nullptr;
+    return !entities.empty() ? entities[0].get() : nullptr;
 }
 
 /**
@@ -187,11 +183,9 @@ entity_repository::get(std::string &id)
  */
 entity_repository::~entity_repository()
 {
-    for (auto it = this->entity_map.begin();
-         it != this->entity_map.end();
-         it++)
+    for (auto &it : this->entity_map)
     {
-        auto &entities = it->second;
+        auto &entities = it.second;
 
         while (!entities.empty())
         {

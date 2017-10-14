@@ -20,35 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_METHOD_H
-#define BOX_METHOD_H
+#ifndef ERROR_LOG_H
+#define ERROR_LOG_H
 
-#include "ORM/entity.h"
-#include "box_data_type.h"
-#include "box_fw.h"
+#include "error_info.h"
 
-typedef enum {
-    INSTRUCTION_OK,
-    INSTRUCTION_ERROR,
-    INSTRUCTION_FINISHED
-} instruction_result;
+void error_log_add(const char *func, error_status status);
+bool error_log_is_empty();
+error_status error_log_last_error();
+const char *error_log_last_error_string();
+void error_log_clear();
 
-/**
- * @brief The box_method class
- */
-class box_method : public entity {
-protected:
-    entity *result;
-    std::map<std::string, entity *> local_objects;
-    std::vector<entity *> stack;
-    instruction *current_instruction;
-public:
-    box_method(std::string id, std::vector<instruction *> &instructions);
-    instruction_result execute_next();
-    void add_local_object(entity *e);
-    entity *get_local_object(std::string id);
-    void push_stack(entity *e);
-    entity *pop_stack();
-};
+#define ERROR_LOG_ADD(__stat) (error_log_add(__func__, __stat))
+#define ERROR_LOG_IS_EMPTY (error_log_is_empty())
+#define ERROR_LOG_LAST_ERROR (error_log_last_error())
+#define ERROR_LOG_LAST_ERROR_STRING (error_log_last_error_string())
+#define ERROR_LOG_CLEAR (error_log_clear())
 
-#endif // BOX_METHOD_H
+#endif // ERROR_LOG_H

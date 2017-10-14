@@ -20,12 +20,11 @@
  * THE SOFTWARE.
  */
 
-#include "box_memory_chunk_if.h"
+#include "memory_chunk_if.h"
 #include "memory.h"
 #include "ORM/relationship.h"
-#include "ORM/orm.h"
 
-memory_chunk_if::memory_chunk_if() : entity::entity("box_memory_chunk", "chunk")
+memory_chunk_if::memory_chunk_if() : entity::entity("memory_chunk_relationship", "chunk")
 {
     entity::master_relationship_add("free_memory", ONE_TO_MANY);
     entity::master_relationship_add("reserved_memory", ONE_TO_MANY);

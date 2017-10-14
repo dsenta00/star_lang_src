@@ -20,13 +20,13 @@
  * THE SOFTWARE.
  */
 
-#include "box_method.h"
+#include "method.h"
 #include "ORM/relationship.h"
-#include "box_monitor.h"
-#include "box_instruction.h"
+#include "error_log.h"
+#include "instruction.h"
 
-box_method::box_method(std::string id,
-                       std::vector<instruction *> &instructions) : entity::entity("box_method", id)
+method::method(std::string id,
+                       std::vector<instruction *> &instructions) : entity::entity("method", id)
 {
     /*
      * - variable
@@ -45,7 +45,7 @@ box_method::box_method(std::string id,
     for (instruction *i : instructions)
     {
         r->add_entity(i);
-        i->master_relationship_add_entity("box_method", (entity *) this);
+        i->master_relationship_add_entity("method", (entity *) this);
     }
 
     this->current_instruction = instructions[0];
@@ -53,11 +53,11 @@ box_method::box_method(std::string id,
 
 
 instruction_result
-box_method::execute_next()
+method::execute_next()
 {
     this->current_instruction = this->current_instruction->execute();
 
-    if (!BOX_OK)
+    if (!ERROR_LOG_IS_EMPTY)
     {
         return INSTRUCTION_ERROR;
     }
@@ -71,11 +71,11 @@ box_method::execute_next()
 }
 
 void
-box_method::add_local_object(entity *e)
+method::add_local_object(entity *e)
 {
     if (this->local_objects[e->get_id()])
     {
-        BOX_ERROR(ERROR_BOX_METHOD_ADD_OBJECTS_OF_SAME_NAME);
+        ERROR_LOG_ADD(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
         return;
     }
 
@@ -90,19 +90,19 @@ box_method::add_local_object(entity *e)
 }
 
 entity *
-box_method::get_local_object(std::string id)
+method::get_local_object(std::string id)
 {
     return this->local_objects[id];
 }
 
 void
-box_method::push_stack(entity *e)
+method::push_stack(entity *e)
 {
     this->stack.push_back(e);
 }
 
 entity *
-box_method::pop_stack()
+method::pop_stack()
 {
     entity *e = this->stack.back();
     this->stack.pop_back();

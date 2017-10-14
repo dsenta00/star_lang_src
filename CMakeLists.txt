@@ -32,19 +32,19 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(include/)
 
 set(INCLUDE_FILES
-        include/box_array.h
-        include/box_assert.h
-        include/box_data.h
-        include/box_data_test.h
-        include/box_data_type.h
-        include/box_error.h
-        include/box_fw.h
-        include/box_instruction.h
-        include/box_memory_chunk.h
-        include/box_memory_chunk_if.h
-        include/box_method.h
-        include/box_monitor.h
-        include/box_virtual_memory.h
+        include/collection.h
+        tests/test_assert.h
+        include/primitive_data.h
+        tests/primitive_data_test.h
+        include/data_type.h
+        include/error_info.h
+        include/fw_decl.h
+        include/instruction.h
+        include/memory_chunk.h
+        include/memory_chunk_if.h
+        include/method.h
+        include/error_log.h
+        include/virtual_memory.h
         include/memory.h
         include/ORM/entity.h
         include/ORM/entity_repository.h
@@ -55,17 +55,17 @@ set(INCLUDE_FILES
         include/ORM/relationship_type.h)
 
 set(SOURCE_FILES
-        source/box_array.cpp
-        source/box_assert.cpp
-        source/box_data.cpp
-        source/box_data_type.cpp
-        source/box_error.cpp
-        source/box_instruction.cpp
-        source/box_memory_chunk.cpp
-        source/box_memory_chunk_if.cpp
-        source/box_method.cpp
-        source/box_monitor.cpp
-        source/box_virtual_memory.cpp
+        source/collection.cpp
+        tests/test_assert.cpp
+        source/primitive_data.cpp
+        source/data_type.cpp
+        source/error_info.cpp
+        source/instruction.cpp
+        source/memory_chunk.cpp
+        source/memory_chunk_if.cpp
+        source/method.cpp
+        source/error_log.cpp
+        source/virtual_memory.cpp
         source/main.cpp
         source/memory.cpp
         source/ORM/entity.cpp
@@ -81,13 +81,13 @@ set(SOURCE_FILES
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
 
 set(TEST_FILES
-        tests/box_array_test.cpp
-        tests/box_array_test.h
-        tests/box_data_test.cpp
-        tests/box_memory_chunk_test.cpp
-        tests/box_memory_chunk_test.h
-        tests/box_virtual_memory_test.cpp
-        tests/box_virtual_memory_test.h
+        tests/collection_test.cpp
+        tests/collection_test.h
+        tests/primitive_data_test.cpp
+        tests/memory_chunk_test.cpp
+        tests/memory_chunk_test.h
+        tests/virtual_memory_test.cpp
+        tests/virtual_memory_test.h
         tests/test.cpp
         tests/test.h)
 

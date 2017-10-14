@@ -20,37 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_DATA_TYPE_CPP
-#define BOX_DATA_TYPE_CPP
+#ifndef FW_DECL_H
+#define FW_DECL_H
 
-#include "box_data_type.h"
+class memory;
 
-box_data_type get_from_token(std::string &str)
-{
-    if (str == "bool")
-    {
-        return BOX_DATA_BOOL;
-    }
-    else if (str == "char")
-    {
-        return BOX_DATA_CHAR;
-    }
-    else if (str == "int")
-    {
-        return BOX_DATA_INT;
-    }
-    else if (str == "float")
-    {
-        return BOX_DATA_FLOAT;
-    }
-    else if (str == "string")
-    {
-        return BOX_DATA_STRING;
-    }
-    else
-    {
-        return BOX_DATA_INVALID;
-    }
-}
+class memory_chunk;
 
-#endif // BOX_DATA_TYPE_CPP
+class virtual_memory;
+
+class primitive_data;
+
+class collection;
+
+class instruction;
+
+class method;
+
+#endif // FW_DECL_H

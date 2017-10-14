@@ -20,47 +20,47 @@
  * THE SOFTWARE.
  */
 
-#include "box_error.h"
+#include "error_info.h"
 #include <cstdio>
 
-#define BOX_DATA_STRING_LENGTH (128)
+#define ERROR_INFO_STRING_LENGTH (128)
 
-static const char *box_status_string[BOX_DATA_STRING_LENGTH] =
+static const char *error_info_string[ERROR_INFO_STRING_LENGTH] =
     {
-        "BOX_STATUS_OK",
+        "STATUS_OK",
 
-        "ERROR_BOX_INSTRUCTION_OBJECT_DOES_NOT_EXIST",
-        "ERROR_BOX_INSTRUCTION_UNKNOWN",
-        "ERROR_BOX_INSTRUCTION_INVALID_NO_OF_ARGS",
-        "ERROR_BOX_INSTRUCTION_UNKNOWN_CONSTANT_FORMAT",
-        "ERROR_BOX_INSTRUCTION_NO_MATCH_CONSTANT_FORMAT_WITH_DATA_TYPE",
+        "ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST",
+        "ERROR_INSTRUCTION_UNKNOWN",
+        "ERROR_INSTRUCTION_INVALID_NO_OF_ARGS",
+        "ERROR_INSTRUCTION_UNKNOWN_CONSTANT_FORMAT",
+        "ERROR_INSTRUCTION_NO_MATCH_CONSTANT_FORMAT_WITH_DATA_TYPE",
 
-        "ERROR_BOX_METHOD_ADD_OBJECTS_OF_SAME_NAME",
+        "ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME",
 
-        "ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE",
+        "ERROR_RELATIONSHIP_ADDING_MORE_THAN_ONE",
 
-        "ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP",
+        "ERROR_ENTITY_UNKNOWN_RELATIONSHIP",
 
-        "ERROR_BOX_DATA_INVALID_DATA_TYPE",
-        "ERROR_BOX_DATA_NULL_DATA",
-        "ERROR_BOX_DATA_ASSIGNING_STRING",
-        "ERROR_BOX_DATA_ADDING_STRING",
-        "ERROR_BOX_DATA_SUBTRACTING_STRING",
-        "ERROR_BOX_DATA_LOGICAL_OPERATION_STRING",
-        "ERROR_BOX_DATA_LOGICAL_OPERATION_FLOAT",
-        "ERROR_BOX_DATA_MULTIPLYING_STRING",
-        "ERROR_BOX_DATA_INCREMENTING_STRING",
-        "ERROR_BOX_DATA_DECREMENTING_STRING",
-        "ERROR_BOX_DATA_DIVIDING_STRING",
-        "ERROR_BOX_DATA_DIVIDING_ZERO",
-        "ERROR_BOX_DATA_INVALID_MODULUS",
-        "ERROR_BOX_DATA_MODULUS_ZERO",
+        "ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE",
+        "ERROR_PRIMITIVE_DATA_NULL_DATA",
+        "ERROR_PRIMITIVE_DATA_ASSIGNING_STRING",
+        "ERROR_PRIMITIVE_DATA_ADDING_STRING",
+        "ERROR_PRIMITIVE_DATA_SUBTRACTING_STRING",
+        "ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_STRING",
+        "ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_FLOAT",
+        "ERROR_PRIMITIVE_DATA_MULTIPLYING_STRING",
+        "ERROR_PRIMITIVE_DATA_INCREMENTING_STRING",
+        "ERROR_PRIMITIVE_DATA_DECREMENTING_STRING",
+        "ERROR_PRIMITIVE_DATA_DIVIDING_STRING",
+        "ERROR_PRIMITIVE_DATA_DIVIDING_ZERO",
+        "ERROR_PRIMITIVE_DATA_INVALID_MODULUS",
+        "ERROR_PRIMITIVE_DATA_MODULUS_ZERO",
 
-        "ERROR_BOX_ARRAY_ADDING_NULL_DATA",
+        "ERROR_METHOD_ADDING_NULL_DATA",
 
-        "ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_CHUNK",
-        "ERROR_BOX_VIRTUAL_MEMORY_ZERO_CAPACITY",
-        "ERROR_BOX_VIRTUAL_MEMORY_UNKNOWN_FAULT"
+        "ERROR_VIRTUAL_MEMORY_UNKNOWN_CHUNK",
+        "ERROR_VIRTUAL_MEMORY_ZERO_CAPACITY",
+        "ERROR_VIRTUAL_MEMORY_UNKNOWN_FAULT"
     };
 
 /**
@@ -69,7 +69,7 @@ static const char *box_status_string[BOX_DATA_STRING_LENGTH] =
  * @param status - fault status
  * @param func - function name where fault occurs.
  */
-box_error::box_error(box_status status, const char *func)
+error_info::error_info(error_status status, const char *func)
 {
     this->status = status;
     this->func = func;
@@ -83,7 +83,7 @@ box_error::box_error(box_status status, const char *func)
  * @return true if same, otherwise return false.
  */
 bool
-box_error::operator==(box_error &another_error)
+error_info::operator==(error_info &another_error)
 {
     return this->status == another_error.status;
 }
@@ -92,10 +92,10 @@ box_error::operator==(box_error &another_error)
  * Print error information.
  */
 void
-box_error::print()
+error_info::print()
 {
-    printf("[BOX_ERROR] -> %s, %s()\r\n",
-           box_status_string[this->status],
+    printf("[ERROR] -> %s, %s()\r\n",
+           error_info_string[this->status],
            this->func);
 }
 
@@ -105,9 +105,9 @@ box_error::print()
  * @return status in string format.
  */
 const char *
-box_error::get_status_str()
+error_info::get_status_str()
 {
-    return box_status_string[this->status];
+    return error_info_string[this->status];
 }
 
 /**
@@ -115,8 +115,8 @@ box_error::get_status_str()
  *
  * @return status.
  */
-box_status
-box_error::get_status()
+error_status
+error_info::get_status()
 {
     return this->status;
 }
