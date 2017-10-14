@@ -20,9 +20,37 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_VIRTUAL_MEMORY_TEST_H
-#define BOX_VIRTUAL_MEMORY_TEST_H
+#ifndef BOX_DATA_TYPE_CPP
+#define BOX_DATA_TYPE_CPP
 
-void box_virtual_memory_test();
+#include "data_type.h"
 
-#endif // BOX_VIRTUAL_MEMORY_TEST_H
+data_type get_from_token(std::string &str)
+{
+    if (str == "bool")
+    {
+        return DATA_TYPE_BOOL;
+    }
+    else if (str == "char")
+    {
+        return DATA_TYPE_CHAR;
+    }
+    else if (str == "int")
+    {
+        return DATA_TYPE_INT;
+    }
+    else if (str == "float")
+    {
+        return DATA_TYPE_FLOAT;
+    }
+    else if (str == "string")
+    {
+        return DATA_TYPE_STRING;
+    }
+    else
+    {
+        return DATA_TYPE_INVALID;
+    }
+}
+
+#endif // BOX_DATA_TYPE_CPP

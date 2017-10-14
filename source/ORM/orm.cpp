@@ -20,6 +20,8 @@
  * THE SOFTWARE.
  */
 
+#include <utility>
+
 #include "ORM/orm.h"
 #include "ORM/entity.h"
 
@@ -149,7 +151,7 @@ orm::sweep()
 entity *
 orm::select(std::string entity_type, std::function<bool(entity *)> where)
 {
-    entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
 
     if (!er)
     {
@@ -169,7 +171,7 @@ orm::select(std::string entity_type, std::function<bool(entity *)> where)
 entity *
 orm::select(std::string entity_type, std::string id)
 {
-    entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
 
     if (!er)
     {
@@ -188,7 +190,7 @@ orm::select(std::string entity_type, std::string id)
 entity *
 orm::get_first(std::string entity_type)
 {
-    entity_repository *er = orm::find_entity_repository(entity_type);
+    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
 
     if (!er)
     {

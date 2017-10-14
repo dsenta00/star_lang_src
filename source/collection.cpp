@@ -20,12 +20,12 @@
  * THE SOFTWARE.
  */
 
-#include "box_array.h"
-#include "box_data.h"
-#include "box_monitor.h"
+#include "collection.h"
+#include "primitive_data.h"
+#include "error_log.h"
 #include "ORM/relationship.h"
 #include "ORM/orm.h"
-#include "box_virtual_memory.h"
+#include "virtual_memory.h"
 
 /**
  * The constructor.
@@ -33,16 +33,16 @@
  * @param type - data type.
  * @param size - array size in members.
  */
-box_array::box_array(std::string id, box_array *array) : entity::entity("box_array", id)
+collection::collection(std::string id, collection *c) : entity::entity("collection", id)
 {
-    this->master_relationship_add("array", ONE_TO_MANY);
+    this->master_relationship_add("collection", ONE_TO_MANY);
 
-    if (array == nullptr)
+    if (c == nullptr)
     {
         return;
     }
 
-    (*this) += (entity *) array;
+    (*this) += (entity *) c;
 }
 
 /**
@@ -50,10 +50,10 @@ box_array::box_array(std::string id, box_array *array) : entity::entity("box_arr
  *
  * @return number of data.
  */
-uint16_t
-box_array::get_noof()
+uint32_t
+collection::get_number_of()
 {
-    return this->array.size();
+    return static_cast<uint32_t>(this->data_cache.size());
 }
 
 /**
@@ -63,7 +63,7 @@ box_array::get_noof()
  * @return data of found, otherwise return NULL.
  */
 entity *
-box_array::operator[](uint32_t index)
+collection::operator[](uint32_t index)
 {
     return (*this)[std::to_string(index)];
 }
@@ -75,30 +75,30 @@ box_array::operator[](uint32_t index)
  * @return data of found, otherwise return NULL.
  */
 entity *
-box_array::operator[](std::string index)
+collection::operator[](std::string index)
 {
-    return this->array[index];
+    return this->data_cache[index];
 }
 
 /**
- * @brief box_array::insert_entity
+ * @brief collection::insert
  * @param index
  * @param e
  */
 void
-box_array::insert(std::string index, entity *e)
+collection::insert(std::string index, entity *e)
 {
     this->remove_data(index);
     this->insert_data(index, e);
 }
 
 /**
- * @brief box_array::insert_entity
+ * @brief collection::insert
  * @param index
  * @param e
  */
 void
-box_array::insert(uint32_t index, entity *e)
+collection::insert(uint32_t index, entity *e)
 {
     this->insert(std::to_string(index), e);
 }
@@ -110,24 +110,24 @@ box_array::insert(uint32_t index, entity *e)
  * @return true if operation success, otherwise return false.
  */
 bool
-box_array::operator+=(entity *e)
+collection::operator+=(entity *e)
 {
-    this->insert_data(std::to_string(this->get_noof()), e);
+    this->insert_data(std::to_string(this->get_number_of()), e);
     return true;
 }
 
 /**
- * Convert array into string.
+ * Convert collection into string.
  *
- * @return the box data string.
+ * @return the data string.
  */
-box_data &
-box_array::to_string()
+primitive_data &
+collection::to_string()
 {
-    box_data &str = *box_data::create(this->id.append(" as string"),
-                                      BOX_DATA_STRING);
+    primitive_data &str = *primitive_data::create(this->id.append(" as string"),
+                                                  DATA_TYPE_STRING);
 
-    relationship *r = this->master_relationship_get("array");
+    relationship *r = this->master_relationship_get("collection");
 
     if (!r)
     {
@@ -135,18 +135,18 @@ box_array::to_string()
     }
 
     char ch = ' ';
-    box_data &separator_char = *box_data::create("<<temp_char>>",
-                                                 BOX_DATA_CHAR,
-                                                 (const void *) &ch);
+    primitive_data &separator_char = *primitive_data::create("<<temp_char>>",
+                                                             DATA_TYPE_CHAR,
+                                                             (const void *) &ch);
 
 
     r->for_each([&](entity *e) {
-        if (e->get_entity_type() == "box_data")
+        if (e->get_entity_type() == "primitive_data")
         {
-            box_data *data = (box_data *) e;
+            auto *data = (primitive_data *) e;
             str += *data;
 
-            if (!BOX_OK)
+            if (!ERROR_LOG_IS_EMPTY)
             {
                 str.default_value();
                 return;
@@ -157,12 +157,12 @@ box_array::to_string()
                 str += separator_char;
             }
         }
-        else if (e->get_entity_type() == "box_array")
+        else if (e->get_entity_type() == "collection")
         {
-            box_array *data = (box_array *) e;
+            auto *data = (collection *) e;
             str += data->to_string();
 
-            if (!BOX_OK)
+            if (!ERROR_LOG_IS_EMPTY)
             {
                 str.default_value();
                 return;
@@ -175,73 +175,88 @@ box_array::to_string()
         }
     });
 
-    box_virtual_memory *vm = (box_virtual_memory *) orm::get_first("box_virtual_memory");
+    virtual_memory *vm = (virtual_memory *) orm::get_first("virtual_memory");
     vm->free(separator_char.get_memory());
     orm::destroy(&separator_char);
 
     return str;
 }
 
+/**
+ * Clear collection.
+ */
 void
-box_array::clear()
+collection::clear()
 {
-    relationship *r = this->master_relationship_get("array");
+    relationship *r = this->master_relationship_get("collection");
 
     while (r->num_of_entities())
     {
         this->remove_data(r->front());
     }
 
-    this->array.clear();
+    this->data_cache.clear();
 }
 
+/**
+ * Remove data from index.
+ *
+ * @param index
+ */
 void
-box_array::remove_data(std::string index)
+collection::remove_data(std::string index)
 {
-    this->remove_data(this->array[index]);
+    this->remove_data(this->data_cache[index]);
 }
 
+/**
+ * Remove data.
+ *
+ * @param e
+ */
 void
-box_array::remove_data(entity *e)
+collection::remove_data(entity *e)
 {
     if (!e)
     {
         return;
     }
 
-    this->master_relationship_remove_entity("array", e);
-    this->array.erase(e->get_id());
+    this->master_relationship_remove_entity("collection", e);
+    this->data_cache.erase(e->get_id());
 }
 
 /**
- * @brief box_array::add_data
- * @param data
+ * @brief collection::insert_data
+ * @param index
+ * @param e
  */
 void
-box_array::insert_data(std::string index, entity *e)
+collection::insert_data(std::string index, entity *e)
 {
     if (e == nullptr)
     {
-        BOX_ERROR(ERROR_BOX_ARRAY_ADDING_NULL_DATA);
+        ERROR_LOG_ADD(ERROR_METHOD_ADDING_NULL_DATA);
+        return;
     }
 
-    if (e->get_entity_type() == "box_data")
+    if (e->get_entity_type() == "primitive_data")
     {
         /*
          * Data is not a reference. Create a new data.
          */
-        entity *new_data = box_data::create(index, *(box_data *) e);
+        entity *new_data = primitive_data::create(index, *(primitive_data *) e);
         e = new_data;
     }
 
-    this->master_relationship_add_entity("array", e);
-    this->array[index] = e;
+    this->master_relationship_add_entity("collection", e);
+    this->data_cache[index] = e;
 }
 
 /**
- * @brief box_array::~box_array
+ * @brief collection::~collection()
  */
-box_array::~box_array()
+collection::~collection()
 {
     this->clear();
 }
@@ -249,11 +264,11 @@ box_array::~box_array()
 /**
  * @brief create
  * @param id
- * @param array
+ * @param c
  * @return
  */
-box_array *
-box_array::create(std::string id, box_array *array)
+collection *
+collection::create(std::string id, collection *c)
 {
-    return (box_array *) orm::create((entity *) new box_array(id, array));
+    return (collection *) orm::create((entity *) new collection(std::move(id), c));
 }

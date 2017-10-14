@@ -20,9 +20,35 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_ARRAY_TEST_H
-#define BOX_ARRAY_TEST_H
+#ifndef COLLECTION_H
+#define COLLECTION_H
 
-void box_array_test();
+#include "ORM/entity.h"
+#include "data_type.h"
+#include "fw_decl.h"
+#include <string>
 
-#endif // BOX_ARRAY_TEST_H
+/**
+ * Represents data collection.
+ */
+class collection : public entity {
+public:
+    explicit collection(std::string id, collection *c = nullptr);
+    uint32_t get_number_of();
+    entity *operator[](uint32_t index);
+    entity *operator[](std::string index);
+    void insert(std::string index, entity *e);
+    void insert(uint32_t index, entity *e);
+    bool operator+=(entity *e);
+    primitive_data &to_string();
+    void clear();
+    ~collection() override;
+    static collection *create(std::string id, collection *c = nullptr);
+protected:
+    void remove_data(std::string index);
+    void remove_data(entity *e);
+    void insert_data(std::string index, entity *e);
+    std::map<std::string, entity *> data_cache;
+};
+
+#endif // COLLECTION_H

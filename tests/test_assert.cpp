@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-#include "box_assert.h"
+#include "test_assert.h"
 
 /**
  * Check if statement is true.

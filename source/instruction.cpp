@@ -20,19 +20,19 @@
  * THE SOFTWARE.
  */
 
-#include "box_instruction.h"
+#include "instruction.h"
 #include "ORM/relationship.h"
-#include "box_method.h"
-#include "box_data.h"
-#include "box_array.h"
-#include "box_monitor.h"
+#include "method.h"
+#include "primitive_data.h"
+#include "collection.h"
+#include "error_log.h"
 #include <regex>
 
-instruction::instruction(box_op_code op_code,
+instruction::instruction(op_code op,
                          instruction *next_instruction,
                          instruction *branch_result_false) : entity::entity("instruction", 0)
 {
-    this->op_code = op_code;
+    this->op = op;
 
     this->master_relationship_add("next_instruction", ONE_TO_ONE);
     this->master_relationship_add("branch", ONE_TO_ONE);
@@ -51,10 +51,10 @@ instruction::instruction(box_op_code op_code,
     }
 }
 
-box_op_code &
+op_code &
 instruction::get_op_code()
 {
-    return this->op_code;
+    return this->op;
 }
 
 /**
@@ -65,11 +65,11 @@ instruction::create()
 {
     if (this->arg.size() != 2)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_INVALID_NO_OF_ARGS);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_INVALID_NO_OF_ARGS);
         return;
     }
 
-    auto method = (box_method *) this->slave_relationship_get("method_instructions")->front();
+    auto m = (method *) this->slave_relationship_get("method_instructions")->front();
 
     auto &name = this->arg[0];
     auto &type = this->arg[1];
@@ -78,11 +78,11 @@ instruction::create()
 
     if (type == "array")
     {
-        data = box_array::create(name);
+        data = collection::create(name);
     }
     else
     {
-        data = box_data::create(name, get_from_token(type));
+        data = primitive_data::create(name, get_from_token(type));
     }
 
     if (!data)
@@ -90,7 +90,7 @@ instruction::create()
         return;
     }
 
-    method->add_local_object(data);
+    m->add_local_object(data);
 }
 
 /**
@@ -101,11 +101,11 @@ instruction::create_and_assign_constant()
 {
     if (this->arg.size() != 3)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_INVALID_NO_OF_ARGS);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_INVALID_NO_OF_ARGS);
         return;
     }
 
-    auto method = (box_method *) this->slave_relationship_get("method_instructions")->front();
+    auto m = (method *) this->slave_relationship_get("method_instructions")->front();
 
     auto &name = this->arg[0];
     auto &type = this->arg[1];
@@ -113,9 +113,9 @@ instruction::create_and_assign_constant()
 
     auto const_data_type = this->detect_data_type(constant);
 
-    if (const_data_type == BOX_DATA_INVALID)
+    if (const_data_type == DATA_TYPE_INVALID)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_UNKNOWN_CONSTANT_FORMAT);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_UNKNOWN_CONSTANT_FORMAT);
         return;
     }
 
@@ -125,13 +125,13 @@ instruction::create_and_assign_constant()
     {
         this->clean_constant_format(constant, const_data_type);
 
-        auto constant_data = box_data::create(
+        auto constant_data = primitive_data::create(
             name.append(":constant"),
             const_data_type,
             constant.c_str()
         );
 
-        auto &array = *box_array::create(name);
+        auto &array = *collection::create(name);
         array += constant_data;
         data = &array;
     }
@@ -141,18 +141,18 @@ instruction::create_and_assign_constant()
 
         if (const_data_type != actual_data_type)
         {
-            BOX_ERROR(ERROR_BOX_INSTRUCTION_NO_MATCH_CONSTANT_FORMAT_WITH_DATA_TYPE);
+            ERROR_LOG_ADD(ERROR_INSTRUCTION_NO_MATCH_CONSTANT_FORMAT_WITH_DATA_TYPE);
             return;
         }
 
         this->clean_constant_format(constant, const_data_type);
 
-        data = box_data::create(name,
-                                actual_data_type,
-                                constant.c_str());
+        data = primitive_data::create(name,
+                                      actual_data_type,
+                                      constant.c_str());
     }
 
-    method->add_local_object(data);
+    m->add_local_object(data);
 }
 
 /**
@@ -163,35 +163,35 @@ instruction::create_and_assign_object()
 {
     if (this->arg.size() != 2)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_INVALID_NO_OF_ARGS);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_INVALID_NO_OF_ARGS);
         return;
     }
 
-    auto method = (box_method *) this->slave_relationship_get("method_instructions")->front();
+    auto m = (method *) this->slave_relationship_get("method_instructions")->front();
 
     auto &name = this->arg[0];
     auto &obj_name = this->arg[1];
 
-    auto object_to_assign = method->get_local_object(obj_name);
+    auto object_to_assign = m->get_local_object(obj_name);
 
     if (!object_to_assign)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
         return;
     }
 
     entity *object = nullptr;
 
-    if (object_to_assign->get_entity_type() == "box_data")
+    if (object_to_assign->get_entity_type() == "primitive_data")
     {
-        object = box_data::create(name, *(box_data *) object_to_assign);
+        object = primitive_data::create(name, *(primitive_data *) object_to_assign);
     }
-    else if (object_to_assign->get_entity_type() == "box_array")
+    else if (object_to_assign->get_entity_type() == "collection")
     {
-        object = box_array::create(name, (box_array *) object_to_assign);
+        object = collection::create(name, (collection *) object_to_assign);
     }
 
-    method->add_local_object(object);
+    m->add_local_object(object);
 }
 
 /**
@@ -200,20 +200,20 @@ instruction::create_and_assign_object()
 void
 instruction::pop_and_store()
 {
-    box_method *method = (box_method *) this->master_relationship_get("method_instructions")->front();
-    auto *data2 = (box_data *) method->pop_stack();
+    method *m = (method *) this->master_relationship_get("method_instructions")->front();
+    auto *data2 = (primitive_data *) m->pop_stack();
 
     if (!data2)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
         return;
     }
 
-    box_data *data = (box_data *) method->get_local_object(this->arg[0]);
+    primitive_data *data = (primitive_data *) m->get_local_object(this->arg[0]);
 
     if (!data)
     {
-        BOX_ERROR(ERROR_BOX_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
+        ERROR_LOG_ADD(ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
         return;
     }
 
@@ -228,7 +228,7 @@ instruction::pop_and_store()
 instruction *
 instruction::execute()
 {
-    switch (this->op_code)
+    switch (this->op)
     {
         case CREATE:
             this->create();
@@ -243,61 +243,61 @@ instruction::execute()
             this->pop_and_store();
             break;
         default:
-            BOX_ERROR(ERROR_BOX_INSTRUCTION_UNKNOWN);
+            ERROR_LOG_ADD(ERROR_INSTRUCTION_UNKNOWN);
             break;
     }
 
     return (instruction *) this->master_relationship_get("next_instruction")->front();
 }
 
-box_data_type
+data_type
 instruction::detect_data_type(std::string &sample)
 {
     if (std::regex_match(sample, std::regex("([-+]?[0-9]+)")))
     {
-        return BOX_DATA_INT;
+        return DATA_TYPE_INT;
     }
     else if (std::regex_match(sample, std::regex("[-+]?[0-9]*\\.?[0-9]*")))
     {
-        return BOX_DATA_FLOAT;
+        return DATA_TYPE_FLOAT;
     }
     else if (std::regex_match(sample, std::regex("\'[\\]?(.*)\'")))
     {
-        return BOX_DATA_CHAR;
+        return DATA_TYPE_CHAR;
     }
     else if (std::regex_match(sample, std::regex("\"(.*)\"")) or std::regex_match(sample, std::regex("\'(.*)+\'")))
     {
-        return BOX_DATA_STRING;
+        return DATA_TYPE_STRING;
     }
     else if (std::regex_match(sample, std::regex("true|false")))
     {
-        return BOX_DATA_BOOL;
+        return DATA_TYPE_BOOL;
     }
     else
     {
-        return BOX_DATA_INVALID;
+        return DATA_TYPE_INVALID;
     }
 }
 
 std::string
-instruction::clean_constant_format(std::string &sample, box_data_type type)
+instruction::clean_constant_format(std::string &sample, data_type type)
 {
     switch (type)
     {
-        case BOX_DATA_INT:
-        case BOX_DATA_FLOAT:
+        case DATA_TYPE_INT:
+        case DATA_TYPE_FLOAT:
             /*
              * nothing to do.
              */
             break;
-        case BOX_DATA_CHAR:
-        case BOX_DATA_STRING:
+        case DATA_TYPE_CHAR:
+        case DATA_TYPE_STRING:
         {
             sample.erase(sample.begin());
             sample.erase(sample.end());
             break;
         }
-        case BOX_DATA_BOOL:
+        case DATA_TYPE_BOOL:
         {
             sample.assign(1, (char) (sample == "true"));
             break;

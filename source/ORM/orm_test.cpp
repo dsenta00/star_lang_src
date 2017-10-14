@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#include "box_assert.h"
-#include "box_monitor.h"
+#include "../../tests/test_assert.h"
+#include "error_log.h"
 #include "ORM/entity.h"
 #include "ORM/relationship.h"
 #include "ORM/orm_test.h"
@@ -97,8 +97,8 @@ static void orm_test_basic()
     ASSERT_FALSE(c1->get_marked(), "get_marked should be false");
 
     c1->master_relationship_add_entity("konan", nullptr);
-    ASSERT_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
-    BOX_ERROR_CLEAR;
+    ASSERT_ERROR(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
+    ERROR_LOG_CLEAR;
 
     class2 *c2 = (class2 *) orm::create((entity *) new class2());
     c1->addClass2(c2);

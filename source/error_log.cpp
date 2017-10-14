@@ -20,29 +20,29 @@
  * THE SOFTWARE.
  */
 
-#include "box_monitor.h"
+#include "error_log.h"
 #include <queue>
 
 #define MAX_BOX_ERROR_QUEUE (32)
 
-typedef std::shared_ptr<box_error> box_error_p;
-static std::queue<box_error_p> box_error_queue;
+typedef std::shared_ptr<error_info> error_info_p;
+static std::queue<error_info_p> error_queue;
 
 /**
  * Add error.
  *
  * @param func - function name where error occurs.
- * @param status - box status.
+ * @param status - error status.
  */
 void
-box_monitor_add_error(const char *func, box_status status)
+error_log_add(const char *func, error_status status)
 {
-    if (box_error_queue.size() >= MAX_BOX_ERROR_QUEUE)
+    if (error_queue.size() >= MAX_BOX_ERROR_QUEUE)
     {
-        box_error_queue.pop();
+        error_queue.pop();
     }
 
-    box_error_queue.push(box_error_p(new box_error(status, func)));
+    error_queue.push(error_info_p(new error_info(status, func)));
 }
 
 /**
@@ -51,9 +51,9 @@ box_monitor_add_error(const char *func, box_status status)
  * @return true if okay, otherwise false.
  */
 bool
-box_monitor_ok()
+error_log_is_empty()
 {
-    return box_error_queue.empty();
+    return error_queue.empty();
 }
 
 /**
@@ -61,12 +61,12 @@ box_monitor_ok()
  *
  * @return last error if exist otherwise return BOX_STATUS_OK.
  */
-box_status
-box_monitor_last_error()
+error_status
+error_log_last_error()
 {
-    return box_monitor_ok() ?
-           BOX_STATUS_OK :
-           box_error_queue.back().get()->get_status();
+    return error_log_is_empty() ?
+           STATUS_OK :
+           error_queue.back()->get_status();
 }
 
 /**
@@ -75,22 +75,22 @@ box_monitor_last_error()
  * @return last error string if exist otherwise return "BOX_STATUS_OK".
  */
 const char *
-box_monitor_last_error_string()
+error_log_last_error_string()
 {
-    return box_monitor_ok() ?
-           "BOX_STATUS_OK" :
-           box_error_queue.back().get()->get_status_str();
+    return error_log_is_empty() ?
+           "STATUS_OK" :
+           error_queue.back()->get_status_str();
 }
 
 /**
  * Clear monitor error log.
  */
 void
-box_monitor_clear()
+error_log_clear()
 {
-    while (!box_error_queue.empty())
+    while (!error_queue.empty())
     {
-        box_error_queue.pop();
+        error_queue.pop();
     }
 }
 

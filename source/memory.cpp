@@ -162,7 +162,7 @@ memory::assign(uintptr_t address,
 bool
 memory::ready_to_remove()
 {
-    auto r = this->slave_relationship_get("box_data_memory");
+    auto r = this->slave_relationship_get("primitive_data_memory");
 
     if (!r)
     {

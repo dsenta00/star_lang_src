@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_MEMORY_CHUNK_TEST_H
-#define BOX_MEMORY_CHUNK_TEST_H
+#ifndef MEMORY_CHUNK_TEST_H
+#define MEMORY_CHUNK_TEST_H
 
-void box_memory_chunk_test();
+void memory_chunk_test();
 
-#endif // BOX_MEMORY_CHUNK_TEST_H
+#endif // MEMORY_CHUNK_TEST_H

@@ -23,7 +23,7 @@
 #include "ORM/entity.h"
 #include "ORM/relationship.h"
 #include <sstream>
-#include "box_monitor.h"
+#include "error_log.h"
 
 /**
  * The constructor.
@@ -34,7 +34,7 @@
 entity::entity(std::string type, const uint64_t id)
 {
     this->marked = false;
-    this->type = type;
+    this->type = std::move(type);
     this->id = std::to_string(id);
 }
 
@@ -47,8 +47,8 @@ entity::entity(std::string type, const uint64_t id)
 entity::entity(std::string type, std::string id)
 {
     this->marked = false;
-    this->type = type;
-    this->id = id;
+    this->type = std::move(type);
+    this->id = std::move(id);
 }
 
 /**
@@ -96,11 +96,9 @@ entity::master_relationship_add(std::string relationship_name,
 void
 entity::master_relationships_clear_entities()
 {
-    for (auto it = this->master_relationships.begin();
-         it != this->master_relationships.end();
-         it++)
+    for (auto &master_relationship : this->master_relationships)
     {
-        relationship *r = (*it).second.get();
+        relationship *r = master_relationship.second.get();
 
         while (r->num_of_entities())
         {
@@ -142,9 +140,8 @@ entity::get_id()
 void
 entity::set_id(std::string new_id)
 {
-    this->id = new_id;
+    this->id = std::move(new_id);
 }
-
 
 /**
  * Get marked.
@@ -182,7 +179,7 @@ entity::master_relationship_add_entity(std::string relationship_name,
 
     if (!r)
     {
-        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
         return;
     }
 
@@ -213,7 +210,7 @@ void
 entity::master_relationship_remove_entity(std::string relationship_name,
                                           entity *e)
 {
-    relationship *r = this->master_relationship_get(relationship_name);
+    relationship *r = this->master_relationship_get(std::move(relationship_name));
 
     if (!r)
     {
@@ -237,11 +234,9 @@ entity::master_relationship_remove_entity(std::string relationship_name,
 bool
 entity::slave_relationship_have_relations()
 {
-    for (auto it = this->slave_relationships.begin();
-         it != this->slave_relationships.end();
-         it++)
+    for (auto &slave_relationship : this->slave_relationships)
     {
-        relationship *r = (*it).second.get();
+        relationship *r = slave_relationship.second.get();
 
         if (r->num_of_entities() > 0)
         {
@@ -263,7 +258,7 @@ void
 entity::slave_relationship_remove_entity(std::string relationship_name,
                                          entity *e)
 {
-    relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(std::move(relationship_name));
 
     if (!r)
     {
@@ -287,11 +282,11 @@ entity::slave_relationship_remove_entity(std::string relationship_name,
 entity *
 entity::master_relationship_back(std::string relationship_name)
 {
-    relationship *r = this->master_relationship_get(relationship_name);
+    relationship *r = this->master_relationship_get(std::move(relationship_name));
 
     if (!r)
     {
-        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
         return nullptr;
     }
 
@@ -306,11 +301,11 @@ entity::master_relationship_back(std::string relationship_name)
 entity *
 entity::slave_relationship_back(std::string relationship_name)
 {
-    relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(std::move(relationship_name));
 
     if (!r)
     {
-        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
         return nullptr;
     }
 
@@ -353,11 +348,11 @@ entity::slave_relationship_get(std::string relationship_name)
 void
 entity::slave_relationship_add_entity(std::string relationship_name, entity *e)
 {
-    relationship *r = this->slave_relationship_get(relationship_name);
+    relationship *r = this->slave_relationship_get(std::move(relationship_name));
 
     if (!r)
     {
-        BOX_ERROR(ERROR_BOX_ENTITY_UNKNOWN_RELATIONSHIP);
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
         return;
     }
 
@@ -367,11 +362,9 @@ entity::slave_relationship_add_entity(std::string relationship_name, entity *e)
 void
 entity::slave_relationship_notify_destroyed()
 {
-    for (auto it = this->slave_relationships.begin();
-         it != this->slave_relationships.end();
-         it++)
+    for (auto &slave_relationship : this->slave_relationships)
     {
-        relationship *r = (*it).second.get();
+        relationship *r = slave_relationship.second.get();
 
         while (r->num_of_entities())
         {

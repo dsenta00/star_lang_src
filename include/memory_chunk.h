@@ -23,7 +23,7 @@
 #ifndef BOX_MEMORY_CHUNK_H
 #define BOX_MEMORY_CHUNK_H
 
-#include "box_memory_chunk_if.h"
+#include "memory_chunk_if.h"
 #include <cstdint>
 #include <cstdlib>
 

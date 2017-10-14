@@ -20,9 +20,11 @@
  * THE SOFTWARE.
  */
 
+#include <utility>
+
 #include "ORM/relationship.h"
 #include "ORM/entity.h"
-#include "box_monitor.h"
+#include "error_log.h"
 
 /**
  * The constructor.
@@ -33,7 +35,7 @@
  */
 relationship::relationship(std::string relationship_name, relationship_type type)
 {
-    this->relationship_name = relationship_name;
+    this->relationship_name = std::move(relationship_name);
     this->type = type;
 }
 
@@ -69,6 +71,7 @@ entity *
 relationship::find(const std::function<bool(entity *)> &func)
 {
     auto it = std::find_if(this->entities.begin(), this->entities.end(), func);
+
     return (it != this->entities.end()) ? *it : nullptr;
 }
 
@@ -86,7 +89,7 @@ relationship::sort(const std::function<bool(entity *, entity *)> &func)
 /**
  * foreach two neighbour iterators.
  *
- * @param func - function to handle current interators.
+ * @param func - function to handle current iterators.
  */
 void
 relationship::for_each(const std::function<foreach_result(entity *, entity *)> &func)
@@ -147,9 +150,9 @@ relationship::add_entity(entity *e)
 {
     if (this->type == ONE_TO_ONE)
     {
-        if (this->entities.size() != 0)
+        if (!this->entities.empty())
         {
-            BOX_ERROR(ERROR_BOX_RELATIONSHIP_ADDING_MORE_THAN_ONE);
+            ERROR_LOG_ADD(ERROR_RELATIONSHIP_ADDING_MORE_THAN_ONE);
             return;
         }
     }

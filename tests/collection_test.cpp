@@ -20,15 +20,15 @@
  * THE SOFTWARE.
  */
 
-#include "box_array_test.h"
-#include "box_array.h"
-#include "box_assert.h"
-#include "box_virtual_memory.h"
-#include "box_monitor.h"
-#include "box_data.h"
+#include "collection_test.h"
+#include "collection.h"
+#include "test_assert.h"
+#include "virtual_memory.h"
+#include "error_log.h"
+#include "primitive_data.h"
 #include "ORM/orm.h"
 
-static box_virtual_memory *virtual_memory;
+static virtual_memory *vm;
 
 #define ARRAY_SIZE (10)
 
@@ -57,28 +57,28 @@ static const char *random_name(int32_t i = -1)
 }
 
 /**
- * Test array basics.
+ * Test collection basics.
  */
 static void
-box_array_test_basic()
+collection_test_basic()
 {
-    ASSERT_VIRTUAL_MEMORY(*virtual_memory, 0);
-    box_array &empty_array = *box_array::create("empty_array");
-    ASSERT_VIRTUAL_MEMORY(*virtual_memory, 0);
+    ASSERT_VIRTUAL_MEMORY(*vm, 0);
+    collection &empty_collection = *collection::create("empty_collection");
+    ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
     for (uint16_t i = 0; i < USHRT_MAX; i++)
     {
-        ASSERT_TRUE(empty_array[i] == nullptr,
+        ASSERT_TRUE(empty_collection[i] == nullptr,
                     "Returned reference should be NULL! (0x%X)",
-                    empty_array[i]);
+                    empty_collection[i]);
     }
 
-    box_data &str = empty_array.to_string();
+    primitive_data &str = empty_collection.to_string();
     ASSERT_TRUE(strcmp((const char *) str.get_address(),
                        "") == 0,
                 "Returned string should be empty! (%s)",
                 (const char *) str.get_address());
-    ASSERT_VIRTUAL_MEMORY(*virtual_memory, BOX_DATA_TYPE_SIZE[BOX_DATA_STRING]);
+    ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
 
     std::string comparision;
 
@@ -86,23 +86,23 @@ box_array_test_basic()
     {
         if (i % 2 == 0)
         {
-            box_data &data = *box_data::create("temp_name", BOX_DATA_STRING, random_name(i));
-            empty_array.insert(i, (entity *) &data);
+            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
+            empty_collection.insert(i, (entity *) &data);
             ASSERT_OK;
             comparision.append(random_name(i));
         }
         else if (i % 3 == 0)
         {
-            box_data &data = *box_data::create("temp_name", BOX_DATA_INT, (const void *) &i);
-            empty_array.insert(i, (entity *) &data);
+            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
+            empty_collection.insert(i, (entity *) &data);
             ASSERT_OK;
             comparision.append(std::to_string(i));
         }
         else
         {
             double fi = (double) i;
-            box_data &data = *box_data::create("temp_name", BOX_DATA_FLOAT, (const void *) &fi);
-            empty_array.insert(i, (entity *) &data);
+            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_FLOAT, (const void *) &fi);
+            empty_collection.insert(i, (entity *) &data);
             ASSERT_OK;
             comparision.append(std::to_string(fi));
         }
@@ -117,10 +117,10 @@ box_array_test_basic()
     {
         if (i % 2 == 0)
         {
-            box_data *data = (box_data *) empty_array[i];
+            auto *data = (primitive_data *) empty_collection[i];
 
-            ASSERT_TRUE(data->get_type() == BOX_DATA_STRING,
-                        "data should be BOX_DATA_STRING");
+            ASSERT_TRUE(data->get_type() == DATA_TYPE_STRING,
+                        "data should be DATA_TYPE_STRING");
 
             ASSERT_TRUE(strcmp((const char *) data->get_address(),
                                random_name(i)) == 0,
@@ -131,9 +131,9 @@ box_array_test_basic()
         }
         else if (i % 3 == 0)
         {
-            box_data *data = (box_data *) empty_array[i];
-            ASSERT_TRUE(data->get_type() == BOX_DATA_INT,
-                        "data should be BOX_DATA_INT");
+            auto *data = (primitive_data *) empty_collection[i];
+            ASSERT_TRUE(data->get_type() == DATA_TYPE_INT,
+                        "data should be DATA_TYPE_INT");
 
             ASSERT_TRUE(*(uint32_t *) data->get_address() == i,
                         "data should be %u (%u)",
@@ -144,11 +144,11 @@ box_array_test_basic()
         }
         else
         {
-            double fi = (double) i;
-            box_data *data = (box_data *) empty_array[i];
+            auto fi = (double) i;
+            auto *data = (primitive_data *) empty_collection[i];
 
-            ASSERT_TRUE(data->get_type() == BOX_DATA_FLOAT,
-                        "data should be BOX_DATA_FLOAT");
+            ASSERT_TRUE(data->get_type() == DATA_TYPE_FLOAT,
+                        "data should be DATA_TYPE_FLOAT");
 
             ASSERT_TRUE(*(double *) data->get_address() == fi,
                         "data should be %f (%f)",
@@ -159,32 +159,32 @@ box_array_test_basic()
         }
     }
 
-    box_data &str2 = empty_array.to_string();
+    primitive_data &str2 = empty_collection.to_string();
 
     ASSERT_TRUE(comparision.compare((const char *) str2.get_address()) == 0,
                 "they should be the same: expected %s, got %s",
                 comparision.c_str(),
                 (const char *) str2.get_address());
 
-    box_array &array = *box_array::create("array");
+    collection &c = *collection::create("array");
 
     for (uint32_t i = 0; i < ARRAY_SIZE; i++)
     {
         if (i % 2 == 0)
         {
-            box_data &data = *box_data::create("temp_name", BOX_DATA_STRING, random_name(i));
-            array.insert(i, (entity *) &data);
+            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
+            c.insert(i, (entity *) &data);
             ASSERT_OK;
         }
         else if (i % 3 == 0)
         {
-            box_data &data = *box_data::create("temp_name", BOX_DATA_INT, (const void *) &i);
-            array.insert(i, (entity *) &data);
+            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
+            c.insert(i, (entity *) &data);
             ASSERT_OK;
         }
         else
         {
-            array.insert(i, (entity *) &empty_array);
+            c.insert(i, (entity *) &empty_collection);
             ASSERT_OK;
         }
     }
@@ -193,9 +193,9 @@ box_array_test_basic()
     {
         if (i % 2 == 0)
         {
-            box_data *data = (box_data *) array[i];
+            auto *data = (primitive_data *) c[i];
             ASSERT_OK;
-            ASSERT_TRUE(data->get_type() == BOX_DATA_STRING, "data should be BOX_DATA_STRING");
+            ASSERT_TRUE(data->get_type() == DATA_TYPE_STRING, "data should be DATA_TYPE_STRING");
             ASSERT_TRUE(strcmp((const char *) data->get_address(),
                                random_name(i)) == 0,
                         "data should be %s (%s)",
@@ -204,9 +204,9 @@ box_array_test_basic()
         }
         else if (i % 3 == 0)
         {
-            box_data *data = (box_data *) array[i];
+            auto *data = (primitive_data *) c[i];
             ASSERT_OK;
-            ASSERT_TRUE(data->get_type() == BOX_DATA_INT, "data should be BOX_DATA_INT");
+            ASSERT_TRUE(data->get_type() == DATA_TYPE_INT, "data should be DATA_TYPE_INT");
             ASSERT_TRUE(*(uint32_t *) data->get_address() == i,
                         "data should be %u (%u)",
                         i,
@@ -214,29 +214,29 @@ box_array_test_basic()
         }
         else
         {
-            box_array *array_inside = (box_array *) array[i];
+            auto *collection_inside = (collection *) c[i];
             ASSERT_OK;
-            ASSERT_NOT_NULL(array_inside);
-            ASSERT_EQUALS(array_inside, &empty_array);
-            ASSERT_TRUE(array_inside == &empty_array, "data should be the same");
+            ASSERT_NOT_NULL(collection_inside);
+            ASSERT_EQUALS(collection_inside, &empty_collection);
+            ASSERT_TRUE(collection_inside == &empty_collection, "data should be the same");
         }
     }
 
-    orm::destroy(&array);
+    orm::destroy(&c);
 
     printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
- * Test BOX array.
+ * Test collection.
  */
 void
-box_array_test()
+collection_test()
 {
     printf("%s()\r\n", __FUNCTION__);
 
-    virtual_memory = (box_virtual_memory *) orm::get_first("box_virtual_memory");
-    BOX_TEST(box_array_test_basic());
+    vm = (virtual_memory *) orm::get_first("virtual_memory");
+    RUN_TEST(collection_test_basic());
 
     printf("\r\n\r\n");
 }
