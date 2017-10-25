@@ -954,6 +954,88 @@ void primitive_data_test_convert()
 }
 
 /**
+ * Test data references.
+ */
+void primitive_data_test_references()
+{
+    orm::remove_entity_repository("primitive_data");
+
+    /*
+     * Test two string
+     *
+     * string str_data = "35";
+     * string str_data2 = str_data;
+     *
+     * unset(str_data2);
+     */
+    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "35");
+    ASSERT_EQUALS(string_data.get_is_reference(), true);
+    primitive_data &string_data2 = *primitive_data::create("string_data2", string_data);
+    ASSERT_EQUALS(string_data2.get_is_reference(), true);
+    ASSERT_EQUALS(string_data.get_memory(), string_data2.get_memory());
+
+    ORM_DESTROY(&string_data2);
+
+    string_data.convert_itself(DATA_TYPE_INT);
+    ASSERT_EQUALS(*(int32_t *)string_data.get_address(), 35);
+    ASSERT_EQUALS(string_data.get_is_reference(), false);
+
+    for (int type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
+    {
+        /*
+         * type data = 0;
+         * type &data2 = data;
+         * type &data3 = data2;
+         *
+         * unset(data);
+         */
+        primitive_data &data = *primitive_data::create("data", (data_type) type);
+        ASSERT_EQUALS(data.get_is_reference(), false);
+
+        primitive_data &data2 = *primitive_data::create("data2", data, true);
+        ASSERT_EQUALS(data2.get_is_reference(), true);
+        ASSERT_EQUALS(data.get_memory(), data2.get_memory());
+
+        primitive_data &data3 = *primitive_data::create("data3", data, true);
+        ASSERT_EQUALS(data3.get_is_reference(), true);
+        ASSERT_EQUALS(data3.get_memory(), data2.get_memory());
+        ASSERT_EQUALS(data3.get_memory(), data.get_memory());
+
+        ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data"));
+        ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data2"));
+        ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data3"));
+
+        ORM_DESTROY(&data);
+
+        ASSERT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data"));
+        ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data2"));
+        ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "data3"));
+
+        ASSERT_EQUALS(data2.get_is_reference(), true);
+        ASSERT_EQUALS(data3.get_is_reference(), true);
+        ASSERT_EQUALS(data2.get_memory(), data2.get_memory());
+    }
+
+    for (int type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
+    {
+        /*
+         * data = 0;
+         * data2 = &data;
+         */
+        primitive_data &data = *primitive_data::create("data", (data_type) type);
+        ASSERT_EQUALS(data.get_is_reference(), false);
+
+        primitive_data &data2 = *primitive_data::create("data2", data, true);
+        ASSERT_EQUALS(data2.get_is_reference(), true);
+        ASSERT_EQUALS(data.get_memory(), data2.get_memory());
+
+        ORM_DESTROY(&data);
+    }
+
+    printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
  * Test primitive data class.
  */
 void primitive_data_test()
@@ -967,6 +1049,7 @@ void primitive_data_test()
     RUN_TEST(primitive_data_test_string());
     RUN_TEST(primitive_data_test_float());
     RUN_TEST(primitive_data_test_convert());
+    RUN_TEST(primitive_data_test_references());
 
     printf("\r\n\r\n");
 }

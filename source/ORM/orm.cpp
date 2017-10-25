@@ -134,11 +134,9 @@ orm::destroy(entity *e)
 void
 orm::sweep()
 {
-    for (auto it = repo.begin();
-         it != repo.end();
-         it++)
+    for (auto &it : repo)
     {
-        it->second->sweep();
+        it.second->sweep();
     }
 }
 

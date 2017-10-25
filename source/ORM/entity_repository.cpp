@@ -155,6 +155,7 @@ entity_repository::sweep()
                 break;
             }
 
+
             entities.erase(it2);
         }
     }

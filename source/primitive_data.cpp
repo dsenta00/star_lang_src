@@ -40,11 +40,13 @@ primitive_data::primitive_data(std::string id, data_type type, const void *value
     this->vm = (virtual_memory *) orm::get_first("virtual_memory");
     this->type = type;
 
-    if (type >= DATA_TYPE_INVALID)
+    if (this->type >= DATA_TYPE_INVALID)
     {
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
         return;
     }
+
+    this->is_reference = (this->type == DATA_TYPE_STRING);
 
     if (value == nullptr)
     {
@@ -84,7 +86,9 @@ primitive_data::primitive_data(std::string id, data_type type, const void *value
  * @param id
  * @param data
  */
-primitive_data::primitive_data(std::string id, primitive_data &data) : entity::entity("primitive_data", std::move(id))
+primitive_data::primitive_data(std::string id,
+                               primitive_data &data,
+                               bool is_reference) : entity::entity("primitive_data", std::move(id))
 {
     this->master_relationship_add("primitive_data_memory", ONE_TO_MANY);
 
@@ -104,13 +108,20 @@ primitive_data::primitive_data(std::string id, primitive_data &data) : entity::e
 
     this->type = data.type;
     this->vm = data.vm;
+    this->is_reference = (this->type == DATA_TYPE_STRING) || is_reference;
+
+    if (this->is_reference)
+    {
+        this->master_relationship_add_entity("primitive_data_memory", (entity *) data_mem);
+        return;
+    }
 
     memory *mem = this->vm->alloc(data_mem->get_size());
     memcpy(mem->get_pointer<void *>(),
            data_mem->get_pointer<void *>(),
            data_mem->get_size());
-
     this->master_relationship_add_entity("primitive_data_memory", (entity *) mem);
+
 }
 
 /**
@@ -132,12 +143,15 @@ primitive_data::create(std::string id,
  * @brief primitive_data::create
  * @param id
  * @param data
+ * @param is_reference
  * @return
  */
 primitive_data *
-primitive_data::create(std::string id, primitive_data &data)
+primitive_data::create(std::string id,
+                       primitive_data &data,
+                       bool is_reference)
 {
-    return (primitive_data *) orm::create((entity *) new primitive_data(id, data));
+    return (primitive_data *) orm::create((entity *) new primitive_data(id, data, is_reference));
 }
 
 /**
@@ -360,7 +374,18 @@ primitive_data::get_memory()
 data_type
 primitive_data::get_type()
 {
-    return type;
+    return this->type;
+}
+
+/**
+ * Get is_reference.
+ *
+ * @return
+ */
+bool
+primitive_data::get_is_reference()
+{
+    return this->is_reference;
 }
 
 /**
@@ -407,6 +432,12 @@ primitive_data::convert_itself(data_type new_type)
     if (!mem)
     {
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_NULL_DATA);
+        return;
+    }
+
+    if (this->type == new_type)
+    {
+        /* It really makes no sense */
         return;
     }
 
@@ -458,6 +489,7 @@ primitive_data::convert_itself(data_type new_type)
 
     this->vm->free(mem);
     this->type = new_type;
+    this->is_reference = (this->type == DATA_TYPE_STRING);
 }
 
 /**
