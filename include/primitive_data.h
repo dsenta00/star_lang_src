@@ -38,14 +38,18 @@ public:
                             data_type type = DATA_TYPE_INVALID,
                             const void *value = nullptr);
 
-    primitive_data(std::string id, primitive_data &data);
+    primitive_data(std::string id,
+                   primitive_data &data,
+                   bool is_reference = false);
 
     static primitive_data *create(std::string id,
                                   data_type type = DATA_TYPE_INVALID,
                                   const void *value = nullptr);
 
     static primitive_data *create(std::string id,
-                                  primitive_data &data);
+                                  primitive_data &data,
+                                  bool is_reference = false);
+
     bool to_bool();
     int8_t to_char();
     int32_t to_int();
@@ -76,12 +80,13 @@ public:
     memory *get_memory();
     uintptr_t get_address();
     data_type get_type();
+    bool get_is_reference();
 
     bool print();
     bool println();
     bool scan();
-
 protected:
+    bool is_reference;
     virtual_memory *vm;
     std::string get_string();
     data_type type;

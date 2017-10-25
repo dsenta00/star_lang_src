@@ -60,13 +60,13 @@ void assert_false(bool statement,
   assert_true((__statement__) == (__expected__), __FILE__, __LINE__, #__statement__ " and " #__expected__ " are not equal!")
 
 #define ASSERT_NOT_EQUALS(__statement__, __not_expected__) \
-  assert_true((__statement__) != (__not_expected__), __FILE__, __LINE__, "#__statement__ and #__not_expected__ are equal!")
+  assert_true((__statement__) != (__not_expected__), __FILE__, __LINE__, #__statement__ " and  " #__not_expected__ " are equal!")
 
 #define ASSERT_NULL(__pointer__) \
-  assert_true((__pointer__) == nullptr, __FILE__, __LINE__, "#__pointer__ should be null!")
+  assert_true((__pointer__) == nullptr, __FILE__, __LINE__, #__pointer__ " should be null!")
 
 #define ASSERT_NOT_NULL(__pointer__) \
-  assert_true((__pointer__) != nullptr, __FILE__, __LINE__, "#__pointer__ shouldn't be null!")
+  assert_true((__pointer__) != nullptr, __FILE__, __LINE__, #__pointer__ " shouldn't be null!")
 
 #define ASSERT_FALSE(__statement__, __fmt__, ...) \
   assert_false(__statement__, __FILE__, __LINE__, __fmt__, ##__VA_ARGS__)
