@@ -136,7 +136,7 @@ primitive_data::create(std::string id,
                        data_type type,
                        const void *value)
 {
-    return (primitive_data *) orm::create((entity *) new primitive_data(id, type, value));
+    return (primitive_data *) orm::create((entity *) new primitive_data(std::move(id), type, value));
 }
 
 /**
@@ -151,7 +151,7 @@ primitive_data::create(std::string id,
                        primitive_data &data,
                        bool is_reference)
 {
-    return (primitive_data *) orm::create((entity *) new primitive_data(id, data, is_reference));
+    return (primitive_data *) orm::create((entity *) new primitive_data(std::move(id), data, is_reference));
 }
 
 /**
@@ -728,7 +728,7 @@ primitive_data::operator^=(primitive_data &data)
         return false;
     }
 
-    switch (type)
+    switch (this->type)
     {
         case DATA_TYPE_BOOL:
             mem->get_element<bool>() ^= data.to_bool();
@@ -1028,7 +1028,7 @@ primitive_data::operator%=(primitive_data &data)
         return false;
     }
 
-    switch (type)
+    switch (this->type)
     {
         case DATA_TYPE_BOOL:
             /* Doesn't make any sense to do true %= false */
@@ -1232,7 +1232,7 @@ primitive_data::operator!=(primitive_data &data)
             else
             {
                 std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) != 0;
+                return string != mem->get_pointer<const char *>();
             }
         case DATA_TYPE_INVALID:
         default:
@@ -1260,7 +1260,7 @@ primitive_data::operator>(primitive_data &data)
         return false;
     }
 
-    switch (type)
+    switch (this->type)
     {
         case DATA_TYPE_BOOL:
             /* doesn't make any sense "true > false" */
@@ -1271,8 +1271,8 @@ primitive_data::operator>(primitive_data &data)
             return to_int() > data.to_int();
         case DATA_TYPE_FLOAT:
             return to_float() > data.to_float();
-            break;
         case DATA_TYPE_STRING:
+        {
             if (data.type == DATA_TYPE_STRING)
             {
                 return strcmp(mem->get_pointer<const char *>(),
@@ -1284,6 +1284,7 @@ primitive_data::operator>(primitive_data &data)
                 return string.compare(mem->get_pointer<const char *>()) < 0;
             }
             break;
+        }
         case DATA_TYPE_INVALID:
         default:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
@@ -1381,7 +1382,6 @@ primitive_data::operator>=(primitive_data &data)
                 std::string string = data.get_string();
                 return string.compare(mem->get_pointer<const char *>()) <= 0;
             }
-            break;
         case DATA_TYPE_INVALID:
         default:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);

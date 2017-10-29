@@ -85,10 +85,11 @@ public:
     bool print();
     bool println();
     bool scan();
+
+    std::string get_string();
 protected:
     bool is_reference;
     virtual_memory *vm;
-    std::string get_string();
     data_type type;
 };
 

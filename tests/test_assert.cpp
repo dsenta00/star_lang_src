@@ -49,7 +49,7 @@ assert_true(bool statement,
     va_end(arg);
 
     printf("\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -80,6 +80,6 @@ assert_false(bool statement,
     va_end(arg);
 
     printf("\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 }

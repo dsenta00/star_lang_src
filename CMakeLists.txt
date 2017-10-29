@@ -89,7 +89,7 @@ set(TEST_FILES
         tests/virtual_memory_test.cpp
         tests/virtual_memory_test.h
         tests/test.cpp
-        tests/test.h)
+        tests/test.h source/file.cpp include/file.h tests/file_test.cpp tests/file_test.h source/file_mode.cpp include/file_mode.h)
 
 add_executable(runUnitTest
         ${INCLUDE_FILES}

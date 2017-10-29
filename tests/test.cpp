@@ -26,6 +26,7 @@
 #include "collection_test.h"
 #include "memory_chunk_test.h"
 #include "virtual_memory_test.h"
+#include "file_test.h"
 #include <cstdio>
 
 void run_tests()
@@ -35,6 +36,7 @@ void run_tests()
     virtual_memory_test();
     primitive_data_test();
     collection_test();
+    file_test();
 
     printf("TESTS ARE OK!\n");
 }
