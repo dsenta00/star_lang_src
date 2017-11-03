@@ -21,7 +21,7 @@
  */
 
 #include "test.h"
-#include "ORM/orm_test.h"
+#include "orm_test.h"
 #include "primitive_data_test.h"
 #include "collection_test.h"
 #include "memory_chunk_test.h"

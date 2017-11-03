@@ -23,7 +23,7 @@
 #ifndef ORM_FW_H
 #define ORM_FW_H
 
-class entity;
+class object;
 
 class relationship;
 

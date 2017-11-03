@@ -33,7 +33,7 @@
  *
  * @param type - data type.
  */
-primitive_data::primitive_data(std::string id, data_type type, const void *value) : entity::entity("primitive_data",
+primitive_data::primitive_data(std::string id, data_type type, const void *value) : object::object("primitive_data",
                                                                                                    std::move(id))
 {
     this->master_relationship_add("primitive_data_memory", ONE_TO_MANY);
@@ -58,13 +58,13 @@ primitive_data::primitive_data(std::string id, data_type type, const void *value
             return;
         }
 
-        entity::master_relationship_add_entity("primitive_data_memory", (entity *) mem);
+        object::master_relationship_add_object("primitive_data_memory", (object *) mem);
         default_value();
     }
     else
     {
         uint32_t size = (type == DATA_TYPE_STRING) ?
-                        (uint32_t) strlen((const char *) value) + 1 :
+                        (uint32_t) (wcslen((const wchar_t *) value) + 1) * sizeof(wchar_t) :
                         DATA_TYPE_SIZE[type];
 
         memory *mem = vm->alloc(size);
@@ -75,7 +75,7 @@ primitive_data::primitive_data(std::string id, data_type type, const void *value
             return;
         }
 
-        entity::master_relationship_add_entity("primitive_data_memory", (entity *) mem);
+        object::master_relationship_add_object("primitive_data_memory", (object *) mem);
         memcpy(mem->get_pointer<void *>(), value, size);
     }
 }
@@ -88,7 +88,7 @@ primitive_data::primitive_data(std::string id, data_type type, const void *value
  */
 primitive_data::primitive_data(std::string id,
                                primitive_data &data,
-                               bool is_reference) : entity::entity("primitive_data", std::move(id))
+                               bool is_reference) : object::object("primitive_data", std::move(id))
 {
     this->master_relationship_add("primitive_data_memory", ONE_TO_MANY);
 
@@ -112,7 +112,7 @@ primitive_data::primitive_data(std::string id,
 
     if (this->is_reference)
     {
-        this->master_relationship_add_entity("primitive_data_memory", (entity *) data_mem);
+        this->master_relationship_add_object("primitive_data_memory", (object *) data_mem);
         return;
     }
 
@@ -120,7 +120,7 @@ primitive_data::primitive_data(std::string id,
     memcpy(mem->get_pointer<void *>(),
            data_mem->get_pointer<void *>(),
            data_mem->get_size());
-    this->master_relationship_add_entity("primitive_data_memory", (entity *) mem);
+    this->master_relationship_add_object("primitive_data_memory", (object *) mem);
 
 }
 
@@ -136,7 +136,7 @@ primitive_data::create(std::string id,
                        data_type type,
                        const void *value)
 {
-    return (primitive_data *) orm::create((entity *) new primitive_data(std::move(id), type, value));
+    return (primitive_data *) orm::create((object *) new primitive_data(std::move(id), type, value));
 }
 
 /**
@@ -151,7 +151,7 @@ primitive_data::create(std::string id,
                        primitive_data &data,
                        bool is_reference)
 {
-    return (primitive_data *) orm::create((entity *) new primitive_data(std::move(id), data, is_reference));
+    return (primitive_data *) orm::create((object *) new primitive_data(std::move(id), data, is_reference));
 }
 
 /**
@@ -180,7 +180,7 @@ primitive_data::to_bool()
             value = !this->get_string().empty();
             break;
         case DATA_TYPE_CHAR:
-            value = (bool) mem->get_element<int8_t>();
+            value = (bool) mem->get_element<wchar_t>();
             break;
         case DATA_TYPE_INT:
             value = (bool) mem->get_element<int32_t>();
@@ -202,10 +202,10 @@ primitive_data::to_bool()
  *
  * @return char value if success, otherwise return null terminating character.
  */
-int8_t
+wchar_t
 primitive_data::to_char()
 {
-    int8_t value = 0;
+    wchar_t value = 0;
     memory *mem = this->get_memory();
 
     if (!mem)
@@ -217,17 +217,17 @@ primitive_data::to_char()
     switch (type)
     {
         case DATA_TYPE_BOOL:
-            value = (int8_t) mem->get_element<bool>();
+            value = (wchar_t) mem->get_element<bool>();
             break;
         case DATA_TYPE_STRING:
         case DATA_TYPE_CHAR:
-            value = mem->get_element<int8_t>();
+            value = mem->get_element<wchar_t>();
             break;
         case DATA_TYPE_INT:
-            value = (int8_t) mem->get_element<int32_t>();
+            value = (wchar_t) mem->get_element<int32_t>();
             break;
         case DATA_TYPE_FLOAT:
-            value = (int8_t) mem->get_element<double>();
+            value = (wchar_t) mem->get_element<double>();
             break;
         case DATA_TYPE_INVALID:
         default:
@@ -261,7 +261,7 @@ primitive_data::to_int()
             value = (int32_t) mem->get_element<bool>();
             break;
         case DATA_TYPE_CHAR:
-            value = (int32_t) mem->get_element<int8_t>();
+            value = (int32_t) mem->get_element<wchar_t>();
             break;
         case DATA_TYPE_INT:
             value = mem->get_element<int32_t>();
@@ -270,9 +270,9 @@ primitive_data::to_int()
             value = (int32_t) mem->get_element<double>();
             break;
         case DATA_TYPE_STRING:
-            sscanf(mem->get_pointer<const char *>(),
-                   DATA_TYPE_FORMAT[DATA_TYPE_INT],
-                   &value);
+            swscanf(mem->get_pointer<const wchar_t *>(),
+                    DATA_TYPE_FORMAT[DATA_TYPE_INT],
+                    &value);
             break;
         case DATA_TYPE_INVALID:
         default:
@@ -306,7 +306,7 @@ primitive_data::to_float()
             value = (double) mem->get_element<bool>();
             break;
         case DATA_TYPE_CHAR:
-            value = (double) mem->get_element<int8_t>();
+            value = (double) mem->get_element<wchar_t>();
             break;
         case DATA_TYPE_INT:
             value = (double) mem->get_element<int32_t>();
@@ -315,9 +315,9 @@ primitive_data::to_float()
             value = mem->get_element<double>();
             break;
         case DATA_TYPE_STRING:
-            sscanf(mem->get_pointer<const char *>(),
-                   DATA_TYPE_FORMAT[DATA_TYPE_FLOAT],
-                   &value);
+            swscanf(mem->get_pointer<const wchar_t *>(),
+                    DATA_TYPE_FORMAT[DATA_TYPE_FLOAT],
+                    &value);
             break;
         case DATA_TYPE_INVALID:
         default:
@@ -336,7 +336,7 @@ primitive_data::to_float()
 primitive_data &
 primitive_data::to_string()
 {
-    std::string string = this->get_string();
+    std::wstring string = this->get_string();
 
     return *primitive_data::create(this->id.append(" as string"),
                                    DATA_TYPE_STRING,
@@ -454,7 +454,7 @@ primitive_data::convert_itself(data_type new_type)
         case DATA_TYPE_CHAR:
         {
             new_mem = this->vm->alloc(DATA_TYPE_SIZE[new_type]);
-            new_mem->get_element<int8_t>() = this->to_char();
+            new_mem->get_element<wchar_t>() = this->to_char();
             break;
         }
         case DATA_TYPE_INT:
@@ -465,9 +465,9 @@ primitive_data::convert_itself(data_type new_type)
         }
         case DATA_TYPE_STRING:
         {
-            std::string str = this->get_string();
+            std::wstring str = this->get_string();
             new_mem = this->vm->alloc(static_cast<uint32_t>(str.size() + 1));
-            strncpy(new_mem->get_pointer<char *>(),
+            wcsncpy(new_mem->get_pointer<wchar_t *>(),
                     str.c_str(),
                     new_mem->get_size());
             break;
@@ -484,8 +484,8 @@ primitive_data::convert_itself(data_type new_type)
             return;
     }
 
-    entity::master_relationship_add_entity("primitive_data_memory", (entity *) new_mem);
-    entity::master_relationship_remove_entity("primitive_data_memory", (entity *) mem);
+    object::master_relationship_add_object("primitive_data_memory", (object *) new_mem);
+    object::master_relationship_remove_object("primitive_data_memory", (object *) mem);
 
     this->vm->free(mem);
     this->type = new_type;
@@ -516,7 +516,7 @@ primitive_data::operator=(const void *data)
             mem->get_element<bool>() = *(bool *) data;
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() = *(int8_t *) data;
+            mem->get_element<wchar_t>() = *(wchar_t *) data;
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() = *(int32_t *) data;
@@ -526,28 +526,27 @@ primitive_data::operator=(const void *data)
             break;
         case DATA_TYPE_STRING:
         {
-            const char *str_temp = (const char *) data;
-            uint32_t str_size = static_cast<uint32_t>(strlen(str_temp) + 1);
+            const auto *str_temp = (const wchar_t *) data;
+            auto str_size = static_cast<uint32_t>((wcslen(str_temp) + 1) * sizeof(wchar_t));
 
             if (mem->get_size() < str_size)
             {
                 memory *new_mem = this->vm->alloc(str_size);
 
-                entity::master_relationship_remove_entity("primitive_data_memory", (entity *) mem);
-                entity::master_relationship_add_entity("primitive_data_memory", (entity *) new_mem);
+                object::master_relationship_remove_object("primitive_data_memory", (object *) mem);
+                object::master_relationship_add_object("primitive_data_memory", (object *) new_mem);
 
                 this->vm->free(mem);
                 mem = new_mem;
             }
 
-            strncpy(mem->get_pointer<char *>(), str_temp, str_size);
+            wcsncpy(mem->get_pointer<wchar_t *>(), str_temp, str_size);
             break;
         }
         case DATA_TYPE_INVALID:
         default:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
             return false;
-            break;
     }
 
     return true;
@@ -573,7 +572,7 @@ primitive_data::operator=(primitive_data &data)
 
     if (type == DATA_TYPE_STRING)
     {
-        mem->get_element<int8_t>() = 0;
+        mem->get_element<wchar_t>() = 0;
         return (*this) += (data);
     }
 
@@ -589,7 +588,7 @@ primitive_data::operator=(primitive_data &data)
             mem->get_element<bool>() = data.to_bool();
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() = data.to_char();
+            mem->get_element<wchar_t>() = data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() = data.to_int();
@@ -636,7 +635,7 @@ primitive_data::operator&=(primitive_data &data)
             mem->get_element<bool>() &= data.to_bool();
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() &= data.to_char();
+            mem->get_element<wchar_t>() &= data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() &= data.to_int();
@@ -685,7 +684,7 @@ primitive_data::operator|=(primitive_data &data)
             mem->get_element<bool>() |= data.to_bool();
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() |= data.to_char();
+            mem->get_element<wchar_t>() |= data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() |= data.to_int();
@@ -734,7 +733,7 @@ primitive_data::operator^=(primitive_data &data)
             mem->get_element<bool>() ^= data.to_bool();
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() ^= data.to_char();
+            mem->get_element<wchar_t>() ^= data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() ^= data.to_int();
@@ -775,9 +774,9 @@ primitive_data::operator+=(primitive_data &data)
 
     if (this->type == DATA_TYPE_STRING)
     {
-        std::string string = data.get_string();
-        uint32_t request_size = static_cast<uint32_t>(strlen(mem->get_pointer<const char *>()) +
-                                                      strlen(string.c_str()) + 1);
+        std::wstring string = data.get_string();
+        auto request_size = static_cast<uint32_t>(wcslen(mem->get_pointer<const wchar_t *>()) * sizeof(wchar_t) +
+                                                  (wcslen(string.c_str()) + 1) * sizeof(wchar_t));
 
         if (mem->get_size() < request_size)
         {
@@ -795,14 +794,14 @@ primitive_data::operator+=(primitive_data &data)
                  * new_mem is different than mem,
                  * switch relations.
                  */
-                entity::master_relationship_remove_entity("primitive_data_memory", (entity *) mem);
-                entity::master_relationship_add_entity("primitive_data_memory", (entity *) new_mem);
+                object::master_relationship_remove_object("primitive_data_memory", (object *) mem);
+                object::master_relationship_add_object("primitive_data_memory", (object *) new_mem);
 
                 mem = new_mem;
             }
         }
 
-        strcat((char *) mem->get_address(), string.c_str());
+        wcscat((wchar_t *) mem->get_address(), string.c_str());
         return true;
     }
 
@@ -818,7 +817,7 @@ primitive_data::operator+=(primitive_data &data)
             /* Doesn't make any sense to do true += false */
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() += data.to_char();
+            mem->get_element<wchar_t>() += data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() += data.to_int();
@@ -864,7 +863,7 @@ primitive_data::operator-=(primitive_data &data)
             /* Doesn't make any sense to do true -= false */
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() -= data.to_char();
+            mem->get_element<wchar_t>() -= data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() -= data.to_int();
@@ -913,7 +912,7 @@ primitive_data::operator*=(primitive_data &data)
             /* Doesn't make any sense to do true *= false */
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>() *= data.to_char();
+            mem->get_element<wchar_t>() *= data.to_char();
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>() *= data.to_int();
@@ -969,7 +968,7 @@ primitive_data::operator/=(primitive_data &data)
                 return false;
             }
 
-            mem->get_element<int8_t>() /= data.to_char();
+            mem->get_element<wchar_t>() /= data.to_char();
             break;
         case DATA_TYPE_INT:
 
@@ -1040,7 +1039,7 @@ primitive_data::operator%=(primitive_data &data)
                 return false;
             }
 
-            mem->get_element<int8_t>() %= data.to_char();
+            mem->get_element<wchar_t>() %= data.to_char();
             break;
         case DATA_TYPE_INT:
 
@@ -1086,7 +1085,7 @@ primitive_data::operator++()
             /* Doesn't make any sense to do true++ */
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>()++;
+            mem->get_element<wchar_t>()++;
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>()++;
@@ -1127,7 +1126,7 @@ primitive_data::operator--()
             /* Doesn't make any sense to do false-- */
             break;
         case DATA_TYPE_CHAR:
-            mem->get_element<int8_t>()--;
+            mem->get_element<wchar_t>()--;
             break;
         case DATA_TYPE_INT:
             mem->get_element<int32_t>()--;
@@ -1178,13 +1177,13 @@ primitive_data::operator==(primitive_data &data)
         {
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) == 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) == 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) == 0;
+                std::wstring string = data.get_string();
+                return string == mem->get_pointer<const wchar_t *>();
             }
         }
         case DATA_TYPE_INVALID:
@@ -1192,8 +1191,6 @@ primitive_data::operator==(primitive_data &data)
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
             return false;
     }
-
-    return true;
 }
 
 /**
@@ -1226,21 +1223,20 @@ primitive_data::operator!=(primitive_data &data)
         case DATA_TYPE_STRING:
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) != 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) != 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string != mem->get_pointer<const char *>();
+                std::wstring string = data.get_string();
+
+                return string != mem->get_pointer<const wchar_t *>();
             }
         case DATA_TYPE_INVALID:
         default:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
             return false;
     }
-
-    return true;
 }
 
 /**
@@ -1275,21 +1271,19 @@ primitive_data::operator>(primitive_data &data)
         {
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) > 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) > 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) < 0;
+                std::wstring string = data.get_string();
+                return string.compare(mem->get_pointer<const wchar_t *>()) < 0;
             }
-            break;
         }
         case DATA_TYPE_INVALID:
         default:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
             return false;
-            break;
     }
 
     return true;
@@ -1326,13 +1320,13 @@ primitive_data::operator<(primitive_data &data)
         case DATA_TYPE_STRING:
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) < 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) < 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) > 0;
+                std::wstring string = data.get_string();
+                return string.compare(mem->get_pointer<const wchar_t *>()) > 0;
             }
         case DATA_TYPE_INVALID:
         default:
@@ -1374,13 +1368,13 @@ primitive_data::operator>=(primitive_data &data)
         case DATA_TYPE_STRING:
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) >= 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) >= 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) <= 0;
+                std::wstring string = data.get_string();
+                return string.compare(mem->get_pointer<const wchar_t *>()) <= 0;
             }
         case DATA_TYPE_INVALID:
         default:
@@ -1422,13 +1416,13 @@ primitive_data::operator<=(primitive_data &data)
         case DATA_TYPE_STRING:
             if (data.type == DATA_TYPE_STRING)
             {
-                return strcmp(mem->get_pointer<const char *>(),
-                              (const char *) data.get_address()) <= 0;
+                return wcscmp(mem->get_pointer<const wchar_t *>(),
+                              (const wchar_t *) data.get_address()) <= 0;
             }
             else
             {
-                std::string string = data.get_string();
-                return string.compare(mem->get_pointer<const char *>()) >= 0;
+                std::wstring string = data.get_string();
+                return string.compare(mem->get_pointer<const wchar_t *>()) >= 0;
             }
         case DATA_TYPE_INVALID:
         default:
@@ -1460,7 +1454,7 @@ primitive_data::print()
             std::cout << (to_bool() ? "true" : "false");
             break;
         case DATA_TYPE_CHAR:
-            std::cout << to_char();
+            std::wcout << to_char();
             break;
         case DATA_TYPE_INT:
             std::cout << to_int();
@@ -1469,7 +1463,7 @@ primitive_data::print()
             std::cout << to_float();
             break;
         case DATA_TYPE_STRING:
-            std::cout << mem->get_pointer<char *>();
+            std::wcout << mem->get_pointer<wchar_t *>();
             break;
         case DATA_TYPE_INVALID:
         default:
@@ -1517,7 +1511,7 @@ primitive_data::scan()
             std::cin >> mem->get_element<bool>();
             break;
         case DATA_TYPE_CHAR:
-            std::cin >> mem->get_element<int8_t>();
+            std::wcin >> mem->get_element<wchar_t>();
             break;
         case DATA_TYPE_INT:
             std::cin >> mem->get_element<int32_t>();
@@ -1526,7 +1520,7 @@ primitive_data::scan()
             std::cin >> mem->get_element<double>();
             break;
         case DATA_TYPE_STRING:
-            std::cin >> mem->get_pointer<int8_t *>();
+            std::wcin >> mem->get_pointer<wchar_t *>();
             break;
         case DATA_TYPE_INVALID:
         default:
@@ -1542,10 +1536,10 @@ primitive_data::scan()
  *
  * @return string.
  */
-std::string
+std::wstring
 primitive_data::get_string()
 {
-    std::string str;
+    std::wstring str;
     memory *mem = this->get_memory();
 
     if (!mem)
@@ -1557,19 +1551,19 @@ primitive_data::get_string()
     switch (type)
     {
         case DATA_TYPE_BOOL:
-            str = to_bool() ? "true" : "false";
+            str = to_bool() ? L"true" : L"false";
             break;
         case DATA_TYPE_CHAR:
             str = to_char();
             break;
         case DATA_TYPE_INT:
-            str = std::to_string(to_int());
+            str = std::to_wstring(this->to_int());
             break;
         case DATA_TYPE_FLOAT:
-            str = std::to_string(to_float());
+            str = std::to_wstring(this->to_float());
             break;
         case DATA_TYPE_STRING:
-            str.assign(mem->get_pointer<const char *>());
+            str.assign(mem->get_pointer<const wchar_t *>());
             break;
         case DATA_TYPE_INVALID:
         default:

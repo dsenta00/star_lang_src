@@ -67,14 +67,12 @@ next_power_of_2(uint32_t number)
 memory_chunk *
 virtual_memory::find_memory_chunk(std::function<bool(memory_chunk *)> func)
 {
-    auto &entities = this->memory_chunk_relationship->get_entities();
-
-    if (entities.empty())
+    if (this->memory_chunk_relationship->empty())
     {
         return nullptr;
     }
 
-    for (entity *e : entities)
+    for (object *e : *this->memory_chunk_relationship)
     {
         auto *chunk = (memory_chunk *) e;
 
@@ -103,7 +101,7 @@ virtual_memory::add_memory_chunk(uint32_t capacity)
     }
 
     memory_chunk *chunk = memory_chunk::create(max_allocated_bytes);
-    this->master_relationship_add_entity("memory_chunk_relationship", chunk);
+    this->master_relationship_add_object("memory_chunk_relationship", chunk);
 
     return chunk;
 }
@@ -113,7 +111,7 @@ virtual_memory::add_memory_chunk(uint32_t capacity)
  *
  * @param init_capacity - initial capacity.
  */
-virtual_memory::virtual_memory(uint32_t init_capacity) : entity::entity("virtual_memory", "MAIN")
+virtual_memory::virtual_memory(uint32_t init_capacity) : object::object("virtual_memory", "MAIN")
 {
     this->master_relationship_add("memory_chunk_relationship", ONE_TO_MANY);
     this->memory_chunk_relationship = this->master_relationship_get("memory_chunk_relationship");
@@ -177,12 +175,13 @@ virtual_memory::add_new_chunk_and_alloc(uint32_t size)
      * New chunk is not allocated.
      * Remove previously allocated chunk and defragment all memory.
      */
-    this->master_relationship_remove_entity("memory_chunk_relationship", chunk);
+    this->master_relationship_remove_object("memory_chunk_relationship", chunk);
 
-    this->memory_chunk_relationship->for_each([&](entity *entity) {
-        memory_chunk *chunk = (memory_chunk *) entity;
+    for (object *o : *this->memory_chunk_relationship)
+    {
+        memory_chunk *chunk = (memory_chunk *) o;
         chunk->defragmentation();
-    });
+    }
 
     return this->reserve(size);
 }

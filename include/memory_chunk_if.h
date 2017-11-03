@@ -23,13 +23,13 @@
 #ifndef BOX_MEMORY_CHUNK_IF_H
 #define BOX_MEMORY_CHUNK_IF_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "fw_decl.h"
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
 
-class memory_chunk_if : public entity {
+class memory_chunk_if : public object {
 public:
     memory_chunk_if();
     void free_memory_add(uintptr_t address, uint32_t size);

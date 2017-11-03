@@ -21,6 +21,8 @@
  */
 #include <cstdio>
 #include <collection.h>
+#include <codecvt>
+#include <locale>
 #include "error_log.h"
 #include "ORM/orm.h"
 #include "ORM/relationship.h"
@@ -30,7 +32,13 @@
 #include "file.h"
 #include "test_assert.h"
 
-#define TEST_TEXT ("1234 miljenko _+_")
+#define TEST_TEXT (L"1234 miljenko _+_")
+
+std::string convert_utf8_to_ascii(std::wstring ws)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(ws);
+}
 
 /**
  * create_file
@@ -38,7 +46,7 @@
  * @param text
  */
 static void
-create_file(const char *file_name, const char *text)
+create_file(const char *file_name, const wchar_t *text)
 {
     FILE *fp = nullptr;
 
@@ -50,9 +58,13 @@ create_file(const char *file_name, const char *text)
         return;
     }
 
-    if (strlen(text) > 0)
+    if (wcslen(text) > 0)
     {
-        fwrite(text, sizeof(int8_t), strlen(text), fp);
+        std::string str = convert_utf8_to_ascii(text);
+        fwrite(str.c_str(),
+               sizeof(int8_t),
+               str.size(),
+               fp);
     }
 
     fclose(fp);
@@ -125,17 +137,17 @@ file_test_read()
     auto *str = f->read_all();
     ASSERT_NOT_NULL(str);
     ASSERT_EQUALS(str->get_id(), "fr:content");
-    ASSERT_TRUE(strcmp((const char *) str->get_address(), TEST_TEXT) == 0,
-                "Should be equal! %s",
-                (const char *) str->get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(), TEST_TEXT) == 0,
+                "Should be equal! \"%ls\"",
+                (const wchar_t *) str->get_address());
     ORM_DESTROY(str);
     /* try again */
     str = f->read_all();
     ASSERT_NOT_NULL(str);
     ASSERT_EQUALS(str->get_id(), "fr:content");
-    ASSERT_TRUE(strcmp((const char *) str->get_address(), TEST_TEXT) == 0,
-                "Should be equal! %s",
-                (const char *) str->get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(), TEST_TEXT) == 0,
+                "Should be equal! \"%ls\"",
+                (const wchar_t *) str->get_address());
     ORM_DESTROY(str);
 
     f->close();
@@ -163,11 +175,12 @@ file_test_write1()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    primitive_data *str = primitive_data::create("str", DATA_TYPE_STRING, "Miljenko 123");
+    primitive_data *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
     f->close();
+    ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 123"), "Should be equal!");
 
     ORM_DESTROY(f);
@@ -190,45 +203,22 @@ file_test_write2()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    primitive_data *str = primitive_data::create("str", DATA_TYPE_STRING, "Miljenko 123");
-    f->write(str);
-    ASSERT_OK;
-
-    ORM_DESTROY(f);
-    ORM_DESTROY(str);
-    ASSERT_TRUE(compare_file_content(file_name, "Miljenko 123"), "Should be equal!");
-
-    remove(file_name);
-    printf("\t-> %s()::OK \n", __FUNCTION__);
-}
-
-/**
- * file_test_write3
- */
-static void
-file_test_write3()
-{
-    const char *file_name = "test_star_write.txt";
-    file *f = file::create("fw2", FILE_MODE_WRITE, file_name);
-
-    ASSERT_OK;
-    ASSERT_NOT_NULL(f);
-    ASSERT_TRUE(f->is_opened(), "file should be opened!");
-
     /* fill collection */
     collection *c = collection::create("c");
     int var1 = 42;
     *c += primitive_data::create("var1", DATA_TYPE_INT, &var1);
     double var2 = 41.0f;
     *c += primitive_data::create("var2", DATA_TYPE_FLOAT, &var2);
-    const char *var3 = "40";
+    const wchar_t *var3 = L"40";
     *c += primitive_data::create("var3", DATA_TYPE_STRING, var3);
     /* fill collection end */
     f->write(c);
     ASSERT_OK;
 
+    ASSERT_OK;
     ORM_DESTROY(f);
     ORM_DESTROY(c);
+    ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "42 41.000000 40"), "Should be equal!");
 
     remove(file_name);
@@ -242,7 +232,7 @@ static void
 file_test_read_empty_file()
 {
     const char *file_name = "test_star.txt";
-    create_file("test_star.txt", "");
+    create_file("test_star.txt", L"");
     file *f = file::create("fr", FILE_MODE_READ, file_name);
 
     ASSERT_OK;
@@ -291,11 +281,12 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    auto *str = primitive_data::create("str", DATA_TYPE_STRING, "Miljenko 123");
+    auto *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
     f->close();
+    ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 123"), "Should be equal!");
 
     ORM_DESTROY(f);
@@ -307,11 +298,12 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    str = primitive_data::create("str", DATA_TYPE_STRING, "74, 345");
+    str = primitive_data::create("str", DATA_TYPE_STRING, L"74, 345");
     f->write(str);
     ASSERT_OK;
 
     f->close();
+    ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 12374, 345"), "Should be equal!");
     remove(file_name);
 
@@ -333,22 +325,24 @@ file_test_reopen()
     ASSERT_OK;
     ASSERT_TRUE(f->is_opened(), "file should be open!");
 
-    auto *str = primitive_data::create("str", DATA_TYPE_STRING, "Miljenko 123");
+    auto *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_APPEND, file_name);
-    str = primitive_data::create("str", DATA_TYPE_STRING, "74, 345");
+    str = primitive_data::create("str", DATA_TYPE_STRING, L"74, 345");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_READ, file_name);
     str = f->read_all();
-    ASSERT_TRUE(strcmp((const char *) str->get_address(), "Miljenko 12374, 345") == 0, "should be equal");
+    ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(),
+                       L"Miljenko 12374, 345") == 0, "should be equal");
 
     f->close();
+    ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 12374, 345"), "Should be equal!");
     remove(file_name);
 
@@ -366,7 +360,6 @@ file_test()
     file_test_read_empty_file();
     file_test_write1();
     file_test_write2();
-    file_test_write3();
     file_test_append();
     file_test_reopen();
     printf("\r\n\r\n");

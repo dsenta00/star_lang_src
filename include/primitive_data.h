@@ -23,7 +23,7 @@
 #ifndef PRIMITIVE_TYPE_H
 #define PRIMITIVE_TYPE_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "data_type.h"
 #include "fw_decl.h"
 #include <string>
@@ -32,7 +32,7 @@
  * The primitive_data class. Represents primitive data type in
  * this programming language and defines all operations in that scope.
  */
-class primitive_data : public entity {
+class primitive_data : public object {
 public:
     explicit primitive_data(std::string id,
                             data_type type = DATA_TYPE_INVALID,
@@ -51,7 +51,7 @@ public:
                                   bool is_reference = false);
 
     bool to_bool();
-    int8_t to_char();
+    wchar_t to_char();
     int32_t to_int();
     double to_float();
     primitive_data &to_string();
@@ -86,7 +86,7 @@ public:
     bool println();
     bool scan();
 
-    std::string get_string();
+    std::wstring get_string();
 protected:
     bool is_reference;
     virtual_memory *vm;

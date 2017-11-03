@@ -46,11 +46,11 @@ set(INCLUDE_FILES
         include/error_log.h
         include/virtual_memory.h
         include/memory.h
-        include/ORM/entity.h
-        include/ORM/entity_repository.h
+        include/ORM/object.h
+        include/ORM/object_repository.h
         include/ORM/orm.h
         include/ORM/orm_fw.h
-        include/ORM/orm_test.h
+        tests/orm_test.h
         include/ORM/relationship.h
         include/ORM/relationship_type.h)
 
@@ -68,10 +68,10 @@ set(SOURCE_FILES
         source/virtual_memory.cpp
         source/main.cpp
         source/memory.cpp
-        source/ORM/entity.cpp
-        source/ORM/entity_repository.cpp
+        source/ORM/object.cpp
+        source/ORM/object_repository.cpp
         source/ORM/orm.cpp
-        source/ORM/orm_test.cpp
+        tests/orm_test.cpp
         source/ORM/relationship.cpp)
 
 ###################################################################

@@ -23,7 +23,7 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "data_type.h"
 #include "fw_decl.h"
 #include <string>
@@ -31,24 +31,24 @@
 /**
  * Represents data collection.
  */
-class collection : public entity {
+class collection : public object {
 public:
     explicit collection(std::string id, collection *c = nullptr);
     uint32_t get_number_of();
-    entity *operator[](uint32_t index);
-    entity *operator[](std::string index);
-    void insert(std::string index, entity *e);
-    void insert(uint32_t index, entity *e);
-    bool operator+=(entity *e);
+    object *operator[](uint32_t index);
+    object *operator[](std::string index);
+    void insert(std::string index, object *o);
+    void insert(uint32_t index, object *o);
+    bool operator+=(object *o);
     primitive_data &to_string();
     void clear();
     ~collection() override;
     static collection *create(std::string id, collection *c = nullptr);
 protected:
     void remove_data(std::string index);
-    void remove_data(entity *e);
-    void insert_data(std::string index, entity *e);
-    std::map<std::string, entity *> data_cache;
+    void remove_data(object *o);
+    void insert_data(std::string index, object *o);
+    std::map<std::string, object *> data_cache;
 };
 
 #endif // COLLECTION_H

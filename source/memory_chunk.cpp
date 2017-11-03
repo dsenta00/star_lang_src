@@ -44,7 +44,7 @@ memory_chunk::memory_chunk(uint32_t capacity) : memory_chunk_if::memory_chunk_if
         return;
     }
 
-    this->start_address = (uintptr_t) calloc(capacity, sizeof(uint8_t));
+    this->start_address = (uintptr_t)new uint8_t[capacity];
 
     if (!this->start_address)
     {
@@ -82,7 +82,7 @@ memory_chunk::is_parent_of(memory *mem)
         return false;
     }
 
-    return r->find([&](entity *e) { return e == this; }) != nullptr;
+    return r->find([&](object *o) { return o == this; }) != nullptr;
 }
 
 /**
@@ -397,11 +397,11 @@ memory_chunk::defragmentation()
      */
     auto reserved_memory = master_relationship_get("reserved_memory");
 
-    reserved_memory->for_each([&](entity *e1, entity *e2) {
-        memory *mem = (memory *) e1;
-        memory *adjacent_memory = (memory *) e2;
+    reserved_memory->for_each([&](object *o1, object *o2) {
+        auto *m1 = (memory *) o1;
+        auto *m2 = (memory *)o2;
 
-        mem->align(adjacent_memory);
+        m1->align(m2);
         return FOREACH_CONTINUE;
     });
 
@@ -419,7 +419,7 @@ memory_chunk::get_free()
 
 memory_chunk::~memory_chunk()
 {
-    std::free((void *) start_address);
+    delete [] (uint8_t *)start_address;
 }
 
 memory_chunk *

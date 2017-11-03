@@ -23,7 +23,7 @@
 #ifndef BOX_INSTRUCTION_H
 #define BOX_INSTRUCTION_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "ORM/orm_fw.h"
 #include "fw_decl.h"
 #include "data_type.h"
@@ -38,7 +38,7 @@ typedef enum {
 /**
  * @brief The instruction class
  */
-class instruction : public entity {
+class instruction : public object {
 protected:
     op_code op;
     std::vector<std::string> arg;

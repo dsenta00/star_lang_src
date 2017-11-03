@@ -23,113 +23,118 @@
 #include <utility>
 
 #include "ORM/orm.h"
-#include "ORM/entity.h"
+#include "ORM/object.h"
 
-typedef std::unique_ptr<entity_repository> entity_repository_p;
+typedef std::unique_ptr<object_repository> object_repository_p;
 
 /**
  * @brief repo - repository map.
  */
-static std::map<std::string, entity_repository_p> repo;
+static std::map<std::string, object_repository_p> repo;
 
 /**
- * Find entity repository.
+ * Find object repository.
  *
- * @param entity_type - entity type.
+ * @param object_type - entity type.
  * @return entity_repository if found, otherwise return nullptr.
  */
-entity_repository *
-orm::find_entity_repository(std::string entity_type)
+object_repository *
+orm::find_object_repository(std::string object_type)
 {
-    auto it = repo.find(entity_type);
+    auto it = repo.find(object_type);
 
     return (it != repo.end()) ? (it->second).get() : nullptr;
 }
 
 /**
- * Add entity repository if not exists.
+ * Add object repository if not exists.
  *
- * @param entity_type
+ * @param object_type
  */
 void
-orm::add_entity_repository(std::string entity_type)
+orm::add_object_repository(std::string object_type)
 {
-    if (orm::find_entity_repository(entity_type))
+    if (orm::find_object_repository(object_type))
     {
         return;
     }
 
-    repo[entity_type] = entity_repository_p(new entity_repository());
+    repo[object_type] = object_repository_p(new object_repository());
 }
 
 /**
- * Add new entity to repository.
+ * Add new object to repository.
  *
- * @param e - entity.
+ * @param o - entity.
  * @return the entity.
  */
-entity *
-orm::create(entity *e)
+object *
+orm::create(object *o)
 {
-    if (!e)
+    if (!o)
     {
         return nullptr;
     }
 
-    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
+    object_repository *repository = orm::find_object_repository(o->get_object_type());
 
-    if (!er)
+    if (!repository)
     {
-        orm::add_entity_repository(e->get_entity_type());
-        er = orm::find_entity_repository(e->get_entity_type());
+        orm::add_object_repository(o->get_object_type());
+        repository = orm::find_object_repository(o->get_object_type());
     }
 
-    er->add(e);
-    return e;
-}
-
-
-void
-orm::change_id(entity *e, std::string new_id)
-{
-    if (!e)
-    {
-        return;
-    }
-
-    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
-
-    if (!er)
-    {
-        orm::add_entity_repository(e->get_entity_type());
-        er = orm::find_entity_repository(e->get_entity_type());
-    }
-
-    er->change_id(e, new_id);
+    repository->add(o);
+    return o;
 }
 
 /**
- * Destroy entity and all relationships.
- * If objects remains marked, sweep them also.
+ * Change object ID.
  *
- * @param e - The entity.
+ * @param o
+ * @param new_id
  */
 void
-orm::destroy(entity *e)
+orm::change_id(object *o, std::string new_id)
 {
-    entity_repository *er = orm::find_entity_repository(e->get_entity_type());
-
-    if (!er)
+    if (!o)
     {
         return;
     }
 
-    er->remove(e);
+    object_repository *repository = orm::find_object_repository(o->get_object_type());
+
+    if (!repository)
+    {
+        orm::add_object_repository(o->get_object_type());
+        repository = orm::find_object_repository(o->get_object_type());
+    }
+
+    repository->change_id(o, new_id);
+}
+
+/**
+ * Destroy object and all relationships.
+ * If objects remains marked, sweep them also.
+ *
+ * @param o - The entity.
+ */
+void
+orm::destroy(object *o)
+{
+    object_repository *repository = orm::find_object_repository(o->get_object_type());
+
+    if (!repository)
+    {
+        return;
+    }
+
+    repository->remove(o);
     orm::sweep();
 }
 
 /**
- * Sweep all entities from all repositories.
+ * Sweep all objects from all repositories.
  */
 void
 orm::sweep()
@@ -142,74 +147,76 @@ orm::sweep()
 
 /**
  * Select command.
- * @param entity_type
+ *
+ * @param object_type
  * @param where
  * @return
  */
-entity *
-orm::select(std::string entity_type, std::function<bool(entity *)> where)
+object *
+orm::select(std::string object_type, std::function<bool(object *)> where)
 {
-    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
+    object_repository *repository = orm::find_object_repository(std::move(object_type));
 
-    if (!er)
+    if (!repository)
     {
         return nullptr;
     }
 
-    return er->find(where);
+    return repository->find(where);
 }
 
 /**
  * Select id.
  *
- * @param entity_type
+ * @param object_type
  * @param id
  * @return
  */
-entity *
-orm::select(std::string entity_type, std::string id)
+object *
+orm::select(std::string object_type, std::string id)
 {
-    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
+    object_repository *repository = orm::find_object_repository(std::move(object_type));
 
-    if (!er)
+    if (!repository)
     {
         return nullptr;
     }
 
-    return er->get(id);
+    return repository->get(id);
 }
 
 /**
  * Get first object from entity repository.
  *
- * @param entity_type - entity type.
+ * @param object_type - entity type.
  * @return first object if exists, otherwise nullptr.
  */
-entity *
-orm::get_first(std::string entity_type)
+object *
+orm::get_first(std::string object_type)
 {
-    entity_repository *er = orm::find_entity_repository(std::move(entity_type));
+    object_repository *repository = orm::find_object_repository(std::move(object_type));
 
-    if (!er)
+    if (!repository)
     {
         return nullptr;
     }
 
-    return er->find([&](entity *e) {
+    return repository->find([&](object *e) {
         (void) e;
         return true;
     });
 }
 
 /**
- * Remove entity repository.
+ * Remove object repository.
  *
- * @param entity_type
+ * @param object_type
  */
 void
-orm::remove_entity_repository(std::string entity_type)
+orm::remove_object_repository(std::string object_type)
 {
-    auto it = repo.find(entity_type);
+    auto it = repo.find(object_type);
+
     if (it != repo.end())
     {
         repo.erase(it);
