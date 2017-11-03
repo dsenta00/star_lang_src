@@ -30,7 +30,7 @@
  * @param address - memory address.
  * @param size - memory size.
  */
-memory::memory(uintptr_t address, uint32_t size) : entity::entity("memory", address)
+memory::memory(uintptr_t address, uint32_t size) : object::object("memory", address)
 {
     this->address = address;
     this->size = size;
@@ -169,7 +169,7 @@ memory::ready_to_remove()
         return true;
     }
 
-    return r->num_of_entities() == 0;
+    return r->empty();
 }
 
 memory *
@@ -181,7 +181,7 @@ memory::create(uintptr_t address, uint32_t size)
 /*
  * Explicit template instatiation.
  */
-template int8_t &memory::get_element();
+template wchar_t &memory::get_element();
 
 template int16_t &memory::get_element();
 
@@ -195,11 +195,9 @@ template bool &memory::get_element();
 
 template void *memory::get_pointer();
 
-template char *memory::get_pointer();
+template wchar_t *memory::get_pointer();
 
-template const char *memory::get_pointer();
-
-template int8_t *memory::get_pointer();
+template const wchar_t *memory::get_pointer();
 
 template int16_t *memory::get_pointer();
 

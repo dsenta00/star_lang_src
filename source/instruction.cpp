@@ -30,7 +30,7 @@
 
 instruction::instruction(op_code op,
                          instruction *next_instruction,
-                         instruction *branch_result_false) : entity::entity("instruction", 0)
+                         instruction *branch_result_false) : object::object("instruction", 0)
 {
     this->op = op;
 
@@ -41,13 +41,13 @@ instruction::instruction(op_code op,
     if (next_instruction)
     {
         relationship *r = this->master_relationship_get("next_instruction");
-        r->add_entity(next_instruction);
+        r->add_object(next_instruction);
     }
 
     if (branch_result_false)
     {
         relationship *r = this->master_relationship_get("branch_result_false");
-        r->add_entity(branch_result_false);
+        r->add_object(branch_result_false);
     }
 }
 
@@ -74,7 +74,7 @@ instruction::create()
     auto &name = this->arg[0];
     auto &type = this->arg[1];
 
-    entity *data = nullptr;
+    object *data = nullptr;
 
     if (type == "array")
     {
@@ -119,7 +119,7 @@ instruction::create_and_assign_constant()
         return;
     }
 
-    entity *data = nullptr;
+    object *data = nullptr;
 
     if (type == "array")
     {
@@ -180,13 +180,13 @@ instruction::create_and_assign_object()
         return;
     }
 
-    entity *object = nullptr;
+    object *object = nullptr;
 
-    if (object_to_assign->get_entity_type() == "primitive_data")
+    if (object_to_assign->get_object_type() == "primitive_data")
     {
         object = primitive_data::create(name, *(primitive_data *) object_to_assign);
     }
-    else if (object_to_assign->get_entity_type() == "collection")
+    else if (object_to_assign->get_object_type() == "collection")
     {
         object = collection::create(name, (collection *) object_to_assign);
     }

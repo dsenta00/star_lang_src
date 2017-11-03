@@ -23,7 +23,7 @@
 #include <utility>
 
 #include "ORM/relationship.h"
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "error_log.h"
 
 /**
@@ -67,12 +67,12 @@ relationship::get_type()
  * @param func - function rule.
  * @return entity if found, otherwise return NULL.
  */
-entity *
-relationship::find(const std::function<bool(entity *)> &func)
+object *
+relationship::find(const std::function<bool(object *)> &func)
 {
-    auto it = std::find_if(this->entities.begin(), this->entities.end(), func);
+    auto it = std::find_if(this->begin(), this->end(), func);
 
-    return (it != this->entities.end()) ? *it : nullptr;
+    return (it != this->end()) ? *it : nullptr;
 }
 
 /**
@@ -81,9 +81,9 @@ relationship::find(const std::function<bool(entity *)> &func)
  * @param func - function to sort.
  */
 void
-relationship::sort(const std::function<bool(entity *, entity *)> &func)
+relationship::sort(const std::function<bool(object *, object *)> &func)
 {
-    std::sort(this->entities.begin(), this->entities.end(), func);
+    std::sort(this->begin(), this->end(), func);
 }
 
 /**
@@ -92,16 +92,14 @@ relationship::sort(const std::function<bool(entity *, entity *)> &func)
  * @param func - function to handle current iterators.
  */
 void
-relationship::for_each(const std::function<foreach_result(entity *, entity *)> &func)
+relationship::for_each(const std::function<foreach_result(object *, object *)> &func)
 {
-    for (auto it1 = this->entities.begin();
-         it1 != this->entities.end();
-         it1++)
+    for (auto it1 = this->begin(); it1 != this->end(); it1++)
     {
         auto it2 = it1;
         it2++;
 
-        while (it2 != this->entities.end())
+        while (it2 != this->end())
         {
             foreach_result result = func(*it1, *it2);
 
@@ -127,99 +125,58 @@ relationship::for_each(const std::function<foreach_result(entity *, entity *)> &
 }
 
 /**
- * foreach one iterator.
- *
- * @param func - function to handle iterator.
- */
-void
-relationship::for_each(const std::function<void(entity *)> &func)
-{
-    for (entity *e : this->entities)
-    {
-        func(e);
-    }
-}
-
-/**
  * Add entity to this relationship.
  *
- * @param e - the entity.
+ * @param o - the entity.
  */
 void
-relationship::add_entity(entity *e)
+relationship::add_object(object *o)
 {
     if (this->type == ONE_TO_ONE)
     {
-        if (!this->entities.empty())
+        if (!this->empty())
         {
             ERROR_LOG_ADD(ERROR_RELATIONSHIP_ADDING_MORE_THAN_ONE);
             return;
         }
     }
 
-    e->set_marked(false);
-    this->entities.push_back(e);
+    o->set_marked(false);
+    this->push_back(o);
 }
 
 /**
  * Remove entity from this relationship.
  *
- * @param e - the entity.
+ * @param o - the entity.
  */
 void
-relationship::remove_entity(entity *e)
+relationship::remove_object(object *o)
 {
-    for (auto it = this->entities.begin();
-         it != this->entities.end();
-         it++)
+    for (auto it = this->begin(); it != this->end(); it++)
     {
-        if (*it == e)
+        if (*it == o)
         {
-            this->entities.erase(it);
+            this->erase(it);
             break;
         }
     }
 }
 
 /**
- * Get entites
- * @return entity vector
+ * @inherit
  */
-std::vector<entity *> &
-relationship::get_entities()
-{
-    return this->entities;
-}
-
-/**
- * Get front entity from this relationship.
- *
- * @return entity if exists, otherwise return NULL.
- */
-entity *
+object *
 relationship::front()
 {
-    return (this->entities.size()) ? this->entities.front() : nullptr;
+    return obj_vector::empty() ? nullptr : obj_vector::front();
 }
 
 /**
- * Get back entity from this relationship.
- *
- * @return entity if exists, otherwise return NULL.
+ * @inherit
  */
-entity *
+object *
 relationship::back()
 {
-    return (this->entities.size()) ? this->entities.back() : nullptr;
-}
-
-/**
- * Get number of entities.
- *
- * @return number of entities.
- */
-uint32_t
-relationship::num_of_entities()
-{
-    return static_cast<uint32_t>(this->entities.size());
+    return obj_vector::empty() ? nullptr : obj_vector::back();
 }

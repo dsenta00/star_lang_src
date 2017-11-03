@@ -23,7 +23,7 @@
 #ifndef ORM_H
 #define ORM_H
 
-#include "entity_repository.h"
+#include "object_repository.h"
 #include <string>
 #include <functional>
 
@@ -31,26 +31,26 @@
  * ORM interface.
  */
 namespace orm {
-    entity_repository *find_entity_repository(std::string entity_type);
-    void add_entity_repository(std::string entity_type);
-    entity *create(entity *data);
-    void change_id(entity *e, std::string new_id);
-    void destroy(entity *e);
+    object_repository *find_object_repository(std::string object_type);
+    void add_object_repository(std::string object_type);
+    object *create(object *o);
+    void change_id(object *o, std::string new_id);
+    void destroy(object *o);
     void sweep();
-    entity *select(std::string entity_type, std::function<bool(entity *)> where);
-    entity *select(std::string entity_type, std::string id);
-    entity *get_first(std::string entity_type);
-    void remove_entity_repository(std::string entity_type);
+    object *select(std::string object_type, std::function<bool(object *)> where);
+    object *select(std::string object_type, std::string id);
+    object *get_first(std::string object_type);
+    void remove_object_repository(std::string object_type);
 }
 
-#define ORM_SELECT(__ENTITY_TYPE__, __WHERE__) \
-  (__ENTITY_TYPE__ *)orm::select(#__ENTITY_TYPE__, [&] (entity *e) { \
-  __ENTITY_TYPE__ *obj = (__ENTITY_TYPE__ *)e; \
+#define ORM_SELECT(__OBJ_TYPE__, __WHERE__) \
+  (__OBJ_TYPE__ *)orm::select(#__OBJ_TYPE__, [&] (object *e) { \
+  __OBJ_TYPE__ *obj = (__OBJ_TYPE__ *)e; \
   (void)obj; \
   return __WHERE__; \
 })
 
-#define ORM_DESTROY(__ENTITY__) \
-  orm::destroy((entity *)__ENTITY__)
+#define ORM_DESTROY(__OBJ__) \
+  orm::destroy((object *)__OBJ__)
 
 #endif // ORM_H

@@ -26,7 +26,7 @@
 #include "instruction.h"
 
 method::method(std::string id,
-                       std::vector<instruction *> &instructions) : entity::entity("method", id)
+                       std::vector<instruction *> &instructions) : object::object("method", id)
 {
     /*
      * - variable
@@ -44,8 +44,8 @@ method::method(std::string id,
 
     for (instruction *i : instructions)
     {
-        r->add_entity(i);
-        i->master_relationship_add_entity("method", (entity *) this);
+        r->add_object(i);
+        i->master_relationship_add_object("method", (object *) this);
     }
 
     this->current_instruction = instructions[0];
@@ -71,7 +71,7 @@ method::execute_next()
 }
 
 void
-method::add_local_object(entity *e)
+method::add_local_object(object *e)
 {
     if (this->local_objects[e->get_id()])
     {
@@ -80,31 +80,31 @@ method::add_local_object(entity *e)
     }
 
     this->local_objects[e->get_id()] = e;
-    this->master_relationship_add_entity("method_objects", e);
+    this->master_relationship_add_object("method_objects", e);
 
     /*
      * object can be used in many methods.
      */
     e->master_relationship_add("method_objects", ONE_TO_MANY);
-    e->master_relationship_add_entity("method_objects", (entity *) this);
+    e->master_relationship_add_object("method_objects", (object *) this);
 }
 
-entity *
+object *
 method::get_local_object(std::string id)
 {
     return this->local_objects[id];
 }
 
 void
-method::push_stack(entity *e)
+method::push_stack(object *e)
 {
     this->stack.push_back(e);
 }
 
-entity *
+object *
 method::pop_stack()
 {
-    entity *e = this->stack.back();
+    object *e = this->stack.back();
     this->stack.pop_back();
     return e;
 }

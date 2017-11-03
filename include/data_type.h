@@ -23,8 +23,7 @@
 #ifndef DATA_TYPE_H
 #define DATA_TYPE_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
 #include <string>
 
 /**
@@ -47,24 +46,24 @@ typedef enum {
     DATA_TYPE_INVALID
 } data_type;
 
-const char DATA_TYPE_FORMAT[][8] =
+const wchar_t DATA_TYPE_FORMAT[][8] =
     {
-        "%d",  // DATA_TYPE_BOOL,
-        "%c",  // DATA_TYPE_CHAR,
-        "%d",  // DATA_TYPE_INT,
-        "%lf", // DATA_TYPE_FLOAT,
-        "%s",  // DATA_TYPE_STRING,
-        ""     // DATA_TYPE_INVALID
+        L"%d",  // DATA_TYPE_BOOL,
+        L"%c",  // DATA_TYPE_CHAR,
+        L"%d",  // DATA_TYPE_INT,
+        L"%lf", // DATA_TYPE_FLOAT,
+        L"%ls", // DATA_TYPE_STRING,
+        L""     // DATA_TYPE_INVALID
     };
 
 const uint8_t DATA_TYPE_SIZE[] =
     {
-        sizeof(bool),    // DATA_TYPE_BOOL,
-        sizeof(int8_t),  // DATA_TYPE_CHAR,
-        sizeof(int32_t), // DATA_TYPE_INT,
-        sizeof(double),  // DATA_TYPE_FLOAT,
-        8,               // DATA_TYPE_STRING, default size
-        0                // DATA_TYPE_INVALID
+        sizeof(bool),        // DATA_TYPE_BOOL,
+        sizeof(wchar_t),     // DATA_TYPE_CHAR,
+        sizeof(int32_t),     // DATA_TYPE_INT,
+        sizeof(double),      // DATA_TYPE_FLOAT,
+        sizeof(wchar_t) * 8, // DATA_TYPE_STRING, default size
+        0                    // DATA_TYPE_INVALID
     };
 
 data_type get_from_token(std::string &str);

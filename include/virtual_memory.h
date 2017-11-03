@@ -23,7 +23,7 @@
 #ifndef BOX_VIRTUAL_MEMORY_H
 #define BOX_VIRTUAL_MEMORY_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "fw_decl.h"
 #include <cstdint>
 #include <functional>
@@ -34,7 +34,7 @@
 /**
  * Virtual memory entity.
  */
-class virtual_memory : public entity {
+class virtual_memory : public object {
 public:
     explicit virtual_memory(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
     memory *alloc(uint32_t size);

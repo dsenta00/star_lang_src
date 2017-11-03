@@ -23,7 +23,7 @@
 #ifndef BOX_METHOD_H
 #define BOX_METHOD_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "data_type.h"
 #include "fw_decl.h"
 
@@ -36,19 +36,19 @@ typedef enum {
 /**
  * @brief The method class
  */
-class method : public entity {
+class method : public object {
 protected:
-    entity *result;
-    std::map<std::string, entity *> local_objects;
-    std::vector<entity *> stack;
+    object *result;
+    std::map<std::string, object *> local_objects;
+    std::vector<object *> stack;
     instruction *current_instruction;
 public:
     method(std::string id, std::vector<instruction *> &instructions);
     instruction_result execute_next();
-    void add_local_object(entity *e);
-    entity *get_local_object(std::string id);
-    void push_stack(entity *e);
-    entity *pop_stack();
+    void add_local_object(object *e);
+    object *get_local_object(std::string id);
+    void push_stack(object *e);
+    object *pop_stack();
 };
 
 #endif // BOX_METHOD_H

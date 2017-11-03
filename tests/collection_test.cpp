@@ -37,20 +37,20 @@ static virtual_memory *vm;
  *
  * @return random name.
  */
-static const char *random_name(int32_t i = -1)
+static const wchar_t *random_name(int32_t i = -1)
 {
-    static const char str[][64] =
+    static const wchar_t str[][64] =
         {
-            "Miljenko",
-            "Mislav",
-            "Ivan",
-            "Danijela",
-            "Antonia",
-            "Ivanka",
-            "Vesna",
-            "Matea",
-            "Ivana",
-            "Ante",
+            L"Miljenko",
+            L"Mislav",
+            L"Ivan",
+            L"Danijela",
+            L"Antonia",
+            L"Ivanka",
+            L"Vesna",
+            L"Matea",
+            L"Ivana",
+            L"Ante",
         };
 
     return (i == -1) ? str[rand() % 10] : str[i % 10];
@@ -74,42 +74,41 @@ collection_test_basic()
     }
 
     primitive_data &str = empty_collection.to_string();
-    ASSERT_TRUE(strcmp((const char *) str.get_address(),
-                       "") == 0,
-                "Returned string should be empty! (%s)",
-                (const char *) str.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str.get_address(), L"") == 0,
+                "Returned string should be empty! (%ls)",
+                (const wchar_t *) str.get_address());
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
 
-    std::string comparision;
+    std::wstring comparision;
 
     for (uint32_t i = 0; i < ARRAY_SIZE; i++)
     {
         if (i % 2 == 0)
         {
             primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
-            empty_collection.insert(i, (entity *) &data);
+            empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
             comparision.append(random_name(i));
         }
         else if (i % 3 == 0)
         {
             primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
-            empty_collection.insert(i, (entity *) &data);
+            empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
-            comparision.append(std::to_string(i));
+            comparision.append(std::to_wstring(i));
         }
         else
         {
             double fi = (double) i;
             primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_FLOAT, (const void *) &fi);
-            empty_collection.insert(i, (entity *) &data);
+            empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
-            comparision.append(std::to_string(fi));
+            comparision.append(std::to_wstring(fi));
         }
 
         if (i < (ARRAY_SIZE - 1))
         {
-            comparision.append(" ");
+            comparision.append(L" ");
         }
     }
 
@@ -122,9 +121,9 @@ collection_test_basic()
             ASSERT_TRUE(data->get_type() == DATA_TYPE_STRING,
                         "data should be DATA_TYPE_STRING");
 
-            ASSERT_TRUE(strcmp((const char *) data->get_address(),
+            ASSERT_TRUE(wcscmp((const wchar_t *) data->get_address(),
                                random_name(i)) == 0,
-                        "data should be %s (%s)",
+                        "data should be %ls (%ls)",
                         random_name(i),
                         (const char *) data->get_address());
             ASSERT_OK;
@@ -161,10 +160,10 @@ collection_test_basic()
 
     primitive_data &str2 = empty_collection.to_string();
 
-    ASSERT_TRUE(comparision.compare((const char *) str2.get_address()) == 0,
-                "they should be the same: expected %s, got %s",
+    ASSERT_TRUE(comparision == (const wchar_t *) str2.get_address(),
+                "they should be the same: expected %ls, got %ls",
                 comparision.c_str(),
-                (const char *) str2.get_address());
+                (const wchar_t *) str2.get_address());
 
     collection &c = *collection::create("array");
 
@@ -173,18 +172,18 @@ collection_test_basic()
         if (i % 2 == 0)
         {
             primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
-            c.insert(i, (entity *) &data);
+            c.insert(i, (object *) &data);
             ASSERT_OK;
         }
         else if (i % 3 == 0)
         {
             primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
-            c.insert(i, (entity *) &data);
+            c.insert(i, (object *) &data);
             ASSERT_OK;
         }
         else
         {
-            c.insert(i, (entity *) &empty_collection);
+            c.insert(i, (object *) &empty_collection);
             ASSERT_OK;
         }
     }
@@ -196,11 +195,11 @@ collection_test_basic()
             auto *data = (primitive_data *) c[i];
             ASSERT_OK;
             ASSERT_TRUE(data->get_type() == DATA_TYPE_STRING, "data should be DATA_TYPE_STRING");
-            ASSERT_TRUE(strcmp((const char *) data->get_address(),
+            ASSERT_TRUE(wcscmp((const wchar_t *) data->get_address(),
                                random_name(i)) == 0,
-                        "data should be %s (%s)",
+                        "data should be %ls (%ls)",
                         random_name(i),
-                        (const char *) data->get_address());
+                        (const wchar_t *) data->get_address());
         }
         else if (i % 3 == 0)
         {

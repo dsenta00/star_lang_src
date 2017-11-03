@@ -23,14 +23,14 @@
 #ifndef STAR_PROGRAMMING_LANGUAGE_FILE_H
 #define STAR_PROGRAMMING_LANGUAGE_FILE_H
 
-#include "ORM/entity.h"
+#include "ORM/object.h"
 #include "fw_decl.h"
 #include "file_mode.h"
 
 /**
  * The file entity. Handles file streams.
  */
-class file : public entity {
+class file : public object {
 public:
     explicit file(const char *id);
     file(const char *id, file_mode mode, const char *file_name);
@@ -39,15 +39,17 @@ public:
     bool is_opened();
     primitive_data *read_all();
     int64_t get_size();
-    void write(entity *e);
+    void write(object *o);
     static file *create(const char *id, file_mode mode, const char *file_name);
     static file *create(const char *id);
     ~file() override;
 protected:
     void read_into_buffer();
+    void write_from_buffer();
+
     bool is_already_read;
-    FILE *file_pointer;
-    std::string buffer;
+    std::string file_name;
+    std::wstring buffer;
     file_mode mode;
 };
 

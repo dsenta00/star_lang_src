@@ -24,7 +24,7 @@
 #define MEMORY_H
 
 #include <stdint.h>
-#include "ORM/entity.h"
+#include "ORM/object.h"
 
 /**
  * The memory object.
@@ -32,7 +32,7 @@
  * Memory is obtained by memory chunk in order to data can keep
  * memory information.
  */
-class memory : public entity {
+class memory : public object {
 public:
     memory(uintptr_t address, uint32_t size);
 

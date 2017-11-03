@@ -22,6 +22,10 @@
 
 #include <error_log.h>
 #include <file.h>
+#include <fstream>
+#include <codecvt>
+#include <sstream>
+#include <iostream>
 #include "collection.h"
 #include "primitive_data.h"
 #include "ORM/orm.h"
@@ -33,9 +37,8 @@
  * @param mode
  * @param file_name
  */
-file::file(const char *id, file_mode mode, const char *file_name) : entity::entity("file", id)
+file::file(const char *id, file_mode mode, const char *file_name) : object::object("file", id)
 {
-    this->file_pointer = nullptr;
     this->mode = FILE_MODE_NOT_OPEN;
     this->is_already_read = false;
 
@@ -47,9 +50,8 @@ file::file(const char *id, file_mode mode, const char *file_name) : entity::enti
  *
  * @param id
  */
-file::file(const char *id) : entity::entity("file", id)
+file::file(const char *id) : object::object("file", id)
 {
-    this->file_pointer = nullptr;
     this->mode = FILE_MODE_NOT_OPEN;
     this->is_already_read = false;
 }
@@ -62,7 +64,7 @@ file::file(const char *id) : entity::entity("file", id)
 bool
 file::is_opened()
 {
-    return (this->file_pointer != nullptr) && file_mode_is_valid(this->mode);
+    return file_mode_is_valid(this->mode);
 }
 
 /**
@@ -84,10 +86,7 @@ file::read_all()
         return nullptr;
     }
 
-    if (!this->is_already_read)
-    {
-        this->read_into_buffer();
-    }
+    this->read_into_buffer();
 
     primitive_data *data = nullptr;
 
@@ -107,7 +106,6 @@ file::read_all()
         );
     }
 
-    this->is_already_read = true;
     return data;
 }
 
@@ -119,27 +117,25 @@ file::read_all()
 int64_t
 file::get_size()
 {
-    int64_t size;
-
     if (!this->is_opened())
     {
         return 0;
     }
 
-    rewind(this->file_pointer);
-    fseek(this->file_pointer, 0L, SEEK_END);
-    size = ftell(this->file_pointer);
-    rewind(this->file_pointer);
+    std::wifstream wif(this->file_name);
+    wif.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8<wchar_t>));
+    std::wstringstream wss;
+    wss << wif.rdbuf();
 
-    return size;
+    return static_cast<int64_t>(wss.str().size());
 }
 
 /**
  * Write data to file.
- * @param e
+ * @param o
  */
 void
-file::write(entity *e)
+file::write(object *o)
 {
     if (!this->is_opened())
     {
@@ -152,13 +148,13 @@ file::write(entity *e)
         return;
     }
 
-    if (e->get_entity_type() == "primitive_data")
+    if (o->get_object_type() == "primitive_data")
     {
-        this->buffer.append(((primitive_data *) e)->get_string());
+        this->buffer.append(((primitive_data *) o)->get_string());
     }
-    else if (e->get_entity_type() == "collection")
+    else if (o->get_object_type() == "collection")
     {
-        this->buffer.append(((collection *) e)->to_string().get_string());
+        this->buffer.append(((collection *) o)->to_string().get_string());
     }
 }
 
@@ -175,21 +171,11 @@ file::close()
 
     if (file_mode_can_write(this->mode))
     {
-        fwrite(buffer.c_str(), sizeof(int8_t), buffer.size(), this->file_pointer);
-        this->buffer.clear();
+        this->write_from_buffer();
     }
 
-    fclose(this->file_pointer);
-    this->file_pointer = nullptr;
+    this->file_name.clear();
     this->mode = FILE_MODE_NOT_OPEN;
-}
-
-/**
- * The destructor.
- */
-file::~file()
-{
-    this->close();
 }
 
 /**
@@ -224,22 +210,27 @@ file::create(const char *id)
 void
 file::read_into_buffer()
 {
-    int64_t size = this->get_size();
-
-    if (size == 0)
+    if (this->is_already_read)
     {
-        this->buffer.clear();
+        return;
     }
-    else
-    {
-        this->buffer.resize(static_cast<unsigned long>(size + 1));
 
-        fread((void *) this->buffer.c_str(),
-              sizeof(int8_t),
-              static_cast<size_t>(size + 1),
-              this->file_pointer
-        );
+    std::wifstream wif(this->file_name);
+
+    if (!wif.good())
+    {
+        ERROR_LOG_ADD(ERROR_FILE_UNKNOWN_FILE);
+        this->mode = FILE_MODE_NOT_OPEN;
+        return;
     }
+
+    wif.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8<wchar_t>));
+    std::wstringstream wss;
+    wss << wif.rdbuf();
+    wif.close();
+
+    this->buffer = wss.str();
+    this->is_already_read = true;
 }
 
 /**
@@ -256,6 +247,8 @@ file::open(file_mode mode, const char *file_name)
         this->close();
     }
 
+    this->file_name = file_name;
+
     this->mode = mode;
     if (!file_mode_is_valid(this->mode))
     {
@@ -263,20 +256,58 @@ file::open(file_mode mode, const char *file_name)
         return;
     }
 
-    this->file_pointer = fopen(file_name, file_mode_get_format(mode));
-    if (!this->file_pointer)
+    if (this->mode == FILE_MODE_READ)
     {
-        if (this->mode == FILE_MODE_READ)
-        {
-            ERROR_LOG_ADD(ERROR_FILE_UNKNOWN_FILE);
-        }
-        else
-        {
-            ERROR_LOG_ADD(ERROR_FILE_DID_NOT_OPEN);
-        }
-
-        this->mode = FILE_MODE_NOT_OPEN;
+        this->read_into_buffer();
     }
+}
+
+/**
+ * Write from buffer.
+ */
+void
+file::write_from_buffer()
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::string str;
+
+    if (this->buffer.empty())
+    {
+        return;
+    }
+
+    try
+    {
+        str = converter.to_bytes(this->buffer);
+    }
+    catch (std::exception &e)
+    {
+        ERROR_LOG_ADD(ERROR_FILE_WRITE_FAIL);
+    }
+
+    std::ofstream of;
+
+    if (this->mode == FILE_MODE_WRITE)
+    {
+        of.open(this->file_name);
+    }
+    else if (this->mode == FILE_MODE_APPEND)
+    {
+        of.open(this->file_name, std::ios_base::app);
+    }
+
+    of << str;
+    of.close();
+
+    this->buffer.clear();
+}
+
+/**
+ * The destructor.
+ */
+file::~file()
+{
+    this->close();
 }
 
 

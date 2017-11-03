@@ -30,29 +30,29 @@
 #include <functional>
 #include <memory>
 
-typedef std::shared_ptr<entity> entity_p;
+typedef std::shared_ptr<object> object_p;
 
 /**
- * The entity_repository class.
+ * The object_repository class.
  *
- * All created entities of same type are stored right here.
- * Each entity type has its own entity_repository.
+ * All created objects of same type are stored right here.
+ * Each object type has its own object_repository.
  */
-class entity_repository {
+class object_repository {
 public:
-    entity *find(const std::function<bool(entity *)> &func);
-    entity *get(std::string &id);
-    void add(entity *e);
-    void remove(entity *e);
-    void change_id(entity *e, std::string &new_id);
+    object *find(const std::function<bool(object *)> &func);
+    object *get(std::string &id);
+    void add(object *o);
+    void remove(object *o);
+    void change_id(object *o, std::string &new_id);
     void sweep();
-    ~entity_repository();
+    ~object_repository();
 protected:
     /*
-     * key -> entity ID
-     * values array
+     * key    -> object ID
+     * values -> object array
      */
-    std::map<std::string, std::vector<entity_p>> entity_map;
+    std::map<std::string, std::vector<object_p>> object_map;
 };
 
 #endif // ENTITY_REPOSITORY_H

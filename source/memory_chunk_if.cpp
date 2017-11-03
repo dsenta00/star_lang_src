@@ -24,23 +24,23 @@
 #include "memory.h"
 #include "ORM/relationship.h"
 
-memory_chunk_if::memory_chunk_if() : entity::entity("memory_chunk_relationship", "chunk")
+memory_chunk_if::memory_chunk_if() : object::object("memory_chunk_relationship", "chunk")
 {
-    entity::master_relationship_add("free_memory", ONE_TO_MANY);
-    entity::master_relationship_add("reserved_memory", ONE_TO_MANY);
+    object::master_relationship_add("free_memory", ONE_TO_MANY);
+    object::master_relationship_add("reserved_memory", ONE_TO_MANY);
 }
 
 void
 memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
 {
     memory *mem = memory::create(address, size);
-    this->master_relationship_add_entity("free_memory", mem);
+    this->master_relationship_add_object("free_memory", mem);
 }
 
 void
 memory_chunk_if::free_memory_remove(memory *mem)
 {
-    this->master_relationship_remove_entity("free_memory", mem);
+    this->master_relationship_remove_object("free_memory", mem);
 }
 
 memory *
@@ -48,8 +48,8 @@ memory_chunk_if::free_memory_find(std::function<bool(memory *)> foo)
 {
     auto free_memory = this->master_relationship_get("free_memory");
 
-    return (memory *) free_memory->find([&](entity *e) {
-        memory *m = (memory *) e;
+    return (memory *) free_memory->find([&](object *e) {
+        auto *m = (memory *) e;
         return foo(m);
     });
 }
@@ -67,7 +67,7 @@ memory_chunk_if::free_memory_num()
 {
     auto free_memory = this->master_relationship_get("free_memory");
 
-    return free_memory->num_of_entities();
+    return static_cast<uint32_t>(free_memory->size());
 }
 
 void
@@ -88,16 +88,16 @@ memory_chunk_if::free_memory_union()
 {
     auto free_memory = master_relationship_get("free_memory");
 
-    free_memory->sort([&](entity *e1, entity *e2) {
-        memory *m1 = (memory *) e1;
-        memory *m2 = (memory *) e2;
+    free_memory->sort([&](object *e1, object *e2) {
+        auto *m1 = (memory *) e1;
+        auto m2 = (memory *) e2;
 
         return m1->get_address() < m2->get_address();
     });
 
-    free_memory->for_each([&](entity *e1, entity *e2) {
-        memory *m1 = (memory *) e1;
-        memory *m2 = (memory *) e2;
+    free_memory->for_each([&](object *e1, object *e2) {
+        auto *m1 = (memory *) e1;
+        auto *m2 = (memory *) e2;
 
         if (m2->get_address() == (m1->get_address() + m1->get_size()))
         {
@@ -114,7 +114,7 @@ memory *
 memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 {
     memory *mem = memory::create(address, size);
-    this->master_relationship_add_entity("reserved_memory", (entity *) mem);
+    this->master_relationship_add_object("reserved_memory", (object *) mem);
 
     return mem;
 }
@@ -122,7 +122,7 @@ memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 void
 memory_chunk_if::reserved_memory_remove(memory *mem)
 {
-    this->master_relationship_remove_entity("reserved_memory", mem);
+    this->master_relationship_remove_object("reserved_memory", mem);
 }
 
 memory *
@@ -146,7 +146,7 @@ memory_chunk_if::reserved_memory_num()
 {
     auto reserved_memory = master_relationship_get("reserved_memory");
 
-    return reserved_memory->num_of_entities();
+    return static_cast<uint32_t>(reserved_memory->size());
 }
 
 void
@@ -154,7 +154,7 @@ memory_chunk_if::reserved_memory_sort()
 {
     auto reserved_memory = master_relationship_get("reserved_memory");
 
-    reserved_memory->sort([&](entity *e1, entity *e2) {
+    reserved_memory->sort([&](object *e1, object *e2) {
         auto m1 = (memory *) e1;
         auto m2 = (memory *) e2;
 

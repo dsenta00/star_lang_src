@@ -33,7 +33,7 @@
  * @param type - data type.
  * @param size - array size in members.
  */
-collection::collection(std::string id, collection *c) : entity::entity("collection", id)
+collection::collection(std::string id, collection *c) : object::object("collection", id)
 {
     this->master_relationship_add("collection", ONE_TO_MANY);
 
@@ -42,7 +42,7 @@ collection::collection(std::string id, collection *c) : entity::entity("collecti
         return;
     }
 
-    (*this) += (entity *) c;
+    (*this) += (object *) c;
 }
 
 /**
@@ -62,7 +62,7 @@ collection::get_number_of()
  * @param index - element index.
  * @return data of found, otherwise return NULL.
  */
-entity *
+object *
 collection::operator[](uint32_t index)
 {
     return (*this)[std::to_string(index)];
@@ -74,7 +74,7 @@ collection::operator[](uint32_t index)
  * @param index - element index.
  * @return data of found, otherwise return NULL.
  */
-entity *
+object *
 collection::operator[](std::string index)
 {
     return this->data_cache[index];
@@ -83,24 +83,24 @@ collection::operator[](std::string index)
 /**
  * @brief collection::insert
  * @param index
- * @param e
+ * @param o
  */
 void
-collection::insert(std::string index, entity *e)
+collection::insert(std::string index, object *o)
 {
     this->remove_data(index);
-    this->insert_data(index, e);
+    this->insert_data(index, o);
 }
 
 /**
  * @brief collection::insert
  * @param index
- * @param e
+ * @param o
  */
 void
-collection::insert(uint32_t index, entity *e)
+collection::insert(uint32_t index, object *o)
 {
-    this->insert(std::to_string(index), e);
+    this->insert(std::to_string(index), o);
 }
 
 /**
@@ -110,9 +110,10 @@ collection::insert(uint32_t index, entity *e)
  * @return true if operation success, otherwise return false.
  */
 bool
-collection::operator+=(entity *e)
+collection::operator+=(object *o)
 {
-    this->insert_data(std::to_string(this->get_number_of()), e);
+    this->insert_data(std::to_string(this->get_number_of()), o);
+
     return true;
 }
 
@@ -124,9 +125,7 @@ collection::operator+=(entity *e)
 primitive_data &
 collection::to_string()
 {
-    primitive_data &str = *primitive_data::create(this->id.append(" as string"),
-                                                  DATA_TYPE_STRING);
-
+    primitive_data &str = *primitive_data::create(this->id.append(" as string"), DATA_TYPE_STRING);
     relationship *r = this->master_relationship_get("collection");
 
     if (!r)
@@ -134,22 +133,20 @@ collection::to_string()
         return str;
     }
 
-    char ch = ' ';
-    primitive_data &separator_char = *primitive_data::create("<<temp_char>>",
-                                                             DATA_TYPE_CHAR,
-                                                             (const void *) &ch);
+    wchar_t ch = L' ';
+    primitive_data &separator_char = *primitive_data::create("<<temp_char>>", DATA_TYPE_CHAR, (const void *) &ch);
 
-
-    r->for_each([&](entity *e) {
-        if (e->get_entity_type() == "primitive_data")
+    for (object *o : *r)
+    {
+        if (o->get_object_type() == "primitive_data")
         {
-            auto *data = (primitive_data *) e;
+            auto *data = (primitive_data *) o;
             str += *data;
 
             if (!ERROR_LOG_IS_EMPTY)
             {
                 str.default_value();
-                return;
+                return str;
             }
 
             if (data != r->back())
@@ -157,15 +154,15 @@ collection::to_string()
                 str += separator_char;
             }
         }
-        else if (e->get_entity_type() == "collection")
+        else if (o->get_object_type() == "collection")
         {
-            auto *data = (collection *) e;
+            auto *data = (collection *) o;
             str += data->to_string();
 
             if (!ERROR_LOG_IS_EMPTY)
             {
                 str.default_value();
-                return;
+                return str;
             }
 
             if (data != r->back())
@@ -173,7 +170,7 @@ collection::to_string()
                 str += separator_char;
             }
         }
-    });
+    }
 
     virtual_memory *vm = (virtual_memory *) orm::get_first("virtual_memory");
     vm->free(separator_char.get_memory());
@@ -190,7 +187,7 @@ collection::clear()
 {
     relationship *r = this->master_relationship_get("collection");
 
-    while (r->num_of_entities())
+    while (!r->empty())
     {
         this->remove_data(r->front());
     }
@@ -212,45 +209,45 @@ collection::remove_data(std::string index)
 /**
  * Remove data.
  *
- * @param e
+ * @param o
  */
 void
-collection::remove_data(entity *e)
+collection::remove_data(object *o)
 {
-    if (!e)
+    if (!o)
     {
         return;
     }
 
-    this->master_relationship_remove_entity("collection", e);
-    this->data_cache.erase(e->get_id());
+    this->master_relationship_remove_object("collection", o);
+    this->data_cache.erase(o->get_id());
 }
 
 /**
  * @brief collection::insert_data
  * @param index
- * @param e
+ * @param o
  */
 void
-collection::insert_data(std::string index, entity *e)
+collection::insert_data(std::string index, object *o)
 {
-    if (e == nullptr)
+    if (o == nullptr)
     {
         ERROR_LOG_ADD(ERROR_METHOD_ADDING_NULL_DATA);
         return;
     }
 
-    if (e->get_entity_type() == "primitive_data")
+    if (o->get_object_type() == "primitive_data")
     {
         /*
          * Data is not a reference. Create a new data.
          */
-        entity *new_data = primitive_data::create(index, *(primitive_data *) e);
-        e = new_data;
+        object *new_data = primitive_data::create(index, *(primitive_data *) o);
+        o = new_data;
     }
 
-    this->master_relationship_add_entity("collection", e);
-    this->data_cache[index] = e;
+    this->master_relationship_add_object("collection", o);
+    this->data_cache[index] = o;
 }
 
 /**
@@ -270,5 +267,5 @@ collection::~collection()
 collection *
 collection::create(std::string id, collection *c)
 {
-    return (collection *) orm::create((entity *) new collection(std::move(id), c));
+    return (collection *) orm::create((object *) new collection(std::move(id), c));
 }

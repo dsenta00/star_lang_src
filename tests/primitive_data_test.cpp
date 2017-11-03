@@ -51,28 +51,28 @@ primitive_data_test_float()
     ASSERT_OK;
     ASSERT_EQUALS(float_data.to_float(), 65.0);
 
-    ASSERT_EQUALS(float_data.to_char(), 'A');
+    ASSERT_EQUALS(float_data.to_char(), L'A');
     ASSERT_OK;
 
     ASSERT_EQUALS(float_data.to_int(), 65);
     ASSERT_OK;
 
     primitive_data &str = float_data.to_string();
-    ASSERT_TRUE(strcmp((const char *) str.get_address(), "65.000000") == 0,
-                "string should be 65.000000! (%s)",
-                (const char *) str.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str.get_address(), L"65.000000") == 0,
+                "string should be 65.000000! (%ls)",
+                (const wchar_t *) str.get_address());
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
-                          sizeof("65.000000"));
+                          sizeof(L"65.000000"));
 
     int num = 35;
     primitive_data &int_data = *primitive_data::create("int_data", DATA_TYPE_INT, &num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
-                          sizeof("65.000000") +
+                          sizeof(L"65.000000") +
                           sizeof(int));
 
     ASSERT_FALSE(float_data == int_data, "float_data and int_data should not be equal");
@@ -132,7 +132,7 @@ primitive_data_test_float()
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
-                          sizeof("65.000000") +
+                          sizeof(L"65.000000") +
                           sizeof(int) +
                           sizeof(double));
 
@@ -189,14 +189,14 @@ primitive_data_test_float()
 
     /* interaction with string */
 
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "35");
+    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
-                          sizeof("65.000000") +
+                          sizeof(L"65.000000") +
                           sizeof(int) +
                           sizeof(double) +
-                          sizeof("35"));
+                          sizeof(L"35"));
 
     ASSERT_FALSE(float_data == string_data, "float_data and string_data should not be equal");
     ASSERT_OK;
@@ -238,18 +238,18 @@ primitive_data_test_float()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
-    string_data = "35 Grupa Zana rules!";
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(),
-                       "35 Grupa Zana rules!") == 0,
-                "string should be \"35 Grupa Zana rules!\" (%s)",
-                (const char *) string_data.get_address());
+    string_data = L"35 Grupa Zana rules!";
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(),
+                       L"35 Grupa Zana rules!") == 0,
+                "string should be \"35 Grupa Zana rules!\" (%ls)",
+                (const wchar_t *) string_data.get_address());
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
-                          sizeof("65.000000") +
+                          sizeof(L"65.000000") +
                           sizeof(int) +
                           sizeof(double) +
-                          sizeof("35 Grupa Zana rules!"));
+                          sizeof(L"35 Grupa Zana rules!"));
 
     ASSERT_FALSE(float_data == string_data, "float_data and string_data should be equal");
     ASSERT_OK;
@@ -292,7 +292,7 @@ primitive_data_test_float()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
-    string_data = "0";
+    string_data = L"0";
 
     ASSERT_FALSE(float_data /= string_data, "float_data and float_data shouldn't divide");
     ASSERT_EQUALS(float_data.to_float(), 65.0);
@@ -319,6 +319,27 @@ primitive_data_test_float()
 }
 
 /**
+ * Test empty string
+ */
+static void
+primitive_data_test_string_empty()
+{
+    ASSERT_VIRTUAL_MEMORY(*vm, 0);
+
+    primitive_data &empty_string = *primitive_data::create(
+        "empty_string",
+        DATA_TYPE_STRING
+    );
+
+    ASSERT_OK;
+    ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
+    ASSERT_TRUE(wcscmp((const wchar_t *) empty_string.get_address(), L"") == 0,
+                "string_data should be empty!");
+
+    printf("\t-> %s()::OK\n", __FUNCTION__);
+}
+
+/**
  * Test data as string.
  */
 static void
@@ -326,17 +347,10 @@ primitive_data_test_string()
 {
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
-    primitive_data &empty_string = *primitive_data::create("empty_string", DATA_TYPE_STRING);
-    ASSERT_OK;
-    ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
-    ASSERT_TRUE(strcmp((const char *) empty_string.get_address(), "") == 0,
-                "string_data should be empty!");
-
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "32");
+    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"32");
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32"));
+                          sizeof(L"32"));
 
     ASSERT_FALSE(++string_data, "string_data shouldn't' be incremented!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INCREMENTING_STRING);
@@ -346,10 +360,10 @@ primitive_data_test_string()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DECREMENTING_STRING);
     ERROR_LOG_CLEAR;
 
-    ASSERT_TRUE(string_data.to_char() == '3',
+    ASSERT_TRUE(string_data.to_char() == L'3',
                 "int_data to char() -> %c instead of %c",
                 string_data.to_char(),
-                '3');
+                L'3');
     ASSERT_OK;
 
     ASSERT_TRUE(string_data.to_float() == 32.0,
@@ -359,21 +373,19 @@ primitive_data_test_string()
     ASSERT_OK;
 
     primitive_data &str = string_data.to_string();
-    ASSERT_TRUE(strcmp((const char *) str.get_address(), "32") == 0,
-                "string should be 32! (%s)",
-                (const char *) str.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str.get_address(), L"32") == 0,
+                "string should be 32! (%ls)",
+                (const wchar_t *) str.get_address());
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32") +
-                          sizeof("32"));
+                          sizeof(L"32") +
+                          sizeof(L"32"));
 
-    primitive_data &string_data2 = *primitive_data::create("string_data2", DATA_TYPE_STRING, "31");
+    primitive_data &string_data2 = *primitive_data::create("string_data2", DATA_TYPE_STRING, L"31");
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32") +
-                          sizeof("32") +
-                          sizeof("31"));
+                          sizeof(L"32") +
+                          sizeof(L"32") +
+                          sizeof(L"31"));
 
     ASSERT_FALSE(string_data == string_data2,
                  "string_data and string_data2 should not be equal");
@@ -395,46 +407,44 @@ primitive_data_test_string()
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32") +
-                          sizeof("32") +
-                          sizeof("31"));
+                          sizeof(L"32") +
+                          sizeof(L"32") +
+                          sizeof(L"31"));
 
     ASSERT_TRUE(string_data += string_data2,
                 "string_data and string_data2 should add");
     ASSERT_OK;
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "3231") == 0,
-                "string_data should be 3231! (%s)",
-                (const char *) string_data.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"3231") == 0,
+                "string_data should be 3231! (%ls)",
+                (const wchar_t *) string_data.get_address());
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("3231") +
-                          sizeof("32") +
-                          sizeof("31"));
+                          sizeof(L"3231") +
+                          sizeof(L"32") +
+                          sizeof(L"31"));
 
     ASSERT_FALSE(string_data -= string_data2,
                  "string_data and string_data2 shouldn't substract");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "3231") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"3231") == 0,
                 "string_data should be 3231!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_SUBTRACTING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data *= string_data2, "string_data and string_data2 shouldn't multiply");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "3231") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"3231") == 0,
                 "string_data should be 3231!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_MULTIPLYING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data /= string_data2, "string_data and string_data2 shouldn't divide");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "3231") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"3231") == 0,
                 "string_data should be 3231!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data %= string_data2, "string_data and string_data2 shouldn't mod");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "3231") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"3231") == 0,
                 "string_data should be 3231!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
     ERROR_LOG_CLEAR;
@@ -443,10 +453,9 @@ primitive_data_test_string()
     primitive_data &int_data = *primitive_data::create("int_data", DATA_TYPE_INT, &num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("3231") +
-                          sizeof("32") +
-                          sizeof("31") +
+                          sizeof(L"3231") +
+                          sizeof(L"32") +
+                          sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT]);
 
     ASSERT_FALSE(string_data == int_data, "string_data and int_data should not be equal");
@@ -468,36 +477,35 @@ primitive_data_test_string()
     ASSERT_OK;
 
     ASSERT_TRUE(string_data += int_data, "string_data and int_data should add");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "323131") == 0,
-                "string_data should be 323131! (%s)",
-                (const char *) string_data.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"323131") == 0,
+                "string_data should be 323131! (%ls)",
+                (const wchar_t *) string_data.get_address());
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("323131") +
-                          sizeof("32") +
-                          sizeof("31") +
+                          sizeof(L"323131") +
+                          sizeof(L"32") +
+                          sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT]);
 
     ASSERT_FALSE(string_data -= int_data, "string_data and int_data shouldn't substract");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "323131") == 0, "string_data should be 323131!");
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"323131") == 0, "string_data should be 323131!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_SUBTRACTING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data *= int_data,
                  "string_data and int_data shouldn't multiply");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "323131") == 0, "string_data should be 323131!");
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"323131") == 0, "string_data should be 323131!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_MULTIPLYING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data /= int_data, "string_data and int_data shouldn't divide");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "323131") == 0, "string_data should be 323131!");
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"323131") == 0, "string_data should be 323131!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data %= int_data, "string_data and int_data shouldn't mod");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "323131") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"323131") == 0,
                 "string_data should be 323131!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
     ERROR_LOG_CLEAR;
@@ -506,10 +514,9 @@ primitive_data_test_string()
     primitive_data &float_data = *primitive_data::create("float_data", DATA_TYPE_FLOAT, &float_num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("323131") +
-                          sizeof("32") +
-                          sizeof("31") +
+                          sizeof(L"323131") +
+                          sizeof(L"32") +
+                          sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT] +
                           DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
 
@@ -533,42 +540,41 @@ primitive_data_test_string()
     ASSERT_OK;
 
     ASSERT_TRUE(string_data += float_data, "string_data and float_data should add");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(),
-                       "32313131.000000") == 0,
-                "string_data should be 32313131.000000! (%s)",
-                (const char *) string_data.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(),
+                       L"32313131.000000") == 0,
+                "string_data should be 32313131.000000! (%ls)",
+                (const wchar_t *) string_data.get_address());
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32313131.000000") +
-                          sizeof("32") +
-                          sizeof("31") +
+                          sizeof(L"32313131.000000") +
+                          sizeof(L"32") +
+                          sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT] +
                           DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
 
     ASSERT_FALSE(string_data -= float_data, "string_data and float_data shouldn't substract");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "32313131.000000") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"32313131.000000") == 0,
                 "string_data should be 32313131.000000!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_SUBTRACTING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data *= float_data, "string_data and float_data shouldn't multiply");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "32313131.000000") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"32313131.000000") == 0,
                 "string_data should be 32313131.000000!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_MULTIPLYING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data /= float_data, "string_data and float_data shouldn't divide");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(),
-                       "32313131.000000") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(),
+                       L"32313131.000000") == 0,
                 "string_data should be 32313131.000000!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
     ASSERT_FALSE(string_data %= float_data, "string_data and float_data shouldn't mod");
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(),
-                       "32313131.000000") == 0,
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(),
+                       L"32313131.000000") == 0,
                 "string_data should be 32313131.000000!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
     ERROR_LOG_CLEAR;
@@ -577,16 +583,15 @@ primitive_data_test_string()
     ASSERT_OK;
 
     ASSERT_NOT_EQUALS(string_data, int_data);
-    ASSERT_TRUE(strcmp((const char *) string_data.get_address(), "31") != 0,
-                "string_data should be 31! (%s)",
-                (const char *) string_data.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) string_data.get_address(), L"31") != 0,
+                "string_data should be 31! (%ls)",
+                (const wchar_t *) string_data.get_address());
     ASSERT_OK;
 
     ASSERT_VIRTUAL_MEMORY(*vm,
-                          DATA_TYPE_SIZE[DATA_TYPE_STRING] +
-                          sizeof("32313131.000000") + // still reserved
-                          sizeof("32") +
-                          sizeof("31") +
+                          sizeof(L"32313131.000000") + // still reserved
+                          sizeof(L"32") +
+                          sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT] +
                           DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
 
@@ -635,9 +640,9 @@ primitive_data_test_int()
 
     primitive_data &str = int_data.to_string();
     ASSERT_OK;
-    ASSERT_TRUE(strcmp((const char *) str.get_address(), "65") == 0,
-                "string should be 65! (%s)",
-                (const char *) str.get_address());
+    ASSERT_TRUE(wcscmp((const wchar_t *) str.get_address(), L"65") == 0,
+                "string should be 65! (%ls)",
+                (const wchar_t *) str.get_address());
 
     int num2 = 35;
     primitive_data &int_data2 = *primitive_data::create("int_data", DATA_TYPE_INT, &num2);
@@ -935,7 +940,7 @@ primitive_data_test_basic()
  */
 void primitive_data_test_convert()
 {
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "35");
+    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
 
     string_data.convert_itself(DATA_TYPE_INT);
     ASSERT_OK;
@@ -947,7 +952,7 @@ void primitive_data_test_convert()
 
     string_data.convert_itself(DATA_TYPE_STRING);
     ASSERT_OK;
-    ASSERT_TRUE(strcmp((char *) string_data.get_address(), "35.000000") == 0,
+    ASSERT_TRUE(wcscmp((wchar_t *) string_data.get_address(), L"35.000000") == 0,
                 "data should be 35");
 
     printf("\t-> %s()::OK\n", __FUNCTION__);
@@ -958,7 +963,7 @@ void primitive_data_test_convert()
  */
 void primitive_data_test_references()
 {
-    orm::remove_entity_repository("primitive_data");
+    orm::remove_object_repository("primitive_data");
 
     /*
      * Test two string
@@ -968,7 +973,7 @@ void primitive_data_test_references()
      *
      * unset(str_data2);
      */
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "35");
+    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
     ASSERT_EQUALS(string_data.get_is_reference(), true);
     primitive_data &string_data2 = *primitive_data::create("string_data2", string_data);
     ASSERT_EQUALS(string_data2.get_is_reference(), true);
@@ -977,7 +982,7 @@ void primitive_data_test_references()
     ORM_DESTROY(&string_data2);
 
     string_data.convert_itself(DATA_TYPE_INT);
-    ASSERT_EQUALS(*(int32_t *)string_data.get_address(), 35);
+    ASSERT_EQUALS(*(int32_t *) string_data.get_address(), 35);
     ASSERT_EQUALS(string_data.get_is_reference(), false);
 
     for (int type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
@@ -1046,6 +1051,7 @@ void primitive_data_test()
 
     RUN_TEST(primitive_data_test_basic());
     RUN_TEST(primitive_data_test_int());
+    RUN_TEST(primitive_data_test_string_empty());
     RUN_TEST(primitive_data_test_string());
     RUN_TEST(primitive_data_test_float());
     RUN_TEST(primitive_data_test_convert());

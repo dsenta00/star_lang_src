@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef ENTITY_H
-#define ENTITY_H
+#ifndef OBJECT_H
+#define OBJECT_H
 
 #include "orm_fw.h"
 #include "relationship_type.h"
@@ -33,17 +33,17 @@
 typedef std::shared_ptr<relationship> relationship_p;
 
 /**
- * The entity class.
- * Each entity can have relationship with another entity.
- * Usage is to extend objects as entity base class.
+ * The object class.
+ * Each object can have relationship with another object.
+ * Usage is to extend data as object base class.
  */
-class entity {
+class object {
 public:
-    entity(std::string type, const uint64_t id);
-    entity(std::string type, std::string id);
+    object(std::string type, uint64_t id);
+    object(std::string type, std::string id);
     std::string get_id();
     void set_id(std::string new_id);
-    std::string get_entity_type();
+    std::string get_object_type();
     bool get_marked();
     void set_marked(bool marked);
 
@@ -52,9 +52,9 @@ public:
      */
     relationship *slave_relationship_get(std::string relationship_name);
     void slave_relationship_add(std::string relationship_name, relationship_type type);
-    void slave_relationship_add_entity(std::string relationship_name, entity *e);
-    void slave_relationship_remove_entity(std::string relationship_name, entity *e);
-    entity *slave_relationship_back(std::string relationship_name);
+    void slave_relationship_add_entity(std::string relationship_name, object *o);
+    void slave_relationship_remove_object(std::string relationship_name, object *o);
+    object *slave_relationship_back(std::string relationship_name);
     bool slave_relationship_have_relations();
     void slave_relationship_notify_destroyed();
 
@@ -63,12 +63,12 @@ public:
      */
     relationship *master_relationship_get(std::string relationship_name);
     void master_relationship_add(std::string relationship_name, relationship_type type);
-    void master_relationship_add_entity(std::string relationship_name, entity *e);
-    void master_relationship_remove_entity(std::string relationship_name, entity *e);
-    entity *master_relationship_back(std::string relationship_name);
-    void master_relationships_clear_entities();
+    void master_relationship_add_object(std::string relationship_name, object *o);
+    void master_relationship_remove_object(std::string relationship_name, object *o);
+    object *master_relationship_back(std::string relationship_name);
+    void master_relationships_clear_objects();
 
-    virtual ~entity();
+    virtual ~object();
 protected:
     bool marked;
     std::string id;
@@ -77,4 +77,4 @@ protected:
     std::map<std::string, relationship_p> slave_relationships;
 };
 
-#endif // ENTITY_H
+#endif // OBJECT_H
