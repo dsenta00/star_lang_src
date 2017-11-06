@@ -33,7 +33,7 @@ class primitive_data;
 
 class collection;
 
-class instruction;
+class abstract_instruction;
 
 class method;
 

@@ -26,8 +26,8 @@
 #include <codecvt>
 #include <sstream>
 #include <iostream>
+#include <primitive_data/string_data.h>
 #include "collection.h"
-#include "primitive_data.h"
 #include "ORM/orm.h"
 
 /**
@@ -92,42 +92,17 @@ file::read_all()
 
     if (this->buffer.empty())
     {
-        data = primitive_data::create(
-            std::string(this->id).append(":content"),
-            DATA_TYPE_STRING
-        );
+        data = string_data::create(std::string(this->id).append(":content"));
     }
     else
     {
-        data = primitive_data::create(
+        data = string_data::create(
             std::string(this->id).append(":content"),
-            DATA_TYPE_STRING,
             this->buffer.c_str()
         );
     }
 
     return data;
-}
-
-/**
- * Get file size in bytes.
- *
- * @return
- */
-int64_t
-file::get_size()
-{
-    if (!this->is_opened())
-    {
-        return 0;
-    }
-
-    std::wifstream wif(this->file_name);
-    wif.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8<wchar_t>));
-    std::wstringstream wss;
-    wss << wif.rdbuf();
-
-    return static_cast<int64_t>(wss.str().size());
 }
 
 /**

@@ -52,7 +52,7 @@ public:
      */
     relationship *slave_relationship_get(std::string relationship_name);
     void slave_relationship_add(std::string relationship_name, relationship_type type);
-    void slave_relationship_add_entity(std::string relationship_name, object *o);
+    void slave_relationship_add_object(std::string relationship_name, object *o);
     void slave_relationship_remove_object(std::string relationship_name, object *o);
     object *slave_relationship_back(std::string relationship_name);
     bool slave_relationship_have_relations();

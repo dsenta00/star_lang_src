@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <virtual_memory.h>
 
 void assert_true(bool statement,
                  const char *file,
@@ -40,15 +41,22 @@ void assert_false(bool statement,
                   const char *fmt,
                   ...);
 
+#define RUN_TEST_VM(__test__) \
+  printf("\t-> " #__test__ "::Start\r\n"); \
+  do \
+  { \
+      orm::remove_all_repositories(); \
+      vm = virtual_memory::create(); \
+      (__test__); \
+      ERROR_LOG_IS_EMPTY; \
+  } while(false);
+
 #define RUN_TEST(__test__) \
   printf("\t-> " #__test__ "::Start\r\n"); \
   do \
   { \
-      if (vm) \
-      { \
-        orm::destroy(vm); \
-      } \
-      vm = virtual_memory::create(); \
+      orm::remove_all_repositories(); \
+      virtual_memory::create(); \
       (__test__); \
       ERROR_LOG_IS_EMPTY; \
   } while(false);

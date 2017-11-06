@@ -20,9 +20,36 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef BOX_INSTRUCTION_H
+#define BOX_INSTRUCTION_H
 
-void file_test();
+#include "ORM/object.h"
+#include "ORM/orm_fw.h"
+#include "fw_decl.h"
+#include "data_type.h"
+#include "op_code.h"
 
-#endif //FILE_TEST_H
+/**
+ * @brief The instruction class
+ */
+class abstract_instruction : public object {
+public:
+    explicit abstract_instruction(op_code op, std::vector<std::string> arg);
+    op_code &get_op_code();
+    virtual abstract_instruction *execute() = 0;
+    virtual bool validate() = 0;
+protected:
+    op_code op;
+    std::vector<std::string> arg;
+    bool validated;
+
+    /*
+     * Helper methods
+     */
+    method *get_method();
+    data_type detect_data_type(std::string &sample);
+    std::string clean_constant_format(std::string &sample, data_type type);
+    bool object_name_is_valid(std::string &sample);
+};
+
+#endif // BOX_INSTRUCTION_H

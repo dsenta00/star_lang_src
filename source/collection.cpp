@@ -20,8 +20,13 @@
  * THE SOFTWARE.
  */
 
+#include <primitive_data/string_data.h>
+#include <primitive_data/char_data.h>
+#include <primitive_data/bool_data.h>
+#include <primitive_data/int_data.h>
+#include <primitive_data/float_data.h>
 #include "collection.h"
-#include "primitive_data.h"
+#include "primitive_data/primitive_data.h"
 #include "error_log.h"
 #include "ORM/relationship.h"
 #include "ORM/orm.h"
@@ -125,7 +130,7 @@ collection::operator+=(object *o)
 primitive_data &
 collection::to_string()
 {
-    primitive_data &str = *primitive_data::create(this->id.append(" as string"), DATA_TYPE_STRING);
+    string_data &str = *string_data::create(this->id.append(" as string"));
     relationship *r = this->master_relationship_get("collection");
 
     if (!r)
@@ -134,7 +139,7 @@ collection::to_string()
     }
 
     wchar_t ch = L' ';
-    primitive_data &separator_char = *primitive_data::create("<<temp_char>>", DATA_TYPE_CHAR, (const void *) &ch);
+    char_data &separator_char = *char_data::create("<<temp_char>>", &ch);
 
     for (object *o : *r)
     {
@@ -242,7 +247,30 @@ collection::insert_data(std::string index, object *o)
         /*
          * Data is not a reference. Create a new data.
          */
-        object *new_data = primitive_data::create(index, *(primitive_data *) o);
+        auto *new_data = dynamic_cast<primitive_data *>(o);
+
+        switch (new_data->get_type())
+        {
+            case DATA_TYPE_BOOL:
+                new_data = bool_data::create(new_data->get_id(), *(bool_data *)o);
+                break;
+            case DATA_TYPE_CHAR:
+                new_data = char_data::create(new_data->get_id(), *(char_data *)o);
+                break;
+            case DATA_TYPE_INT:
+                new_data = int_data::create(new_data->get_id(), *(int_data *)o);
+                break;
+            case DATA_TYPE_FLOAT:
+                new_data = float_data::create(new_data->get_id(), *(float_data *)o);
+                break;
+            case DATA_TYPE_STRING:
+                new_data = string_data::create(new_data->get_id(), *(string_data *)o);
+                break;
+            case DATA_TYPE_INVALID:
+                ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
+                break;
+        }
+
         o = new_data;
     }
 

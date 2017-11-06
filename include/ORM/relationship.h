@@ -40,7 +40,7 @@ typedef std::vector<object *> obj_vector;
 
 /**
  * The relationship class.
- * Contains and manages all entity objects in relationship.
+ * Contains and manages all objects in relationship.
  */
 class relationship : public obj_vector {
 public:

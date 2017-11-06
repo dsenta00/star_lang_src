@@ -20,9 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef CREATE_INSTRUCTION_H
+#define CREATE_INSTRUCTION_H
 
-void file_test();
+#include "abstract_instruction.h"
 
-#endif //FILE_TEST_H
+/**
+ * OP_CODE_CREATE <name> <type>
+ */
+class create_instruction : public abstract_instruction {
+public:
+    explicit create_instruction(std::vector<std::string> &arg);
+    static create_instruction *create(std::string name, std::string type);
+    abstract_instruction *execute() override;
+    bool validate() override;
+};
+
+
+#endif //CREATE_INSTRUCTION_H

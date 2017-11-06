@@ -35,8 +35,8 @@ static std::map<std::string, object_repository_p> repo;
 /**
  * Find object repository.
  *
- * @param object_type - entity type.
- * @return entity_repository if found, otherwise return nullptr.
+ * @param object_type - object type.
+ * @return object repository if found, otherwise return nullptr.
  */
 object_repository *
 orm::find_object_repository(std::string object_type)
@@ -65,8 +65,8 @@ orm::add_object_repository(std::string object_type)
 /**
  * Add new object to repository.
  *
- * @param o - entity.
- * @return the entity.
+ * @param o - object.
+ * @return the object.
  */
 object *
 orm::create(object *o)
@@ -117,7 +117,7 @@ orm::change_id(object *o, std::string new_id)
  * Destroy object and all relationships.
  * If objects remains marked, sweep them also.
  *
- * @param o - The entity.
+ * @param o - The object.
  */
 void
 orm::destroy(object *o)
@@ -186,9 +186,9 @@ orm::select(std::string object_type, std::string id)
 }
 
 /**
- * Get first object from entity repository.
+ * Get first object from object repository.
  *
- * @param object_type - entity type.
+ * @param object_type - object type.
  * @return first object if exists, otherwise nullptr.
  */
 object *
@@ -221,4 +221,13 @@ orm::remove_object_repository(std::string object_type)
     {
         repo.erase(it);
     }
+}
+
+/**
+ * Remove all repositories
+ */
+void
+orm::remove_all_repositories()
+{
+    repo.clear();
 }

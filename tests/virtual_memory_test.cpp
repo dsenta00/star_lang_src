@@ -128,6 +128,6 @@ void
 virtual_memory_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    virtual_memory_test_basic();
+    RUN_TEST(virtual_memory_test_basic());
     printf("\r\n\r\n");
 }

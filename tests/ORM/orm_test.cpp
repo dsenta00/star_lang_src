@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-#include "test_assert.h"
+#include "../test_assert.h"
 #include "error_log.h"
 #include "ORM/object.h"
 #include "ORM/relationship.h"
@@ -122,6 +122,7 @@ static void orm_test_basic()
     ASSERT_OK;
     ASSERT_EQUALS(orm::get_first("class1"), c1);
     ASSERT_NULL(orm::get_first("class2"));
+    ASSERT_EQUALS(c1_relationship->size(), 0);
 
     ORM_DESTROY(c1);
 
@@ -534,17 +535,13 @@ static void orm_test_switch_relations2()
 void orm_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    orm_test_basic();
-    orm_test_advanced1();
-    orm_test_advanced2();
-    orm_test_cyclic_relations1();
-    orm_test_cyclic_relations2();
-    orm_test_change_id();
-    orm_test_switch_relations1();
-    orm_test_switch_relations2();
+    RUN_TEST(orm_test_basic());
+    RUN_TEST(orm_test_advanced1());
+    RUN_TEST(orm_test_advanced2());
+    RUN_TEST(orm_test_cyclic_relations1());
+    RUN_TEST(orm_test_cyclic_relations2());
+    RUN_TEST(orm_test_change_id());
+    RUN_TEST(orm_test_switch_relations1());
+    RUN_TEST(orm_test_switch_relations2());
     printf("\r\n\r\n");
-
-    orm::remove_object_repository("class1");
-    orm::remove_object_repository("class2");
-    orm::remove_object_repository("class3");
 }

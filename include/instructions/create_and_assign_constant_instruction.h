@@ -20,9 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H
+#define CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H
 
-void file_test();
+#include "abstract_instruction.h"
 
-#endif //FILE_TEST_H
+/**
+ * OP_CODE_CREATE_AND_ASSIGN_CONSTANT <name> <type> <constant>
+ */
+class create_and_assign_constant_instruction : public abstract_instruction {
+public:
+    explicit create_and_assign_constant_instruction(std::vector<std::string> &arg);
+    static create_and_assign_constant_instruction *create(std::string name, std::string type, std::string constant);
+    abstract_instruction *execute() override;
+    bool validate() override;
+};
+
+
+#endif //CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H

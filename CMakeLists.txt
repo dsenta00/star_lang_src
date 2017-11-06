@@ -34,12 +34,12 @@ include_directories(include/)
 set(INCLUDE_FILES
         include/collection.h
         tests/test_assert.h
-        include/primitive_data.h
+        include/primitive_data/primitive_data.h
         tests/primitive_data_test.h
         include/data_type.h
         include/error_info.h
         include/fw_decl.h
-        include/instruction.h
+        include/instructions/abstract_instruction.h
         include/memory_chunk.h
         include/memory_chunk_if.h
         include/method.h
@@ -50,17 +50,17 @@ set(INCLUDE_FILES
         include/ORM/object_repository.h
         include/ORM/orm.h
         include/ORM/orm_fw.h
-        tests/orm_test.h
+        tests/ORM/orm_test.h
         include/ORM/relationship.h
         include/ORM/relationship_type.h)
 
 set(SOURCE_FILES
         source/collection.cpp
         tests/test_assert.cpp
-        source/primitive_data.cpp
+        source/primitive_data/primitive_data.cpp
         source/data_type.cpp
         source/error_info.cpp
-        source/instruction.cpp
+        source/instructions/abstract_instruction.cpp
         source/memory_chunk.cpp
         source/memory_chunk_if.cpp
         source/method.cpp
@@ -71,7 +71,7 @@ set(SOURCE_FILES
         source/ORM/object.cpp
         source/ORM/object_repository.cpp
         source/ORM/orm.cpp
-        tests/orm_test.cpp
+        tests/ORM/orm_test.cpp
         source/ORM/relationship.cpp)
 
 ###################################################################
@@ -89,7 +89,7 @@ set(TEST_FILES
         tests/virtual_memory_test.cpp
         tests/virtual_memory_test.h
         tests/test.cpp
-        tests/test.h source/file.cpp include/file.h tests/file_test.cpp tests/file_test.h source/file_mode.cpp include/file_mode.h)
+        tests/test.h source/file.cpp include/file.h tests/file_test.cpp tests/file_test.h source/file_mode.cpp include/file_mode.h tests/instructions/create_instruction_test.cpp tests/instructions/create_instruction_test.h include/instructions/op_code.h source/instructions/create_instruction.cpp include/instructions/create_instruction.h source/instructions/create_and_assign_constant_instruction.cpp include/instructions/create_and_assign_constant_instruction.h source/instructions/create_and_assign_object_instruction.cpp include/instructions/create_and_assign_object_instruction.h source/instructions/pop_and_store_instruction.cpp include/instructions/pop_and_store_instruction.h tests/instructions/create_and_assign_constant_instruction_test.cpp tests/instructions/create_and_assign_constant_instruction_test.h source/primitive_data/int_data.cpp include/primitive_data/int_data.h source/primitive_data/string_data.cpp include/primitive_data/string_data.h source/primitive_data/float_data.cpp include/primitive_data/float_data.h source/primitive_data/char_data.cpp include/primitive_data/char_data.h source/primitive_data/bool_data.cpp include/primitive_data/bool_data.h)
 
 add_executable(runUnitTest
         ${INCLUDE_FILES}

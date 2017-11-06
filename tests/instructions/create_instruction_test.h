@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef CREATE_INSTRUCTION_TEST_H
+#define CREATE_INSTRUCTION_TEST_H
 
-void file_test();
+void create_instruction_test();
 
-#endif //FILE_TEST_H
+#endif //CREATE_INSTRUCTION_TEST_H

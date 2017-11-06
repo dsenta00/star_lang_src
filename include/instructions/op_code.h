@@ -20,9 +20,14 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef OP_CODE_H
+#define OP_CODE_H
 
-void file_test();
+typedef enum {
+    OP_CODE_CREATE,
+    OP_CODE_CREATE_AND_ASSIGN_CONSTANT,
+    OP_CODE_CREATE_AND_ASSIGN_OBJECT,
+    OP_CODE_POP_AND_STORE
+} op_code;
 
-#endif //FILE_TEST_H
+#endif //OP_CODE_H

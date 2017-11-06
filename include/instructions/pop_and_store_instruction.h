@@ -20,9 +20,20 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_TEST_H
-#define FILE_TEST_H
+#ifndef POP_AND_STORE_INSTRUCTION_H
+#define POP_AND_STORE_INSTRUCTION_H
 
-void file_test();
+#include "abstract_instruction.h"
 
-#endif //FILE_TEST_H
+/**
+ * OP_CODE_POP_AND_STORE <name>
+ */
+class pop_and_store_instruction : abstract_instruction {
+public:
+    explicit pop_and_store_instruction(std::vector<std::string> &arg);
+    static pop_and_store_instruction *create(std::string name);
+    abstract_instruction *execute() override;
+    bool validate() override;
+};
+
+#endif //POP_AND_STORE_INSTRUCTION_H

@@ -21,12 +21,15 @@
  */
 
 #include "method.h"
+
+#include <utility>
+#include <ORM/orm.h>
 #include "ORM/relationship.h"
 #include "error_log.h"
-#include "instruction.h"
+#include "instructions/abstract_instruction.h"
 
 method::method(std::string id,
-                       std::vector<instruction *> &instructions) : object::object("method", id)
+               std::vector<abstract_instruction *> &instructions) : object::object("method", std::move(id))
 {
     /*
      * - variable
@@ -40,21 +43,35 @@ method::method(std::string id,
      */
     this->master_relationship_add("method_instructions", ONE_TO_MANY);
 
+    if (instructions.empty())
+    {
+        this->current_instruction = nullptr;
+        return;
+    }
+
+    for (abstract_instruction *i : instructions)
+    {
+        this->master_relationship_add_object("method_instructions", i);
+    }
+
     relationship *r = this->master_relationship_get("method_instructions");
 
-    for (instruction *i : instructions)
-    {
-        r->add_object(i);
-        i->master_relationship_add_object("method", (object *) this);
-    }
+    r->for_each([&] (object *o1, object *o2) {
+        o1->master_relationship_add_object("next_instruction", o2);
+        return FOREACH_CONTINUE;
+    });
 
     this->current_instruction = instructions[0];
 }
 
-
 instruction_result
 method::execute_next()
 {
+    if (!this->current_instruction)
+    {
+        return INSTRUCTION_ERROR;
+    }
+
     this->current_instruction = this->current_instruction->execute();
 
     if (!ERROR_LOG_IS_EMPTY)
@@ -81,12 +98,6 @@ method::add_local_object(object *e)
 
     this->local_objects[e->get_id()] = e;
     this->master_relationship_add_object("method_objects", e);
-
-    /*
-     * object can be used in many methods.
-     */
-    e->master_relationship_add("method_objects", ONE_TO_MANY);
-    e->master_relationship_add_object("method_objects", (object *) this);
 }
 
 object *
@@ -106,5 +117,12 @@ method::pop_stack()
 {
     object *e = this->stack.back();
     this->stack.pop_back();
+
     return e;
+}
+
+method *
+method::create(std::string id, std::vector<abstract_instruction *> &instructions)
+{
+    return (method *)orm::create(new method(std::move(id), instructions));
 }

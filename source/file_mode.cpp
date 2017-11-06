@@ -47,29 +47,6 @@ file_mode_can_write(file_mode mode)
 }
 
 /**
- * Get C format for file open.
- *
- * @param mode
- * @return
- */
-const char *
-file_mode_get_format(file_mode mode)
-{
-    switch (mode)
-    {
-        case FILE_MODE_READ:
-            return "r";
-        case FILE_MODE_WRITE:
-            return "w+";
-        case FILE_MODE_APPEND:
-            return "a+";
-        default:
-        case FILE_MODE_NOT_OPEN:
-            return "";
-    }
-}
-
-/**
  * Check if mode is valid for opening file.
  *
  * @param mode

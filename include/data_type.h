@@ -66,6 +66,6 @@ const uint8_t DATA_TYPE_SIZE[] =
         0                    // DATA_TYPE_INVALID
     };
 
-data_type get_from_token(std::string &str);
+data_type get_data_type_from_token(std::string &str);
 
 #endif // DATA_TYPE_H

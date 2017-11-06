@@ -21,12 +21,14 @@
  */
 
 #include "test.h"
-#include "orm_test.h"
+#include "ORM/orm_test.h"
 #include "primitive_data_test.h"
 #include "collection_test.h"
 #include "memory_chunk_test.h"
 #include "virtual_memory_test.h"
 #include "file_test.h"
+#include "instructions/create_instruction_test.h"
+#include "instructions/create_and_assign_constant_instruction_test.h"
 #include <cstdio>
 
 void run_tests()
@@ -37,6 +39,8 @@ void run_tests()
     primitive_data_test();
     collection_test();
     file_test();
+    create_instruction_test();
+    //create_and_assign_constant_instruction_test();
 
     printf("TESTS ARE OK!\n");
 }

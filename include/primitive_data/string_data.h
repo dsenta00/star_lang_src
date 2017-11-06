@@ -20,35 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef PRIMITIVE_TYPE_H
-#define PRIMITIVE_TYPE_H
+#ifndef STRING_DATA_H
+#define STRING_DATA_H
 
-#include "ORM/object.h"
-#include "data_type.h"
-#include "fw_decl.h"
 #include <string>
+#include "primitive_data.h"
 
 /**
- * The primitive_data class. Represents primitive data type in
- * this programming language and defines all operations in that scope.
+ * String data type.
  */
-class primitive_data : public object {
+class string_data : public primitive_data {
 public:
-    explicit primitive_data(std::string id,
-                            data_type type = DATA_TYPE_INVALID,
-                            const void *value = nullptr);
-
-    primitive_data(std::string id,
-                   primitive_data &data,
-                   bool is_reference = false);
-
-    static primitive_data *create(std::string id,
-                                  data_type type = DATA_TYPE_INVALID,
-                                  const void *value = nullptr);
-
-    static primitive_data *create(std::string id,
-                                  primitive_data &data,
-                                  bool is_reference = false);
+    explicit string_data(std::string id, const void *value = nullptr);
+    string_data(std::string id, string_data &data);
+    static string_data *create(std::string id, const void *value = nullptr);
+    static string_data *create(std::string id, string_data &data);
 
     bool to_bool();
     wchar_t to_char();
@@ -56,7 +42,6 @@ public:
     double to_float();
     primitive_data &to_string();
 
-    void convert_itself(data_type new_type = DATA_TYPE_INVALID);
     bool default_value();
     bool operator=(const void *data);
     bool operator=(primitive_data &data);
@@ -77,20 +62,12 @@ public:
     bool operator>=(primitive_data &data);
     bool operator<=(primitive_data &data);
 
-    memory *get_memory();
-    uintptr_t get_address();
-    data_type get_type();
-    bool get_is_reference();
-
     bool print();
     bool println();
     bool scan();
 
     std::wstring get_string();
-protected:
-    bool is_reference;
-    virtual_memory *vm;
-    data_type type;
 };
 
-#endif // PRIMITIVE_TYPE_H
+
+#endif //STRING_DATA_H

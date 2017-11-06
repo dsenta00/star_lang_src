@@ -41,6 +41,7 @@ namespace orm {
     object *select(std::string object_type, std::string id);
     object *get_first(std::string object_type);
     void remove_object_repository(std::string object_type);
+    void remove_all_repositories();
 }
 
 #define ORM_SELECT(__OBJ_TYPE__, __WHERE__) \
