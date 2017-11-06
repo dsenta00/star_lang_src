@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef STAR_PROGRAMMING_LANGUAGE_BOOL_DATA_H
-#define STAR_PROGRAMMING_LANGUAGE_BOOL_DATA_H
+#ifndef BOOL_DATA_H
+#define BOOL_DATA_H
 
 #include "primitive_data.h"
 
@@ -69,4 +69,4 @@ public:
 };
 
 
-#endif //STAR_PROGRAMMING_LANGUAGE_BOOL_DATA_H
+#endif //BOOL_DATA_H

@@ -111,9 +111,9 @@ object::master_relationships_clear_objects()
 }
 
 /**
- * Get entity type.
+ * Get object type.
  *
- * @return entity type.
+ * @return object type.
  */
 std::string
 object::get_object_type()
@@ -122,9 +122,9 @@ object::get_object_type()
 }
 
 /**
- * Get entity ID.
+ * Get object ID.
  *
- * @return entity ID.
+ * @return object ID.
  */
 std::string
 object::get_id()
@@ -133,9 +133,9 @@ object::get_id()
 }
 
 /**
- * Get entity ID.
+ * Get object ID.
  *
- * @return entity ID.
+ * @return object ID.
  */
 void
 object::set_id(std::string new_id)
@@ -166,14 +166,13 @@ object::set_marked(bool marked)
 }
 
 /**
- * Add entity to master relationship.
+ * Add object to master relationship.
  *
  * @param relationship_name - relationship name.
- * @param o - the entity.
+ * @param o - the object.
  */
 void
-object::master_relationship_add_object(std::string relationship_name,
-                                       object *o)
+object::master_relationship_add_object(std::string relationship_name, object *o)
 {
     relationship *r = this->master_relationship_get(relationship_name);
 
@@ -197,18 +196,17 @@ object::master_relationship_add_object(std::string relationship_name,
             return;
     }
 
-    o->slave_relationship_add_entity(relationship_name, this);
+    o->slave_relationship_add_object(relationship_name, this);
 }
 
 /**
- * Remove entity from master relationship.
+ * Remove object from master relationship.
  *
  * @param relationship_name - relationship name.
- * @param o - the entity.
+ * @param o - the object.
  */
 void
-object::master_relationship_remove_object(std::string relationship_name,
-                                          object *o)
+object::master_relationship_remove_object(std::string relationship_name, object *o)
 {
     relationship *r = this->master_relationship_get(std::move(relationship_name));
 
@@ -227,7 +225,7 @@ object::master_relationship_remove_object(std::string relationship_name,
 }
 
 /**
- * Check if entity has relations.
+ * Check if object has slave relations.
  *
  * @return true if have, otherwise return false.
  */
@@ -248,15 +246,14 @@ object::slave_relationship_have_relations()
 }
 
 /**
- * Notify this entity that another entity is removing
+ * Notify this object that another object is removing
  * it from relationship.
  *
  * @param relationship_name - relationship name.
- * @param o - the entity.
+ * @param o - the object.
  */
 void
-object::slave_relationship_remove_object(std::string relationship_name,
-                                         object *o)
+object::slave_relationship_remove_object(std::string relationship_name, object *o)
 {
     relationship *r = this->slave_relationship_get(std::move(relationship_name));
 
@@ -275,7 +272,7 @@ object::slave_relationship_remove_object(std::string relationship_name,
 }
 
 /**
- * @brief entity::back
+ * @brief object::back
  * @param relationship_name
  * @return
  */
@@ -294,7 +291,6 @@ object::master_relationship_back(std::string relationship_name)
 }
 
 /**
- * @brief entity::back
  * @param relationship_name
  * @return
  */
@@ -313,7 +309,7 @@ object::slave_relationship_back(std::string relationship_name)
 }
 
 /**
- * @brief entity::~entity
+ * The destructor.
  */
 object::~object()
 {
@@ -321,6 +317,12 @@ object::~object()
     this->master_relationships_clear_objects();
 }
 
+/**
+ * Add slave relationship.
+ *
+ * @param relationship_name
+ * @param type
+ */
 void
 object::slave_relationship_add(std::string relationship_name, relationship_type type)
 {
@@ -333,6 +335,12 @@ object::slave_relationship_add(std::string relationship_name, relationship_type 
     this->slave_relationships[relationship_name] = rp;
 }
 
+/**
+ * Get slave relationship.
+ *
+ * @param relationship_name
+ * @return
+ */
 relationship *
 object::slave_relationship_get(std::string relationship_name)
 {
@@ -346,8 +354,14 @@ object::slave_relationship_get(std::string relationship_name)
     return nullptr;
 }
 
+/**
+ * Add object to slave relationship.
+ *
+ * @param relationship_name
+ * @param o
+ */
 void
-object::slave_relationship_add_entity(std::string relationship_name, object *o)
+object::slave_relationship_add_object(std::string relationship_name, object *o)
 {
     relationship *r = this->slave_relationship_get(std::move(relationship_name));
 
@@ -360,6 +374,9 @@ object::slave_relationship_add_entity(std::string relationship_name, object *o)
     r->add_object(o);
 }
 
+/**
+ * Notify through slave relationship that this object is being destroyed.
+ */
 void
 object::slave_relationship_notify_destroyed()
 {

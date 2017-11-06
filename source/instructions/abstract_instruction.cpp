@@ -167,5 +167,5 @@ abstract_instruction::object_name_is_valid(std::string &sample)
 {
     return !sample.empty() &&
            sample != "collection" &&
-           get_from_token(sample) == DATA_TYPE_INVALID;
+        get_data_type_from_token(sample) == DATA_TYPE_INVALID;
 }

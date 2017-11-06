@@ -56,7 +56,7 @@ create_instruction::execute()
     }
     else
     {
-        data = primitive_data::create(name, get_from_token(type));
+        data = primitive_data::create(name, get_data_type_from_token(type));
     }
 
     if (!data)

@@ -24,12 +24,21 @@
 #include "memory.h"
 #include "ORM/relationship.h"
 
+/**
+ * The constructor.
+ */
 memory_chunk_if::memory_chunk_if() : object::object("memory_chunk_relationship", "chunk")
 {
     object::master_relationship_add("free_memory", ONE_TO_MANY);
     object::master_relationship_add("reserved_memory", ONE_TO_MANY);
 }
 
+/**
+ * Add free memory.
+ *
+ * @param address
+ * @param size
+ */
 void
 memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
 {
@@ -37,12 +46,22 @@ memory_chunk_if::free_memory_add(uintptr_t address, uint32_t size)
     this->master_relationship_add_object("free_memory", mem);
 }
 
+/**
+ * Remove free memory.
+ * @param mem
+ */
 void
 memory_chunk_if::free_memory_remove(memory *mem)
 {
     this->master_relationship_remove_object("free_memory", mem);
 }
 
+/**
+ * Find free memory.
+ *
+ * @param foo
+ * @return
+ */
 memory *
 memory_chunk_if::free_memory_find(std::function<bool(memory *)> foo)
 {
@@ -54,6 +73,11 @@ memory_chunk_if::free_memory_find(std::function<bool(memory *)> foo)
     });
 }
 
+/**
+ * Get first free memory.
+ *
+ * @return
+ */
 memory *
 memory_chunk_if::free_memory_front()
 {
@@ -62,6 +86,11 @@ memory_chunk_if::free_memory_front()
     return (memory *) free_memory->front();
 }
 
+/**
+ * Get number of free memory.
+ *
+ * @return
+ */
 uint32_t
 memory_chunk_if::free_memory_num()
 {
@@ -70,6 +99,9 @@ memory_chunk_if::free_memory_num()
     return static_cast<uint32_t>(free_memory->size());
 }
 
+/**
+ * Delete all free_memory.
+ */
 void
 memory_chunk_if::free_memory_delete_all()
 {
@@ -110,6 +142,13 @@ memory_chunk_if::free_memory_union()
     });
 }
 
+/**
+ * Add reserved memory.
+ *
+ * @param address
+ * @param size
+ * @return
+ */
 memory *
 memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
 {
@@ -119,12 +158,21 @@ memory_chunk_if::reserved_memory_add(uintptr_t address, uint32_t size)
     return mem;
 }
 
+/**
+ * Remove reserved memory.
+ * @param mem
+ */
 void
 memory_chunk_if::reserved_memory_remove(memory *mem)
 {
     this->master_relationship_remove_object("reserved_memory", mem);
 }
 
+/**
+ * Get fist reserved memory.
+ *
+ * @return
+ */
 memory *
 memory_chunk_if::reserved_memory_front()
 {
@@ -133,6 +181,11 @@ memory_chunk_if::reserved_memory_front()
     return (memory *) reserved_memory->front();
 }
 
+/**
+ * Get last reserved memory.
+ *
+ * @return
+ */
 memory *
 memory_chunk_if::reserved_memory_back()
 {
@@ -141,6 +194,10 @@ memory_chunk_if::reserved_memory_back()
     return (memory *) reserved_memory->back();
 }
 
+/**
+ * Get number of reserved memory.
+ * @return
+ */
 uint32_t
 memory_chunk_if::reserved_memory_num()
 {
@@ -149,6 +206,9 @@ memory_chunk_if::reserved_memory_num()
     return static_cast<uint32_t>(reserved_memory->size());
 }
 
+/**
+ * Sort reserved memory.
+ */
 void
 memory_chunk_if::reserved_memory_sort()
 {

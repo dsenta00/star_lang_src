@@ -20,15 +20,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef STAR_PROGRAMMING_LANGUAGE_FILE_H
-#define STAR_PROGRAMMING_LANGUAGE_FILE_H
+#ifndef FILE_H
+#define FILE_H
 
 #include "ORM/object.h"
 #include "fw_decl.h"
 #include "file_mode.h"
 
 /**
- * The file entity. Handles file streams.
+ * The file object. Handles file streams.
  */
 class file : public object {
 public:
@@ -38,7 +38,6 @@ public:
     void close();
     bool is_opened();
     primitive_data *read_all();
-    int64_t get_size();
     void write(object *o);
     static file *create(const char *id, file_mode mode, const char *file_name);
     static file *create(const char *id);
@@ -54,4 +53,4 @@ protected:
 };
 
 
-#endif //STAR_PROGRAMMING_LANGUAGE_FILE_H
+#endif //FILE_H

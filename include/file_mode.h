@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef STAR_PROGRAMMING_LANGUAGE_FILE_MODE_H
-#define STAR_PROGRAMMING_LANGUAGE_FILE_MODE_H
+#ifndef FILE_MODE_H
+#define FILE_MODE_H
 
 /**
  * File stream modes.
@@ -39,4 +39,4 @@ bool file_mode_can_write(file_mode mode);
 const char *file_mode_get_format(file_mode mode);
 bool file_mode_is_valid(file_mode mode);
 
-#endif //STAR_PROGRAMMING_LANGUAGE_FILE_MODE_H
+#endif //FILE_MODE_H

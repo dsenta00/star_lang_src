@@ -32,7 +32,7 @@
 #define CHUNK_MAXIMUM_CAPACITY (134217728)
 
 /**
- * Virtual memory entity.
+ * Virtual memory object.
  */
 class virtual_memory : public object {
 public:

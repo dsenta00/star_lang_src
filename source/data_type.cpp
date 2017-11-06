@@ -26,7 +26,7 @@
 #include "data_type.h"
 
 data_type
-get_from_token(std::string &str)
+get_data_type_from_token(std::string &str)
 {
     if (str == "bool")
     {

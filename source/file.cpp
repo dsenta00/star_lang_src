@@ -28,7 +28,6 @@
 #include <iostream>
 #include <primitive_data/string_data.h>
 #include "collection.h"
-#include "primitive_data/primitive_data.h"
 #include "ORM/orm.h"
 
 /**
@@ -104,27 +103,6 @@ file::read_all()
     }
 
     return data;
-}
-
-/**
- * Get file size in bytes.
- *
- * @return
- */
-int64_t
-file::get_size()
-{
-    if (!this->is_opened())
-    {
-        return 0;
-    }
-
-    std::wifstream wif(this->file_name);
-    wif.imbue(std::locale(std::locale::classic(), new std::codecvt_utf8<wchar_t>));
-    std::wstringstream wss;
-    wss << wif.rdbuf();
-
-    return static_cast<int64_t>(wss.str().size());
 }
 
 /**

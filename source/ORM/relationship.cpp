@@ -29,7 +29,6 @@
 /**
  * The constructor.
  *
- * @param parent_entity - relationship owner.
  * @param relationship_name - relationship name.
  * @param type - relationship type.
  */
@@ -62,10 +61,10 @@ relationship::get_type()
 }
 
 /**
- * Find entity.
+ * Find object.
  *
  * @param func - function rule.
- * @return entity if found, otherwise return NULL.
+ * @return object if found, otherwise return NULL.
  */
 object *
 relationship::find(const std::function<bool(object *)> &func)
@@ -125,9 +124,9 @@ relationship::for_each(const std::function<foreach_result(object *, object *)> &
 }
 
 /**
- * Add entity to this relationship.
+ * Add object to this relationship.
  *
- * @param o - the entity.
+ * @param o - the object.
  */
 void
 relationship::add_object(object *o)
@@ -146,9 +145,9 @@ relationship::add_object(object *o)
 }
 
 /**
- * Remove entity from this relationship.
+ * Remove object from this relationship.
  *
- * @param o - the entity.
+ * @param o - the object.
  */
 void
 relationship::remove_object(object *o)

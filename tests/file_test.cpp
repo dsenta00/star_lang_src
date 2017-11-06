@@ -28,10 +28,7 @@
 #include <primitive_data/int_data.h>
 #include "error_log.h"
 #include "ORM/orm.h"
-#include "ORM/relationship.h"
 #include "file_test.h"
-#include "primitive_data/primitive_data.h"
-#include "collection.h"
 #include "file.h"
 #include "test_assert.h"
 

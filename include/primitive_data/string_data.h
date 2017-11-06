@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef STAR_PROGRAMMING_LANGUAGE_STRING_DATA_H
-#define STAR_PROGRAMMING_LANGUAGE_STRING_DATA_H
+#ifndef STRING_DATA_H
+#define STRING_DATA_H
 
 #include <string>
 #include "primitive_data.h"
@@ -70,4 +70,4 @@ public:
 };
 
 
-#endif //STAR_PROGRAMMING_LANGUAGE_STRING_DATA_H
+#endif //STRING_DATA_H

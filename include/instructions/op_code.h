@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef STAR_PROGRAMMING_LANGUAGE_OP_CODE_H
-#define STAR_PROGRAMMING_LANGUAGE_OP_CODE_H
+#ifndef OP_CODE_H
+#define OP_CODE_H
 
 typedef enum {
     OP_CODE_CREATE,
@@ -30,4 +30,4 @@ typedef enum {
     OP_CODE_POP_AND_STORE
 } op_code;
 
-#endif //STAR_PROGRAMMING_LANGUAGE_OP_CODE_H
+#endif //OP_CODE_H

@@ -71,7 +71,7 @@ create_and_assign_constant_instruction::execute()
     }
     else
     {
-        auto actual_data_type = get_from_token(type);
+        auto actual_data_type = get_data_type_from_token(type);
 
         if (const_data_type != actual_data_type)
         {
