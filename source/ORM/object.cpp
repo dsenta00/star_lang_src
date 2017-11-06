@@ -100,7 +100,7 @@ object::master_relationships_clear_objects()
     {
         relationship *r = master_relationship.second.get();
 
-        while (r->size())
+        while (!r->empty())
         {
             object *e = r->front();
 
@@ -238,7 +238,7 @@ object::slave_relationship_have_relations()
     {
         relationship *r = slave_relationship.second.get();
 
-        if (r->size() > 0)
+        if (!r->empty())
         {
             return true;
         }
@@ -317,6 +317,7 @@ object::slave_relationship_back(std::string relationship_name)
  */
 object::~object()
 {
+    this->slave_relationship_notify_destroyed();
     this->master_relationships_clear_objects();
 }
 
@@ -366,7 +367,7 @@ object::slave_relationship_notify_destroyed()
     {
         relationship *r = slave_relationship.second.get();
 
-        while (r->size())
+        while (!r->empty())
         {
             /*
              * Tell master object to remove this object.

@@ -222,3 +222,12 @@ orm::remove_object_repository(std::string object_type)
         repo.erase(it);
     }
 }
+
+/**
+ * Remove all repositories
+ */
+void
+orm::remove_all_repositories()
+{
+    repo.clear();
+}

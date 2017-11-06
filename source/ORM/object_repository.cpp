@@ -32,8 +32,18 @@
 object *
 object_repository::find(const std::function<bool(object *)> &func)
 {
+    if (this->object_map.empty())
+    {
+        return nullptr;
+    }
+
     for (auto &it : this->object_map)
     {
+        if (it.second.empty())
+        {
+            continue;
+        }
+
         for (const auto &op : it.second)
         {
             object *o = op.get();
@@ -61,6 +71,11 @@ object_repository::find(const std::function<bool(object *)> &func)
 void
 object_repository::add(object *o)
 {
+    if (this->find([&](object *a) { return a == o; }) != nullptr)
+    {
+        return;
+    }
+
     if (o->get_marked())
     {
         o->set_marked(false);

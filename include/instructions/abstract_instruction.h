@@ -20,38 +20,36 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_H
-#define ORM_H
+#ifndef BOX_INSTRUCTION_H
+#define BOX_INSTRUCTION_H
 
-#include "object_repository.h"
-#include <string>
-#include <functional>
+#include "ORM/object.h"
+#include "ORM/orm_fw.h"
+#include "fw_decl.h"
+#include "data_type.h"
+#include "op_code.h"
 
 /**
- * ORM interface.
+ * @brief The instruction class
  */
-namespace orm {
-    object_repository *find_object_repository(std::string object_type);
-    void add_object_repository(std::string object_type);
-    object *create(object *o);
-    void change_id(object *o, std::string new_id);
-    void destroy(object *o);
-    void sweep();
-    object *select(std::string object_type, std::function<bool(object *)> where);
-    object *select(std::string object_type, std::string id);
-    object *get_first(std::string object_type);
-    void remove_object_repository(std::string object_type);
-    void remove_all_repositories();
-}
+class abstract_instruction : public object {
+public:
+    explicit abstract_instruction(op_code op, std::vector<std::string> arg);
+    op_code &get_op_code();
+    virtual abstract_instruction *execute() = 0;
+    virtual bool validate() = 0;
+protected:
+    op_code op;
+    std::vector<std::string> arg;
+    bool validated;
 
-#define ORM_SELECT(__OBJ_TYPE__, __WHERE__) \
-  (__OBJ_TYPE__ *)orm::select(#__OBJ_TYPE__, [&] (object *e) { \
-  __OBJ_TYPE__ *obj = (__OBJ_TYPE__ *)e; \
-  (void)obj; \
-  return __WHERE__; \
-})
+    /*
+     * Helper methods
+     */
+    method *get_method();
+    data_type detect_data_type(std::string &sample);
+    std::string clean_constant_format(std::string &sample, data_type type);
+    bool object_name_is_valid(std::string &sample);
+};
 
-#define ORM_DESTROY(__OBJ__) \
-  orm::destroy((object *)__OBJ__)
-
-#endif // ORM_H
+#endif // BOX_INSTRUCTION_H

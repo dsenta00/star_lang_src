@@ -20,12 +20,13 @@
  * THE SOFTWARE.
  */
 
+#include <primitive_data/string_data.h>
+#include <primitive_data/int_data.h>
+#include <primitive_data/float_data.h>
 #include "collection_test.h"
 #include "collection.h"
 #include "test_assert.h"
-#include "virtual_memory.h"
 #include "error_log.h"
-#include "primitive_data.h"
 #include "ORM/orm.h"
 
 static virtual_memory *vm;
@@ -85,14 +86,14 @@ collection_test_basic()
     {
         if (i % 2 == 0)
         {
-            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
+            primitive_data &data = *string_data::create("temp_name", random_name(i));
             empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
             comparision.append(random_name(i));
         }
         else if (i % 3 == 0)
         {
-            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
+            primitive_data &data = *int_data::create("temp_name", &i);
             empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
             comparision.append(std::to_wstring(i));
@@ -100,7 +101,7 @@ collection_test_basic()
         else
         {
             double fi = (double) i;
-            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_FLOAT, (const void *) &fi);
+            primitive_data &data = *float_data::create("temp_name", &fi);
             empty_collection.insert(i, (object *) &data);
             ASSERT_OK;
             comparision.append(std::to_wstring(fi));
@@ -171,13 +172,13 @@ collection_test_basic()
     {
         if (i % 2 == 0)
         {
-            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_STRING, random_name(i));
+            primitive_data &data = *string_data::create("temp_name", random_name(i));
             c.insert(i, (object *) &data);
             ASSERT_OK;
         }
         else if (i % 3 == 0)
         {
-            primitive_data &data = *primitive_data::create("temp_name", DATA_TYPE_INT, (const void *) &i);
+            primitive_data &data = *int_data::create("temp_name", &i);
             c.insert(i, (object *) &data);
             ASSERT_OK;
         }
@@ -235,7 +236,7 @@ collection_test()
     printf("%s()\r\n", __FUNCTION__);
 
     vm = (virtual_memory *) orm::get_first("virtual_memory");
-    RUN_TEST(collection_test_basic());
+    RUN_TEST_VM(collection_test_basic());
 
     printf("\r\n\r\n");
 }

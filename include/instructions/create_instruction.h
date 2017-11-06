@@ -20,52 +20,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_INSTRUCTION_H
-#define BOX_INSTRUCTION_H
+#ifndef STAR_PROGRAMMING_LANGUAGE_CREATE_INSTRUCTION_H
+#define STAR_PROGRAMMING_LANGUAGE_CREATE_INSTRUCTION_H
 
-#include "ORM/object.h"
-#include "ORM/orm_fw.h"
-#include "fw_decl.h"
-#include "data_type.h"
-
-typedef enum {
-    CREATE,
-    CREATE_AND_ASSIGN_CONSTANT,
-    CREATE_AND_ASSIGN_OBJECT,
-    POP_AND_STORE
-} op_code;
+#include "abstract_instruction.h"
 
 /**
- * @brief The instruction class
+ * OP_CODE_CREATE <name> <type>
  */
-class instruction : public object {
-protected:
-    op_code op;
-    std::vector<std::string> arg;
-
-    /*
-     * instructions logic
-     */
-    void create();
-    void create_and_assign_constant();
-    void create_and_assign_object();
-    void pop_and_store();
-
+class create_instruction : public abstract_instruction {
 public:
-    explicit instruction(op_code op,
-                         instruction *next_instruction = nullptr,
-                         instruction *branch_result_false = nullptr);
-
-    op_code &get_op_code();
-
-    /*
-     * helpers
-     */
-    data_type detect_data_type(std::string &sample);
-    std::string clean_constant_format(std::string &sample, data_type type);
-
-
-    instruction *execute();
+    explicit create_instruction(std::vector<std::string> &arg);
+    static create_instruction *create(std::string name, std::string type);
+    abstract_instruction *execute() override;
+    bool validate() override;
 };
 
-#endif // BOX_INSTRUCTION_H
+
+#endif //STAR_PROGRAMMING_LANGUAGE_CREATE_INSTRUCTION_H

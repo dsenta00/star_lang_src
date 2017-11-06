@@ -20,11 +20,12 @@
  * THE SOFTWARE.
  */
 
-#include "primitive_data.h"
+#include <primitive_data/float_data.h>
+#include <primitive_data/int_data.h>
+#include <primitive_data/string_data.h>
 #include "primitive_data_test.h"
 #include "test_assert.h"
 #include "error_log.h"
-#include "virtual_memory.h"
 #include "ORM/orm.h"
 
 static virtual_memory *vm;
@@ -38,7 +39,7 @@ primitive_data_test_float()
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
     double float_num = 65.0;
-    primitive_data &float_data = *primitive_data::create("float_data", DATA_TYPE_FLOAT, &float_num);
+    primitive_data &float_data = *float_data::create("float_data", &float_num);
     ASSERT_VIRTUAL_MEMORY(*vm, sizeof(double));
 
     ASSERT_OK;
@@ -67,8 +68,8 @@ primitive_data_test_float()
                           sizeof(double) +
                           sizeof(L"65.000000"));
 
-    int num = 35;
-    primitive_data &int_data = *primitive_data::create("int_data", DATA_TYPE_INT, &num);
+    int32_t num = 35;
+    primitive_data &int_data = *int_data::create("int_data", &num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
@@ -128,7 +129,7 @@ primitive_data_test_float()
     ERROR_LOG_CLEAR;
 
     double fnum2 = 35.0;
-    primitive_data &float_data2 = *primitive_data::create("float_data2", DATA_TYPE_FLOAT, &fnum2);
+    primitive_data &float_data2 = *float_data::create("float_data2", &fnum2);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
@@ -189,7 +190,7 @@ primitive_data_test_float()
 
     /* interaction with string */
 
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
+    primitive_data &string_data = *string_data::create("string_data", L"35");
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(double) +
@@ -326,10 +327,7 @@ primitive_data_test_string_empty()
 {
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
-    primitive_data &empty_string = *primitive_data::create(
-        "empty_string",
-        DATA_TYPE_STRING
-    );
+    primitive_data &empty_string = *string_data::create("empty_string");
 
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
@@ -347,10 +345,9 @@ primitive_data_test_string()
 {
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"32");
+    primitive_data &string_data = *string_data::create("string_data", L"32");
     ASSERT_OK;
-    ASSERT_VIRTUAL_MEMORY(*vm,
-                          sizeof(L"32"));
+    ASSERT_VIRTUAL_MEMORY(*vm, sizeof(L"32"));
 
     ASSERT_FALSE(++string_data, "string_data shouldn't' be incremented!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INCREMENTING_STRING);
@@ -381,7 +378,7 @@ primitive_data_test_string()
                           sizeof(L"32") +
                           sizeof(L"32"));
 
-    primitive_data &string_data2 = *primitive_data::create("string_data2", DATA_TYPE_STRING, L"31");
+    primitive_data &string_data2 = *string_data::create("string_data2", L"31");
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(L"32") +
                           sizeof(L"32") +
@@ -449,8 +446,8 @@ primitive_data_test_string()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
     ERROR_LOG_CLEAR;
 
-    int num = 31;
-    primitive_data &int_data = *primitive_data::create("int_data", DATA_TYPE_INT, &num);
+    int32_t num = 31;
+    primitive_data &int_data = *int_data::create("int_data", &num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(L"3231") +
@@ -511,7 +508,7 @@ primitive_data_test_string()
     ERROR_LOG_CLEAR;
 
     double float_num = 31.0;
-    primitive_data &float_data = *primitive_data::create("float_data", DATA_TYPE_FLOAT, &float_num);
+    primitive_data &float_data = *float_data::create("float_data", &float_num);
 
     ASSERT_VIRTUAL_MEMORY(*vm,
                           sizeof(L"323131") +
@@ -604,8 +601,8 @@ primitive_data_test_string()
 static void
 primitive_data_test_int()
 {
-    int num = 65;
-    primitive_data &int_data = *primitive_data::create("int_data", DATA_TYPE_INT, &num);
+    int32_t num = 65;
+    primitive_data &int_data = *int_data::create("int_data", &num);
 
     ASSERT_OK;
 
@@ -626,7 +623,7 @@ primitive_data_test_int()
     ASSERT_TRUE(int_data.println(), "int_data should be printed!");
     ASSERT_OK;
 
-    ASSERT_TRUE(int_data.to_char() == 'A',
+    ASSERT_TRUE(int_data.to_char() == L'A',
                 "int_data to char() -> %c instead of %c",
                 int_data.to_char(),
                 'A');
@@ -644,8 +641,8 @@ primitive_data_test_int()
                 "string should be 65! (%ls)",
                 (const wchar_t *) str.get_address());
 
-    int num2 = 35;
-    primitive_data &int_data2 = *primitive_data::create("int_data", DATA_TYPE_INT, &num2);
+    int32_t num2 = 35;
+    primitive_data &int_data2 = *int_data::create("int_data", &num2);
 
     ASSERT_FALSE(int_data == int_data2, "int_data and int_data2 should not be equal");
     ASSERT_OK;
@@ -699,10 +696,10 @@ primitive_data_test_int()
     /*
      * Putting int_data to value of 65.
      */
-    *(int *) int_data.get_address() = 65;
+    *(int32_t *) int_data.get_address() = 65;
 
     double float_num = 35.0;
-    primitive_data &float_data = *primitive_data::create("float_data", DATA_TYPE_FLOAT, &float_num);
+    primitive_data &float_data = *float_data::create("float_data", &float_num);
 
     ASSERT_FALSE(int_data == float_data, "int_data and float_data should not be equal");
     ASSERT_OK;
@@ -751,7 +748,7 @@ primitive_data_test_int()
 
     /* interaction with string */
 
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, "35");
+    primitive_data &string_data = *string_data::create("string_data", L"35");
 
     ASSERT_FALSE(int_data == string_data, "int_data and string_data should not be equal");
     ASSERT_OK;
@@ -791,7 +788,7 @@ primitive_data_test_int()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
-    string_data = "35 Grupa Zana rules!";
+    string_data = L"35 Grupa Zana rules!";
     ASSERT_OK;
 
     ASSERT_FALSE(int_data == string_data, "int_data and string_data should not be equal");
@@ -832,7 +829,7 @@ primitive_data_test_int()
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
     ERROR_LOG_CLEAR;
 
-    string_data = "0";
+    string_data = L"0";
 
     ASSERT_FALSE(int_data /= string_data,
                  "int_data and float_data shouldn't divide");
@@ -855,106 +852,6 @@ primitive_data_test_int()
 
     int_data.print();
 
-    orm::destroy(&int_data);
-    ERROR_LOG_IS_EMPTY;
-    orm::destroy(&int_data2);
-    ERROR_LOG_IS_EMPTY;
-    orm::destroy(&float_data);
-    ERROR_LOG_IS_EMPTY;
-    orm::destroy(&string_data);
-    ERROR_LOG_IS_EMPTY;
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
-}
-
-/**
- * Test basic data test.
- */
-static void
-primitive_data_test_basic()
-{
-    /* Completely invalid data */
-    primitive_data &invalid_data = *primitive_data::create("invalid_data");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE((++invalid_data), "invalid_data shouldn't increase!");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE((--invalid_data), "invalid_data shouldn't decrease!");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE(invalid_data.print(), "invalid_data shouldn't print!");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE(invalid_data.println(), "invalid_data shouldn't println!");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE(invalid_data.scan(), "invalid_data shouldn't scan!");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_EQUALS(invalid_data.to_char(), 0);
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_EQUALS(invalid_data.to_int(), 0);
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_EQUALS(invalid_data.to_float(), 0.0);
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    primitive_data &invalid_data_string = invalid_data.to_string();
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    int valid = 24;
-    primitive_data &valid_data = *primitive_data::create("valid_data", DATA_TYPE_INT, &valid);
-    ASSERT_OK;
-
-    ASSERT_FALSE(valid_data = invalid_data, "valid_data and invalid should not assign!\n");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    ASSERT_FALSE(valid_data += invalid_data, "valid_data and invalid should not add!\n");
-    ASSERT_ERROR(ERROR_PRIMITIVE_DATA_NULL_DATA);
-    ERROR_LOG_CLEAR;
-
-    orm::destroy(&invalid_data);
-    ERROR_LOG_IS_EMPTY;
-    orm::destroy(&invalid_data_string);
-    ERROR_LOG_IS_EMPTY;
-    orm::destroy(&valid_data);
-    ERROR_LOG_IS_EMPTY;
-    printf("\t-> %s()::OK\n", __FUNCTION__);
-}
-
-/**
- * Test data convert
- */
-void primitive_data_test_convert()
-{
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
-
-    string_data.convert_itself(DATA_TYPE_INT);
-    ASSERT_OK;
-    ASSERT_TRUE(*(int *) string_data.get_address() == 35, "data should be 35!");
-
-    string_data.convert_itself(DATA_TYPE_FLOAT);
-    ASSERT_OK;
-    ASSERT_TRUE(*(double *) string_data.get_address() == 35.0, "data should be 35.0!");
-
-    string_data.convert_itself(DATA_TYPE_STRING);
-    ASSERT_OK;
-    ASSERT_TRUE(wcscmp((wchar_t *) string_data.get_address(), L"35.000000") == 0,
-                "data should be 35");
-
     printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
@@ -965,35 +862,18 @@ void primitive_data_test_references()
 {
     orm::remove_object_repository("primitive_data");
 
-    /*
-     * Test two string
-     *
-     * string str_data = "35";
-     * string str_data2 = str_data;
-     *
-     * unset(str_data2);
-     */
-    primitive_data &string_data = *primitive_data::create("string_data", DATA_TYPE_STRING, L"35");
-    ASSERT_EQUALS(string_data.get_is_reference(), true);
-    primitive_data &string_data2 = *primitive_data::create("string_data2", string_data);
-    ASSERT_EQUALS(string_data2.get_is_reference(), true);
-    ASSERT_EQUALS(string_data.get_memory(), string_data2.get_memory());
+    string_data &str = *string_data::create("string_data", L"35");
+    ASSERT_EQUALS(str.get_is_reference(), true);
 
-    ORM_DESTROY(&string_data2);
+    string_data &str2 = *string_data::create("string_data2", str);
+    ASSERT_EQUALS(str2.get_is_reference(), true);
 
-    string_data.convert_itself(DATA_TYPE_INT);
-    ASSERT_EQUALS(*(int32_t *) string_data.get_address(), 35);
-    ASSERT_EQUALS(string_data.get_is_reference(), false);
+    ASSERT_EQUALS(str.get_memory(), str2.get_memory());
 
-    for (int type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
+    ORM_DESTROY(&str2);
+
+    /*for (int32_t type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
     {
-        /*
-         * type data = 0;
-         * type &data2 = data;
-         * type &data3 = data2;
-         *
-         * unset(data);
-         */
         primitive_data &data = *primitive_data::create("data", (data_type) type);
         ASSERT_EQUALS(data.get_is_reference(), false);
 
@@ -1019,14 +899,10 @@ void primitive_data_test_references()
         ASSERT_EQUALS(data2.get_is_reference(), true);
         ASSERT_EQUALS(data3.get_is_reference(), true);
         ASSERT_EQUALS(data2.get_memory(), data2.get_memory());
-    }
+    }*/
 
-    for (int type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
+    /*for (int32_t type = DATA_TYPE_BOOL; type < DATA_TYPE_STRING; type++)
     {
-        /*
-         * data = 0;
-         * data2 = &data;
-         */
         primitive_data &data = *primitive_data::create("data", (data_type) type);
         ASSERT_EQUALS(data.get_is_reference(), false);
 
@@ -1035,7 +911,7 @@ void primitive_data_test_references()
         ASSERT_EQUALS(data.get_memory(), data2.get_memory());
 
         ORM_DESTROY(&data);
-    }
+    }*/
 
     printf("\t-> %s()::OK\n", __FUNCTION__);
 }
@@ -1049,13 +925,11 @@ void primitive_data_test()
 
     vm = (virtual_memory *) orm::get_first("virtual_memory");
 
-    RUN_TEST(primitive_data_test_basic());
-    RUN_TEST(primitive_data_test_int());
-    RUN_TEST(primitive_data_test_string_empty());
-    RUN_TEST(primitive_data_test_string());
-    RUN_TEST(primitive_data_test_float());
-    RUN_TEST(primitive_data_test_convert());
-    RUN_TEST(primitive_data_test_references());
+    RUN_TEST_VM(primitive_data_test_int());
+    RUN_TEST_VM(primitive_data_test_string_empty());
+    RUN_TEST_VM(primitive_data_test_string());
+    RUN_TEST_VM(primitive_data_test_float());
+    RUN_TEST_VM(primitive_data_test_references());
 
     printf("\r\n\r\n");
 }

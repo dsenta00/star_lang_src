@@ -44,7 +44,8 @@ memory_chunk::memory_chunk(uint32_t capacity) : memory_chunk_if::memory_chunk_if
         return;
     }
 
-    this->start_address = (uintptr_t)new uint8_t[capacity];
+    this->field.reserve(capacity);
+    this->start_address = reinterpret_cast<uintptr_t>(&*this->field.begin());
 
     if (!this->start_address)
     {
@@ -415,11 +416,6 @@ uint32_t
 memory_chunk::get_free()
 {
     return this->free;
-}
-
-memory_chunk::~memory_chunk()
-{
-    delete [] (uint8_t *)start_address;
 }
 
 memory_chunk *

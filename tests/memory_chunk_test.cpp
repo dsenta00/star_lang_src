@@ -299,7 +299,7 @@ void
 memory_chunk_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    memory_chunk_test_basic();
-    memory_chunk_test_advanced();
+    RUN_TEST(memory_chunk_test_basic());
+    RUN_TEST(memory_chunk_test_advanced());
     printf("\r\n\r\n");
 }

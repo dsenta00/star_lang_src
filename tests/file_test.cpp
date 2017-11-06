@@ -23,11 +23,14 @@
 #include <collection.h>
 #include <codecvt>
 #include <locale>
+#include <primitive_data/string_data.h>
+#include <primitive_data/float_data.h>
+#include <primitive_data/int_data.h>
 #include "error_log.h"
 #include "ORM/orm.h"
 #include "ORM/relationship.h"
 #include "file_test.h"
-#include "primitive_data.h"
+#include "primitive_data/primitive_data.h"
 #include "collection.h"
 #include "file.h"
 #include "test_assert.h"
@@ -175,7 +178,7 @@ file_test_write1()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    primitive_data *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
+    primitive_data *str = string_data::create("str", L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
@@ -206,11 +209,11 @@ file_test_write2()
     /* fill collection */
     collection *c = collection::create("c");
     int var1 = 42;
-    *c += primitive_data::create("var1", DATA_TYPE_INT, &var1);
+    *c += int_data::create("var1", &var1);
     double var2 = 41.0f;
-    *c += primitive_data::create("var2", DATA_TYPE_FLOAT, &var2);
+    *c += float_data::create("var2", &var2);
     const wchar_t *var3 = L"40";
-    *c += primitive_data::create("var3", DATA_TYPE_STRING, var3);
+    *c += string_data::create("var3", var3);
     /* fill collection end */
     f->write(c);
     ASSERT_OK;
@@ -281,7 +284,7 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    auto *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
+    auto *str = string_data::create("str", L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
@@ -298,7 +301,7 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    str = primitive_data::create("str", DATA_TYPE_STRING, L"74, 345");
+    str = string_data::create("str", L"74, 345");
     f->write(str);
     ASSERT_OK;
 
@@ -325,19 +328,19 @@ file_test_reopen()
     ASSERT_OK;
     ASSERT_TRUE(f->is_opened(), "file should be open!");
 
-    auto *str = primitive_data::create("str", DATA_TYPE_STRING, L"Miljenko 123");
+    auto *str = string_data::create("str", L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_APPEND, file_name);
-    str = primitive_data::create("str", DATA_TYPE_STRING, L"74, 345");
+    str = string_data::create("str", L"74, 345");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_READ, file_name);
-    str = f->read_all();
+    str = dynamic_cast<string_data *>(f->read_all());
     ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(),
                        L"Miljenko 12374, 345") == 0, "should be equal");
 
@@ -356,11 +359,11 @@ void
 file_test()
 {
     printf("%s()\r\n", __FUNCTION__);
-    file_test_read();
-    file_test_read_empty_file();
-    file_test_write1();
-    file_test_write2();
-    file_test_append();
-    file_test_reopen();
+    RUN_TEST(file_test_read());
+    RUN_TEST(file_test_read_empty_file());
+    RUN_TEST(file_test_write1());
+    RUN_TEST(file_test_write2());
+    RUN_TEST(file_test_append());
+    RUN_TEST(file_test_reopen());
     printf("\r\n\r\n");
 }

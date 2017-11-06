@@ -26,8 +26,9 @@
 #include <codecvt>
 #include <sstream>
 #include <iostream>
+#include <primitive_data/string_data.h>
 #include "collection.h"
-#include "primitive_data.h"
+#include "primitive_data/primitive_data.h"
 #include "ORM/orm.h"
 
 /**
@@ -92,16 +93,12 @@ file::read_all()
 
     if (this->buffer.empty())
     {
-        data = primitive_data::create(
-            std::string(this->id).append(":content"),
-            DATA_TYPE_STRING
-        );
+        data = string_data::create(std::string(this->id).append(":content"));
     }
     else
     {
-        data = primitive_data::create(
+        data = string_data::create(
             std::string(this->id).append(":content"),
-            DATA_TYPE_STRING,
             this->buffer.c_str()
         );
     }

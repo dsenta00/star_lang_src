@@ -41,9 +41,12 @@ protected:
     object *result;
     std::map<std::string, object *> local_objects;
     std::vector<object *> stack;
-    instruction *current_instruction;
+    abstract_instruction *current_instruction;
 public:
-    method(std::string id, std::vector<instruction *> &instructions);
+    method(std::string id, std::vector<abstract_instruction *> &instructions);
+
+    static method *create(std::string id, std::vector<abstract_instruction *> &instructions);
+
     instruction_result execute_next();
     void add_local_object(object *e);
     object *get_local_object(std::string id);

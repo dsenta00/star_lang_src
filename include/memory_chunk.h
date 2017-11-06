@@ -43,9 +43,12 @@ typedef enum {
     MEMORY_CHUNK_RESIZE_UNKNOWN_ADDRESS
 } memory_chunk_resize_result;
 
+/**
+ * Memory chunk.
+ */
 class memory_chunk : public memory_chunk_if {
 public:
-    memory_chunk(uint32_t capacity = 0);
+    explicit memory_chunk(uint32_t capacity = 0);
     memory *reserve(uint32_t size);
     memory_chunk_resize_result resize(memory *mem, uint32_t new_size);
     memory_chunk_release_result release(memory *mem);
@@ -57,12 +60,11 @@ public:
     uint32_t get_free();
 
     static memory_chunk *create(uint32_t capacity = 0);
-
-    virtual ~memory_chunk();
 protected:
     uint32_t free;
     uint32_t capacity;
     uintptr_t start_address;
+    std::vector<uint8_t> field;
 };
 
 #endif // BOX_MEMORY_CHUNK_H

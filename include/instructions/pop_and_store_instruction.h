@@ -20,38 +20,20 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_H
-#define ORM_H
+#ifndef STAR_PROGRAMMING_LANGUAGE_POP_AND_STORE_INSTRUCTION_H
+#define STAR_PROGRAMMING_LANGUAGE_POP_AND_STORE_INSTRUCTION_H
 
-#include "object_repository.h"
-#include <string>
-#include <functional>
+#include "abstract_instruction.h"
 
 /**
- * ORM interface.
+ * OP_CODE_POP_AND_STORE <name>
  */
-namespace orm {
-    object_repository *find_object_repository(std::string object_type);
-    void add_object_repository(std::string object_type);
-    object *create(object *o);
-    void change_id(object *o, std::string new_id);
-    void destroy(object *o);
-    void sweep();
-    object *select(std::string object_type, std::function<bool(object *)> where);
-    object *select(std::string object_type, std::string id);
-    object *get_first(std::string object_type);
-    void remove_object_repository(std::string object_type);
-    void remove_all_repositories();
-}
+class pop_and_store_instruction : abstract_instruction {
+public:
+    explicit pop_and_store_instruction(std::vector<std::string> &arg);
+    static pop_and_store_instruction *create(std::string name);
+    abstract_instruction *execute() override;
+    bool validate() override;
+};
 
-#define ORM_SELECT(__OBJ_TYPE__, __WHERE__) \
-  (__OBJ_TYPE__ *)orm::select(#__OBJ_TYPE__, [&] (object *e) { \
-  __OBJ_TYPE__ *obj = (__OBJ_TYPE__ *)e; \
-  (void)obj; \
-  return __WHERE__; \
-})
-
-#define ORM_DESTROY(__OBJ__) \
-  orm::destroy((object *)__OBJ__)
-
-#endif // ORM_H
+#endif //STAR_PROGRAMMING_LANGUAGE_POP_AND_STORE_INSTRUCTION_H
