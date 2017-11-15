@@ -24,6 +24,8 @@
 
 #include <utility>
 #include <ORM/orm.h>
+#include <locale>
+#include <codecvt>
 #include "ORM/relationship.h"
 #include "error_log.h"
 #include "instructions/abstract_instruction.h"
@@ -90,18 +92,26 @@ method::execute_next()
 void
 method::add_local_object(object *e)
 {
-    if (this->local_objects[e->get_id()])
+    std::wstring name;
+
+    /* this is workaround */
+    for (char &letter : e->get_id())
+    {
+        name.push_back((wchar_t)letter);
+    }
+
+    if (this->local_objects[name])
     {
         ERROR_LOG_ADD(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
         return;
     }
 
-    this->local_objects[e->get_id()] = e;
+    this->local_objects[name] = e;
     this->master_relationship_add_object("method_objects", e);
 }
 
 object *
-method::get_local_object(std::string id)
+method::get_local_object(std::wstring id)
 {
     return this->local_objects[id];
 }

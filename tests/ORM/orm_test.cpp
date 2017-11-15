@@ -22,7 +22,6 @@
 
 #include "../test_assert.h"
 #include "error_log.h"
-#include "ORM/object.h"
 #include "ORM/relationship.h"
 #include "orm_test.h"
 #include "ORM/orm.h"
@@ -129,8 +128,6 @@ static void orm_test_basic()
     ASSERT_OK;
     ASSERT_NULL(orm::get_first("class1"));
     ASSERT_NULL(orm::get_first("class2"));
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -221,8 +218,6 @@ void orm_test_advanced1()
 
     ASSERT_NULL(orm::get_first("class1"));
     ASSERT_NULL(orm::get_first("class2"));
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -301,8 +296,6 @@ static void orm_test_advanced2()
     ASSERT_NULL(orm::get_first("class1"));
     ASSERT_NULL(orm::get_first("class2"));
     ASSERT_NULL(orm::get_first("class3"));
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 #define CLASS1_CHECK(__MIDDLE__, __FRONT__, __BACK__) \
@@ -349,8 +342,6 @@ static void orm_test_cyclic_relations1()
 
     c = ORM_SELECT(class1, obj == c1_3);
     ASSERT_NULL(c);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -385,8 +376,6 @@ static void orm_test_cyclic_relations2()
 
     c3 = ORM_SELECT(class3, obj == c3);
     ASSERT_NULL(c3);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -419,8 +408,6 @@ static void orm_test_change_id()
 
     c = (class1 *) orm::select("class1", "jure");
     ASSERT_EQUALS(c, c3);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -465,8 +452,6 @@ static void orm_test_switch_relations1()
     r = c1_2->master_relationship_get("class1_class2");
     ASSERT_EQUALS(r->get_type(), ONE_TO_MANY);
     ASSERT_EQUALS(r->size(), 0);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -525,8 +510,6 @@ static void orm_test_switch_relations2()
 
     r = c1_2->master_relationship_get("class1_class2");
     ASSERT_EQUALS(r->size(), 0);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -534,7 +517,6 @@ static void orm_test_switch_relations2()
  */
 void orm_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
     RUN_TEST(orm_test_basic());
     RUN_TEST(orm_test_advanced1());
     RUN_TEST(orm_test_advanced2());
@@ -543,5 +525,4 @@ void orm_test()
     RUN_TEST(orm_test_change_id());
     RUN_TEST(orm_test_switch_relations1());
     RUN_TEST(orm_test_switch_relations2());
-    printf("\r\n\r\n");
 }

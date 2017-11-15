@@ -43,19 +43,19 @@ instruction_test_create_negative()
 
     /* Without method */
 
-    i = create_instruction::create("", "int");
+    i = create_instruction::create(L"", L"int");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("", "");
+    i = create_instruction::create(L"", L"");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("ante", "konjo");
+    i = create_instruction::create(L"ante", L"konjo");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
@@ -66,7 +66,7 @@ instruction_test_create_negative()
     method *foo;
     std::vector<abstract_instruction *> instructions;
 
-    i = create_instruction::create("", "int");
+    i = create_instruction::create(L"", L"int");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -76,7 +76,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("", "");
+    i = create_instruction::create(L"", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -86,7 +86,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("int", "int");
+    i = create_instruction::create(L"int", L"int");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -96,7 +96,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("float", "float");
+    i = create_instruction::create(L"float", L"float");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -106,7 +106,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("char", "char");
+    i = create_instruction::create(L"char", L"char");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -116,7 +116,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("string", "string");
+    i = create_instruction::create(L"string", L"string");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -126,7 +126,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("bool", "bool");
+    i = create_instruction::create(L"bool", L"bool");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -136,7 +136,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("collection", "collection");
+    i = create_instruction::create(L"collection", L"collection");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -146,7 +146,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_instruction::create("ante", "konjo");
+    i = create_instruction::create(L"ante", L"konjo");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -166,7 +166,7 @@ instruction_test_create1()
     /*
      * create <name> <type>
      */
-    abstract_instruction *i = create_instruction::create("int_name", "int");
+    abstract_instruction *i = create_instruction::create(L"int_name", L"int");
     ASSERT_OK;
 
     std::vector<abstract_instruction *> instructions;
@@ -178,7 +178,7 @@ instruction_test_create1()
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT]);
     ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "int_name"));
-    ASSERT_NOT_NULL(foo->get_local_object("int_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
     abstract_instruction *next = i->execute();
@@ -196,13 +196,13 @@ instruction_test_create2()
     /*
      * create <name> <type>
      */
-    abstract_instruction *i = create_instruction::create("int_name", "int");
+    abstract_instruction *i = create_instruction::create(L"int_name", L"int");
     ASSERT_OK;
 
-    abstract_instruction *f = create_instruction::create("float_name", "float");
+    abstract_instruction *f = create_instruction::create(L"float_name", L"float");
     ASSERT_OK;
 
-    abstract_instruction *c = create_instruction::create("collection_name", "collection");
+    abstract_instruction *c = create_instruction::create(L"collection_name", L"collection");
     ASSERT_OK;
 
     std::vector<abstract_instruction *> instructions;
@@ -216,19 +216,19 @@ instruction_test_create2()
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT]);
     ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "int_name"));
-    ASSERT_NOT_NULL(foo->get_local_object("int_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT] + DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
     ASSERT_NOT_NULL(ORM_SELECT(primitive_data, obj->get_id() == "float_name"));
-    ASSERT_NOT_NULL(foo->get_local_object("float_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"float_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT] + DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
     ASSERT_NOT_NULL(ORM_SELECT(collection, obj->get_id() == "collection_name"));
-    ASSERT_NOT_NULL(foo->get_local_object("collection_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"collection_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
     abstract_instruction *next = i->execute();
@@ -242,11 +242,8 @@ instruction_test_create2()
  */
 void create_instruction_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
-
     vm = (virtual_memory *) orm::get_first("virtual_memory");
     RUN_TEST_VM(instruction_test_create_negative());
     RUN_TEST_VM(instruction_test_create1());
     RUN_TEST_VM(instruction_test_create2());
-    printf("\r\n\r\n");
 }

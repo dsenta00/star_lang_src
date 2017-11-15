@@ -127,8 +127,6 @@ memory_chunk_test_advanced()
         memory *mem2 = to_keep[i + 1];
         ASSERT_EQUALS(mem1->get_address() + mem1->get_size(), mem2->get_address());
     }
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -289,7 +287,6 @@ memory_chunk_test_basic()
     ASSERT_NULL(chunk.reserve(capacity + 1));
 
     ORM_DESTROY(&chunk);
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -298,8 +295,6 @@ memory_chunk_test_basic()
 void
 memory_chunk_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
     RUN_TEST(memory_chunk_test_basic());
     RUN_TEST(memory_chunk_test_advanced());
-    printf("\r\n\r\n");
 }

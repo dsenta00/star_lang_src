@@ -34,22 +34,20 @@
  */
 class abstract_instruction : public object {
 public:
-    explicit abstract_instruction(op_code op, std::vector<std::string> arg);
+    explicit abstract_instruction(op_code op, std::vector<std::wstring> &arg);
     op_code &get_op_code();
     virtual abstract_instruction *execute() = 0;
     virtual bool validate() = 0;
 protected:
     op_code op;
-    std::vector<std::string> arg;
+    std::vector<std::wstring> arg;
     bool validated;
 
     /*
      * Helper methods
      */
     method *get_method();
-    data_type detect_data_type(std::string &sample);
-    std::string clean_constant_format(std::string &sample, data_type type);
-    bool object_name_is_valid(std::string &sample);
+    bool object_name_is_valid(std::wstring &sample);
 };
 
 #endif // BOX_INSTRUCTION_H

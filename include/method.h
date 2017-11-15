@@ -37,11 +37,6 @@ typedef enum {
  * @brief The method class
  */
 class method : public object {
-protected:
-    object *result;
-    std::map<std::string, object *> local_objects;
-    std::vector<object *> stack;
-    abstract_instruction *current_instruction;
 public:
     method(std::string id, std::vector<abstract_instruction *> &instructions);
 
@@ -49,9 +44,14 @@ public:
 
     instruction_result execute_next();
     void add_local_object(object *e);
-    object *get_local_object(std::string id);
+    object *get_local_object(std::wstring id);
     void push_stack(object *e);
     object *pop_stack();
+protected:
+    object *result;
+    std::map<std::wstring, object *> local_objects;
+    std::vector<object *> stack;
+    abstract_instruction *current_instruction;
 };
 
 #endif // BOX_METHOD_H

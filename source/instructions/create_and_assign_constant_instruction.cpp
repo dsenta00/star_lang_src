@@ -27,12 +27,14 @@
 #include <ORM/orm.h>
 #include <ORM/relationship.h>
 #include <method.h>
+#include <codecvt>
+#include <locale>
 #include "instructions/create_and_assign_constant_instruction.h"
 
 /**
  * @inherit
  */
-create_and_assign_constant_instruction::create_and_assign_constant_instruction(std::vector<std::string> &arg)
+create_and_assign_constant_instruction::create_and_assign_constant_instruction(std::vector<std::wstring> &arg)
     : abstract_instruction(OP_CODE_CREATE_AND_ASSIGN_CONSTANT, arg)
 {
 }
@@ -48,16 +50,20 @@ create_and_assign_constant_instruction::execute()
         return nullptr;
     }
 
-    auto &name = this->arg[0];
+    auto name_w = this->arg[0];
     auto &type = this->arg[1];
     auto &constant = this->arg[2];
-    auto const_data_type = this->detect_data_type(constant);
+    auto const_data_type = data_type_detect(constant);
+
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string name = converter.to_bytes(name_w);
 
     object *data = nullptr;
 
-    if (type == "collection")
+    if (type == L"collection")
     {
-        this->clean_constant_format(constant, const_data_type);
+        clean_constant_format(constant, const_data_type);
         primitive_data *constant_data = primitive_data::create(name, const_data_type, constant.c_str());
 
         if (!constant_data)
@@ -71,7 +77,7 @@ create_and_assign_constant_instruction::execute()
     }
     else
     {
-        auto actual_data_type = get_data_type_from_token(type);
+        auto actual_data_type = data_type_get_from_token(type);
 
         if (const_data_type != actual_data_type)
         {
@@ -79,7 +85,7 @@ create_and_assign_constant_instruction::execute()
             return nullptr;
         }
 
-        this->clean_constant_format(constant, const_data_type);
+        clean_constant_format(constant, const_data_type);
 
         data = primitive_data::create(name, actual_data_type, constant.c_str());
 
@@ -99,9 +105,10 @@ create_and_assign_constant_instruction::execute()
  * @inherit
  */
 create_and_assign_constant_instruction *
-create_and_assign_constant_instruction::create(std::string name, std::string type, std::string constant)
+create_and_assign_constant_instruction::create(std::wstring name, std::wstring type, std::wstring constant)
 {
-    std::vector<std::string> arg;
+    std::vector<std::wstring> arg;
+
     arg.emplace_back(name);
     arg.emplace_back(type);
     arg.emplace_back(constant);
@@ -144,7 +151,7 @@ create_and_assign_constant_instruction::validate()
     }
 
     auto &constant = this->arg[2];
-    auto const_data_type = this->detect_data_type(constant);
+    auto const_data_type = data_type_detect(constant);
 
     if (const_data_type == DATA_TYPE_INVALID)
     {

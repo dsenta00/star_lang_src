@@ -117,8 +117,6 @@ virtual_memory_test_basic()
 
     orm::destroy(&vm);
     orm::destroy(&vm_zero_cap);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -127,7 +125,5 @@ virtual_memory_test_basic()
 void
 virtual_memory_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
     RUN_TEST(virtual_memory_test_basic());
-    printf("\r\n\r\n");
 }

@@ -223,8 +223,6 @@ collection_test_basic()
     }
 
     orm::destroy(&c);
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -233,10 +231,6 @@ collection_test_basic()
 void
 collection_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
-
     vm = (virtual_memory *) orm::get_first("virtual_memory");
     RUN_TEST_VM(collection_test_basic());
-
-    printf("\r\n\r\n");
 }

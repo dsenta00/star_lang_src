@@ -32,7 +32,7 @@
  * @param op
  * @param arg
  */
-abstract_instruction::abstract_instruction(op_code op, std::vector<std::string> arg) : object::object(
+abstract_instruction::abstract_instruction(op_code op, std::vector<std::wstring> &arg) : object::object(
     "abstract_instruction", op)
 {
     this->validated = false;
@@ -51,83 +51,6 @@ op_code &
 abstract_instruction::get_op_code()
 {
     return this->op;
-}
-
-/**
- * Detect data_type.
- *
- * @param sample
- * @return
- */
-data_type
-abstract_instruction::detect_data_type(std::string &sample)
-{
-    if (sample.empty())
-    {
-        return DATA_TYPE_INVALID;
-    }
-
-    if (std::regex_match(sample, std::regex("([-+]?[0-9]+)")))
-    {
-        return DATA_TYPE_INT;
-    }
-    else if (std::regex_match(sample, std::regex("[-+]?[0-9]*\\.?[0-9]*")))
-    {
-        return DATA_TYPE_FLOAT;
-    }
-    else if (std::regex_match(sample, std::regex("\'?.\'")))
-    {
-        return DATA_TYPE_CHAR;
-    }
-    else if (std::regex_match(sample, std::regex("\"(.*)\"")) or std::regex_match(sample, std::regex("\'(.*)+\'")))
-    {
-        return DATA_TYPE_STRING;
-    }
-    else if (std::regex_match(sample, std::regex("true|false")))
-    {
-        return DATA_TYPE_BOOL;
-    }
-    else
-    {
-        return DATA_TYPE_INVALID;
-    }
-}
-
-/**
- * Clean constant format.
- *
- * @param sample
- * @param type
- * @return
- */
-std::string
-abstract_instruction::clean_constant_format(std::string &sample, data_type type)
-{
-    switch (type)
-    {
-        case DATA_TYPE_INT:
-        case DATA_TYPE_FLOAT:
-            /*
-             * nothing to do.
-             */
-            break;
-        case DATA_TYPE_CHAR:
-        case DATA_TYPE_STRING:
-        {
-            sample.erase(sample.begin());
-            sample.erase(sample.end());
-            break;
-        }
-        case DATA_TYPE_BOOL:
-        {
-            sample.assign(1, (char) (sample == "true"));
-            break;
-        }
-        default:
-            break;
-    }
-
-    return sample;
 }
 
 /**
@@ -163,9 +86,9 @@ abstract_instruction::get_method()
  * @return
  */
 bool
-abstract_instruction::object_name_is_valid(std::string &sample)
+abstract_instruction::object_name_is_valid(std::wstring &sample)
 {
     return !sample.empty() &&
-           sample != "collection" &&
-        get_data_type_from_token(sample) == DATA_TYPE_INVALID;
+           sample != L"collection" &&
+        data_type_get_from_token(sample) == DATA_TYPE_INVALID;
 }

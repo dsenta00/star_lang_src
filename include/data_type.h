@@ -66,6 +66,8 @@ const uint8_t DATA_TYPE_SIZE[] =
         0                    // DATA_TYPE_INVALID
     };
 
-data_type get_data_type_from_token(std::string &str);
+data_type data_type_get_from_token(std::wstring str);
+data_type data_type_detect(std::wstring sample);
+std::wstring clean_constant_format(std::wstring &sample, data_type type);
 
 #endif // DATA_TYPE_H

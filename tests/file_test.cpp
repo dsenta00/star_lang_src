@@ -158,8 +158,6 @@ file_test_read()
 
     ORM_DESTROY(f);
     remove(file_name);
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -186,8 +184,6 @@ file_test_write1()
     ORM_DESTROY(f);
     ORM_DESTROY(str);
     remove(file_name);
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -222,7 +218,6 @@ file_test_write2()
     ASSERT_TRUE(compare_file_content(file_name, "42 41.000000 40"), "Should be equal!");
 
     remove(file_name);
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -265,7 +260,6 @@ file_test_read_empty_file()
     ORM_DESTROY(f);
 
     remove(file_name);
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -306,8 +300,6 @@ file_test_append()
     ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 12374, 345"), "Should be equal!");
     remove(file_name);
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -345,8 +337,6 @@ file_test_reopen()
     ASSERT_OK;
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 12374, 345"), "Should be equal!");
     remove(file_name);
-
-    printf("\t-> %s()::OK \n", __FUNCTION__);
 }
 
 /**
@@ -355,12 +345,10 @@ file_test_reopen()
 void
 file_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
     RUN_TEST(file_test_read());
     RUN_TEST(file_test_read_empty_file());
     RUN_TEST(file_test_write1());
     RUN_TEST(file_test_write2());
     RUN_TEST(file_test_append());
     RUN_TEST(file_test_reopen());
-    printf("\r\n\r\n");
 }

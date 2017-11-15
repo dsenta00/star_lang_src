@@ -30,8 +30,8 @@
  */
 class create_instruction : public abstract_instruction {
 public:
-    explicit create_instruction(std::vector<std::string> &arg);
-    static create_instruction *create(std::string name, std::string type);
+    explicit create_instruction(std::vector<std::wstring> &arg);
+    static create_instruction *create(std::wstring name, std::wstring type);
     abstract_instruction *execute() override;
     bool validate() override;
 };

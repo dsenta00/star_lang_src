@@ -24,13 +24,15 @@
 #include <method.h>
 #include <ORM/relationship.h>
 #include <ORM/orm.h>
+#include <codecvt>
+#include <locale>
 #include "instructions/pop_and_store_instruction.h"
 #include "primitive_data/primitive_data.h"
 
 /**
  * @inherit
  */
-pop_and_store_instruction::pop_and_store_instruction(std::vector<std::string> &arg)
+pop_and_store_instruction::pop_and_store_instruction(std::vector<std::wstring> &arg)
     : abstract_instruction(OP_CODE_POP_AND_STORE, arg)
 {
 }
@@ -48,6 +50,7 @@ pop_and_store_instruction::execute()
 
     auto *m = this->get_method();
     auto *data2 = (primitive_data *) m->pop_stack();
+
     primitive_data *data = (primitive_data *) m->get_local_object(this->arg[0]);
     *data = *data2;
 
@@ -58,9 +61,9 @@ pop_and_store_instruction::execute()
  * @inherit
  */
 pop_and_store_instruction *
-pop_and_store_instruction::create(std::string name)
+pop_and_store_instruction::create(std::wstring name)
 {
-    std::vector<std::string> arg;
+    std::vector<std::wstring> arg;
     arg.emplace_back(name);
 
     return dynamic_cast<pop_and_store_instruction *>(orm::create(

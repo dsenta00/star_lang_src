@@ -30,8 +30,8 @@
  */
 class create_and_assign_constant_instruction : public abstract_instruction {
 public:
-    explicit create_and_assign_constant_instruction(std::vector<std::string> &arg);
-    static create_and_assign_constant_instruction *create(std::string name, std::string type, std::string constant);
+    explicit create_and_assign_constant_instruction(std::vector<std::wstring> &arg);
+    static create_and_assign_constant_instruction *create(std::wstring name, std::wstring type, std::wstring constant);
     abstract_instruction *execute() override;
     bool validate() override;
 };

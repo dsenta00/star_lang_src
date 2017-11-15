@@ -43,19 +43,19 @@ instruction_test_create_negative()
 
     /* Without method */
 
-    i = create_and_assign_constant_instruction::create("", "int", "");
+    i = create_and_assign_constant_instruction::create(L"", L"int", L"");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("", "", "");
+    i = create_and_assign_constant_instruction::create(L"", L"", L"");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("ante", "konjo", "");
+    i = create_and_assign_constant_instruction::create(L"ante", L"konjo", L"");
     i->execute();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
@@ -66,7 +66,7 @@ instruction_test_create_negative()
     method *foo;
     std::vector<abstract_instruction *> instructions;
 
-    i = create_and_assign_constant_instruction::create("", "int", "");
+    i = create_and_assign_constant_instruction::create(L"", L"int", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -76,7 +76,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("", "", "");
+    i = create_and_assign_constant_instruction::create(L"", L"", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -86,7 +86,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("int", "int", "");
+    i = create_and_assign_constant_instruction::create(L"int", L"int", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -96,7 +96,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("float", "float", "");
+    i = create_and_assign_constant_instruction::create(L"float", L"float", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -106,7 +106,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("char", "char", "");
+    i = create_and_assign_constant_instruction::create(L"char", L"char", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -116,7 +116,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("string", "string", "");
+    i = create_and_assign_constant_instruction::create(L"string", L"string", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -126,7 +126,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("bool", "bool", "");
+    i = create_and_assign_constant_instruction::create(L"bool", L"bool", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -136,7 +136,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("collection", "collection", "");
+    i = create_and_assign_constant_instruction::create(L"collection", L"collection", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -146,7 +146,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("ante", "konjo", "");
+    i = create_and_assign_constant_instruction::create(L"ante", L"konjo", L"");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -156,7 +156,7 @@ instruction_test_create_negative()
     ORM_DESTROY(foo);
     ERROR_LOG_CLEAR;
 
-    i = create_and_assign_constant_instruction::create("ante", "konjo", "smajo");
+    i = create_and_assign_constant_instruction::create(L"ante", L"konjo", L"smajo");
     instructions.clear();
     instructions.push_back(i);
     foo = method::create("foo", instructions);
@@ -176,7 +176,7 @@ instruction_test_create1()
     /*
      * create <name> <type>
      */
-    abstract_instruction *i = create_and_assign_constant_instruction::create("int_name", "int", "3");
+    abstract_instruction *i = create_and_assign_constant_instruction::create(L"int_name", L"int", L"3");
     ASSERT_OK;
 
     std::vector<abstract_instruction *> instructions;
@@ -190,8 +190,7 @@ instruction_test_create1()
     auto *data = ORM_SELECT(primitive_data, obj->get_id() == "int_name");
     ASSERT_NOT_NULL(data);
     ASSERT_EQUALS(data->get_type(), DATA_TYPE_INT);
-    ASSERT_NOT_NULL(foo->get_local_object("int_name"));
-    printf("data->to_int() => %u\n", data->to_int());
+    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
     ASSERT_EQUALS(data->to_int(), 3);
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
     abstract_instruction *next = i->execute();
@@ -209,13 +208,13 @@ instruction_test_create2()
     /*
      * create <name> <type>
      */
-    abstract_instruction *i = create_and_assign_constant_instruction::create("int_name", "int", "3");
+    abstract_instruction *i = create_and_assign_constant_instruction::create(L"int_name", L"int", L"3");
     ASSERT_OK;
 
-    abstract_instruction *f = create_and_assign_constant_instruction::create("float_name", "float", "4.2");
+    abstract_instruction *f = create_and_assign_constant_instruction::create(L"float_name", L"float", L"4.2");
     ASSERT_OK;
 
-    abstract_instruction *c = create_and_assign_constant_instruction::create("collection_name", "collection", "12.4");
+    abstract_instruction *c = create_and_assign_constant_instruction::create(L"collection_name", L"collection", L"12.4");
     ASSERT_OK;
 
     std::vector<abstract_instruction *> instructions;
@@ -230,7 +229,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT]);
     auto *int_name = ORM_SELECT(primitive_data, obj->get_id() == "int_name");
     ASSERT_NOT_NULL(int_name);
-    ASSERT_NOT_NULL(foo->get_local_object("int_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
     ASSERT_EQUALS(int_name->to_int(), 3);
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
@@ -238,7 +237,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT] + DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
     auto *float_name = ORM_SELECT(primitive_data, obj->get_id() == "float_name");
     ASSERT_NOT_NULL(float_name);
-    ASSERT_NOT_NULL(foo->get_local_object("float_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"float_name"));
     ASSERT_EQUALS(int_name->to_float(), 4.2);
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
@@ -246,7 +245,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_INT] + DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
     auto *collection_name = ORM_SELECT(collection, obj->get_id() == "collection_name");
     ASSERT_NOT_NULL(collection_name);
-    ASSERT_NOT_NULL(foo->get_local_object("collection_name"));
+    ASSERT_NOT_NULL(foo->get_local_object(L"collection_name"));
     auto *collection_data = (primitive_data *)(*collection_name)[0];
     ASSERT_NOT_NULL(collection_data);
     ASSERT_EQUALS(collection_data->to_float(), 14.2);
@@ -263,10 +262,8 @@ instruction_test_create2()
  */
 void create_and_assign_constant_instruction_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
     vm = (virtual_memory *) orm::get_first("virtual_memory");
     RUN_TEST_VM(instruction_test_create_negative());
     RUN_TEST_VM(instruction_test_create1());
     RUN_TEST_VM(instruction_test_create2());
-    printf("\r\n\r\n");
 }

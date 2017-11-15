@@ -27,11 +27,13 @@
 #include <primitive_data/primitive_data.h>
 #include <method.h>
 #include <ORM/orm.h>
+#include <codecvt>
+#include <locale>
 
 /**
  * @inherit
  */
-create_instruction::create_instruction(std::vector<std::string> &arg) : abstract_instruction(OP_CODE_CREATE, arg)
+create_instruction::create_instruction(std::vector<std::wstring> &arg) : abstract_instruction(OP_CODE_CREATE, arg)
 {
 }
 
@@ -46,17 +48,21 @@ create_instruction::execute()
         return nullptr;
     }
 
-    auto &name = this->arg[0];
+    auto &name_w = this->arg[0];
     auto &type = this->arg[1];
     object *data = nullptr;
 
-    if (type == "collection")
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string name = converter.to_bytes(name_w);
+
+    if (type == L"collection")
     {
         data = collection::create(name);
     }
     else
     {
-        data = primitive_data::create(name, get_data_type_from_token(type));
+        data = primitive_data::create(name, data_type_get_from_token(type));
     }
 
     if (!data)
@@ -74,9 +80,9 @@ create_instruction::execute()
  * @inherit
  */
 create_instruction *
-create_instruction::create(std::string name, std::string type)
+create_instruction::create(std::wstring name, std::wstring type)
 {
-    std::vector<std::string> arg;
+    std::vector<std::wstring> arg;
     arg.emplace_back(name);
     arg.emplace_back(type);
 

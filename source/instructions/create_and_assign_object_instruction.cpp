@@ -27,12 +27,14 @@
 #include <ORM/orm.h>
 #include <ORM/relationship.h>
 #include <method.h>
+#include <codecvt>
+#include <locale>
 #include "instructions/create_and_assign_object_instruction.h"
 
 /**
  * @inherit
  */
-create_and_assign_object_instruction::create_and_assign_object_instruction(std::vector<std::string> &arg)
+create_and_assign_object_instruction::create_and_assign_object_instruction(std::vector<std::wstring> &arg)
     : abstract_instruction(OP_CODE_CREATE_AND_ASSIGN_OBJECT, arg)
 {
 }
@@ -48,9 +50,14 @@ create_and_assign_object_instruction::execute()
         return nullptr;
     }
 
-    auto &name = this->arg[0];
+    auto &name_w = this->arg[0];
     auto &obj_name = this->arg[1];
     auto *m = this->get_method();
+
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string name = converter.to_bytes(name_w);
+
     auto *object_to_assign = m->get_local_object(obj_name);
     object *object = nullptr;
 
@@ -79,9 +86,9 @@ create_and_assign_object_instruction::execute()
  * @inherit
  */
 create_and_assign_object_instruction *
-create_and_assign_object_instruction::create(std::string name, std::string obj_name)
+create_and_assign_object_instruction::create(std::wstring name, std::wstring obj_name)
 {
-    std::vector<std::string> arg;
+    std::vector<std::wstring> arg;
     arg.emplace_back(name);
     arg.emplace_back(obj_name);
 

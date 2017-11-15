@@ -29,18 +29,30 @@
 #include "file_test.h"
 #include "instructions/create_instruction_test.h"
 #include "instructions/create_and_assign_constant_instruction_test.h"
+#include "data_type_test.h"
 #include <cstdio>
 
+#define RUN_TEST_SECTION(__test__) \
+    do { \
+            printf(#__test__ " section:\r\n\r\n"); \
+            __test__(); \
+            printf("\r\r\n", __FUNCTION__); \
+    } while (false);
+
+/**
+ * Run tests.
+ */
 void run_tests()
 {
-    orm_test();
-    memory_chunk_test();
-    virtual_memory_test();
-    primitive_data_test();
-    collection_test();
-    file_test();
-    create_instruction_test();
-    //create_and_assign_constant_instruction_test();
+    RUN_TEST_SECTION(orm_test);
+    RUN_TEST_SECTION(memory_chunk_test);
+    RUN_TEST_SECTION(virtual_memory_test);
+    RUN_TEST_SECTION(data_type_test);
+    RUN_TEST_SECTION(primitive_data_test);
+    RUN_TEST_SECTION(collection_test);
+    RUN_TEST_SECTION(file_test);
+    RUN_TEST_SECTION(create_instruction_test);
+    //RUN_TEST_SECTION(create_and_assign_constant_instruction_test);
 
     printf("TESTS ARE OK!\n");
 }

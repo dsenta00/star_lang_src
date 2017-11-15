@@ -315,8 +315,6 @@ primitive_data_test_float()
 
     ASSERT_EQUALS(float_data.to_float(), 0.0);
     ASSERT_OK;
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -333,8 +331,6 @@ primitive_data_test_string_empty()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[DATA_TYPE_STRING]);
     ASSERT_TRUE(wcscmp((const wchar_t *) empty_string.get_address(), L"") == 0,
                 "string_data should be empty!");
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -591,8 +587,6 @@ primitive_data_test_string()
                           sizeof(L"31") +
                           DATA_TYPE_SIZE[DATA_TYPE_INT] +
                           DATA_TYPE_SIZE[DATA_TYPE_FLOAT]);
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -851,8 +845,6 @@ primitive_data_test_int()
     ASSERT_OK;
 
     int_data.print();
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -910,8 +902,6 @@ void primitive_data_test_references()
     {
         primitive_data_test_references((data_type) type);
     }
-
-    printf("\t-> %s()::OK\n", __FUNCTION__);
 }
 
 /**
@@ -919,8 +909,6 @@ void primitive_data_test_references()
  */
 void primitive_data_test()
 {
-    printf("%s()\r\n", __FUNCTION__);
-
     vm = (virtual_memory *) orm::get_first("virtual_memory");
 
     RUN_TEST_VM(primitive_data_test_int());
@@ -928,6 +916,4 @@ void primitive_data_test()
     RUN_TEST_VM(primitive_data_test_string());
     RUN_TEST_VM(primitive_data_test_float());
     RUN_TEST_VM(primitive_data_test_references());
-
-    printf("\r\n\r\n");
 }

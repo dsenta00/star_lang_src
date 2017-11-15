@@ -23,28 +23,35 @@
 #ifndef BOX_DATA_TYPE_CPP
 #define BOX_DATA_TYPE_CPP
 
+#include <regex>
 #include "data_type.h"
 
+/**
+ * Get data type from token.
+ *
+ * @param str
+ * @return
+ */
 data_type
-get_data_type_from_token(std::string &str)
+data_type_get_from_token(const std::wstring str)
 {
-    if (str == "bool")
+    if (str == L"bool")
     {
         return DATA_TYPE_BOOL;
     }
-    else if (str == "char")
+    else if (str == L"char")
     {
         return DATA_TYPE_CHAR;
     }
-    else if (str == "int")
+    else if (str == L"int")
     {
         return DATA_TYPE_INT;
     }
-    else if (str == "float")
+    else if (str == L"float")
     {
         return DATA_TYPE_FLOAT;
     }
-    else if (str == "string")
+    else if (str == L"string")
     {
         return DATA_TYPE_STRING;
     }
@@ -52,6 +59,83 @@ get_data_type_from_token(std::string &str)
     {
         return DATA_TYPE_INVALID;
     }
+}
+
+/**
+ * Detect data_type.
+ *
+ * @param sample
+ * @return
+ */
+data_type
+data_type_detect(const std::wstring sample)
+{
+    if (sample.empty())
+    {
+        return DATA_TYPE_INVALID;
+    }
+
+    if (std::regex_match(sample, std::wregex(L"([-+]?[0-9]+)")))
+    {
+        return DATA_TYPE_INT;
+    }
+    else if (std::regex_match(sample, std::wregex(L"[-+]?[0-9]*\\.?[0-9]*")))
+    {
+        return DATA_TYPE_FLOAT;
+    }
+    else if (std::regex_match(sample, std::wregex(L"\'?.\'")))
+    {
+        return DATA_TYPE_CHAR;
+    }
+    else if (std::regex_match(sample, std::wregex(L"\"(.*)\"")) or std::regex_match(sample, std::wregex(L"\'(.*)+\'")))
+    {
+        return DATA_TYPE_STRING;
+    }
+    else if (std::regex_match(sample, std::wregex(L"true|false")))
+    {
+        return DATA_TYPE_BOOL;
+    }
+    else
+    {
+        return DATA_TYPE_INVALID;
+    }
+}
+
+/**
+ * Clean constant format.
+ *
+ * @param sample
+ * @param type
+ * @return
+ */
+std::wstring
+clean_constant_format(std::wstring &sample, data_type type)
+{
+    switch (type)
+    {
+        case DATA_TYPE_INT:
+        case DATA_TYPE_FLOAT:
+            /*
+             * nothing to do.
+             */
+            break;
+        case DATA_TYPE_CHAR:
+        case DATA_TYPE_STRING:
+        {
+            sample.erase(sample.begin());
+            sample.erase(sample.end());
+            break;
+        }
+        case DATA_TYPE_BOOL:
+        {
+            sample.assign(1, (wchar_t) (sample == L"true"));
+            break;
+        }
+        default:
+            break;
+    }
+
+    return sample;
 }
 
 #endif // BOX_DATA_TYPE_CPP

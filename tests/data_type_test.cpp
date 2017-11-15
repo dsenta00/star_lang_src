@@ -20,20 +20,28 @@
  * THE SOFTWARE.
  */
 
-#ifndef POP_AND_STORE_INSTRUCTION_H
-#define POP_AND_STORE_INSTRUCTION_H
-
-#include "abstract_instruction.h"
+#include <cstdio>
+#include <ORM/orm.h>
+#include <error_log.h>
+#include "data_type_test.h"
+#include "test_assert.h"
+#include "data_type.h"
 
 /**
- * OP_CODE_POP_AND_STORE <name>
+ *
  */
-class pop_and_store_instruction : abstract_instruction {
-public:
-    explicit pop_and_store_instruction(std::vector<std::wstring> &arg);
-    static pop_and_store_instruction *create(std::wstring name);
-    abstract_instruction *execute() override;
-    bool validate() override;
-};
+static void data_type_detect_test()
+{
+    ASSERT_EQUALS(data_type_detect(L"9"), DATA_TYPE_INT);
+    ASSERT_EQUALS(data_type_detect(L"+9"), DATA_TYPE_INT);
+    ASSERT_EQUALS(data_type_detect(L"\'a\'"), DATA_TYPE_CHAR);
+    ASSERT_EQUALS(data_type_detect(L"\'jabukica\'"), DATA_TYPE_STRING);
+    ASSERT_EQUALS(data_type_detect(L"4.09"), DATA_TYPE_FLOAT);
+    ASSERT_EQUALS(data_type_detect(L"+4.09"), DATA_TYPE_FLOAT);
+    ASSERT_EQUALS(data_type_detect(L"-4.09"), DATA_TYPE_FLOAT);
+}
 
-#endif //POP_AND_STORE_INSTRUCTION_H
+void data_type_test()
+{
+    RUN_TEST(data_type_detect_test());
+}
