@@ -20,30 +20,49 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#include "variable/file/file_mode.h"
 
 /**
- * Main program.
+ * Check if can read in this file mode.
  *
- * @param argc
- * @param argv
+ * @param mode
  * @return
  */
-int main(int argc, char *argv[])
+bool
+file_mode_can_read(file_mode mode)
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    return (mode & FILE_MODE_READ) == FILE_MODE_READ;
 }
 
+/**
+ * Check if can write in this mode.
+ *
+ * @param mode
+ * @return
+ */
+bool
+file_mode_can_write(file_mode mode)
+{
+    return (mode & FILE_MODE_WRITE) == FILE_MODE_WRITE;
+}
+
+/**
+ * Check if mode is valid for opening file.
+ *
+ * @param mode
+ * @return
+ */
+bool
+file_mode_is_valid(file_mode mode)
+{
+    switch (mode)
+    {
+        case FILE_MODE_READ:
+        case FILE_MODE_WRITE:
+        case FILE_MODE_APPEND:
+            return true;
+        default:
+        case FILE_MODE_NOT_OPEN:
+            return false;
+    }
+}

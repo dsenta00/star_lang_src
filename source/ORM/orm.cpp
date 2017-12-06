@@ -30,18 +30,18 @@ typedef std::unique_ptr<object_repository> object_repository_p;
 /**
  * @brief repo - repository map.
  */
-static std::map<std::string, object_repository_p> repo;
+static std::map<object_type, object_repository_p> repo;
 
 /**
  * Find object repository.
  *
- * @param object_type - object type.
+ * @param type - object type.
  * @return object repository if found, otherwise return nullptr.
  */
 object_repository *
-orm::find_object_repository(std::string object_type)
+orm::find_object_repository(object_type type)
 {
-    auto it = repo.find(object_type);
+    auto it = repo.find(type);
 
     return (it != repo.end()) ? (it->second).get() : nullptr;
 }
@@ -49,17 +49,17 @@ orm::find_object_repository(std::string object_type)
 /**
  * Add object repository if not exists.
  *
- * @param object_type
+ * @param type
  */
 void
-orm::add_object_repository(std::string object_type)
+orm::add_object_repository(object_type type)
 {
-    if (orm::find_object_repository(object_type))
+    if (orm::find_object_repository(type))
     {
         return;
     }
 
-    repo[object_type] = object_repository_p(new object_repository());
+    repo[type] = object_repository_p(new object_repository());
 }
 
 /**
@@ -148,14 +148,14 @@ orm::sweep()
 /**
  * Select command.
  *
- * @param object_type
+ * @param type
  * @param where
  * @return
  */
 object *
-orm::select(std::string object_type, std::function<bool(object *)> where)
+orm::select(object_type type, std::function<bool(object *)> where)
 {
-    object_repository *repository = orm::find_object_repository(std::move(object_type));
+    object_repository *repository = orm::find_object_repository(type);
 
     if (!repository)
     {
@@ -168,14 +168,14 @@ orm::select(std::string object_type, std::function<bool(object *)> where)
 /**
  * Select id.
  *
- * @param object_type
+ * @param type
  * @param id
  * @return
  */
 object *
-orm::select(std::string object_type, std::string id)
+orm::select(object_type type, std::string id)
 {
-    object_repository *repository = orm::find_object_repository(std::move(object_type));
+    object_repository *repository = orm::find_object_repository(type);
 
     if (!repository)
     {
@@ -188,13 +188,13 @@ orm::select(std::string object_type, std::string id)
 /**
  * Get first object from object repository.
  *
- * @param object_type - object type.
+ * @param type - object type.
  * @return first object if exists, otherwise nullptr.
  */
 object *
-orm::get_first(std::string object_type)
+orm::get_first(object_type type)
 {
-    object_repository *repository = orm::find_object_repository(std::move(object_type));
+    object_repository *repository = orm::find_object_repository(type);
 
     if (!repository)
     {
@@ -210,12 +210,12 @@ orm::get_first(std::string object_type)
 /**
  * Remove object repository.
  *
- * @param object_type
+ * @param type
  */
 void
-orm::remove_object_repository(std::string object_type)
+orm::remove_object_repository(object_type type)
 {
-    auto it = repo.find(object_type);
+    auto it = repo.find(type);
 
     if (it != repo.end())
     {

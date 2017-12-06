@@ -20,30 +20,35 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
+#ifndef BOX_MEMORY_CHUNK_IF_H
+#define BOX_MEMORY_CHUNK_IF_H
+
+#include "ORM/object.h"
+#include "fw_decl.h"
+#include <cstdint>
 #include <cstdlib>
+#include <functional>
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class memory_chunk_if : public object {
+public:
+    memory_chunk_if();
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+    object_type get_object_type();
 
-    run_tests();
+    void free_memory_add(uintptr_t address, uint32_t size);
+    void free_memory_remove(memory *mem);
+    memory *free_memory_find(std::function<bool(memory *)> foo);
+    memory *free_memory_front();
+    uint32_t free_memory_num();
+    void free_memory_delete_all();
+    void free_memory_union();
 
-    return EXIT_SUCCESS;
-}
+    memory *reserved_memory_add(uintptr_t address, uint32_t size);
+    void reserved_memory_remove(memory *mem);
+    memory *reserved_memory_front();
+    memory *reserved_memory_back();
+    uint32_t reserved_memory_num();
+    void reserved_memory_sort();
+};
 
+#endif // BOX_MEMORY_CHUNK_IF_H

@@ -20,39 +20,43 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_H
-#define ORM_H
+#ifndef BOX_VIRTUAL_MEMORY_H
+#define BOX_VIRTUAL_MEMORY_H
 
-#include "object_repository.h"
-#include "object_type.h"
-#include <string>
+#include "ORM/object.h"
+#include "fw_decl.h"
+#include <cstdint>
 #include <functional>
 
+#define CHUNK_MINIMUM_CAPACITY (32768)
+#define CHUNK_MAXIMUM_CAPACITY (134217728)
+
 /**
- * ORM interface.
+ * Virtual memory object.
  */
-namespace orm {
-    object_repository *find_object_repository(object_type type);
-    void add_object_repository(object_type type);
-    object *create(object *o);
-    void change_id(object *o, std::string new_id);
-    void destroy(object *o);
-    void sweep();
-    object *select(object_type type, std::function<bool(object *)> where);
-    object *select(object_type type, std::string id);
-    object *get_first(object_type type);
-    void remove_object_repository(object_type type);
-    void remove_all_repositories();
-}
+class virtual_memory : public object {
+public:
+    explicit virtual_memory(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
 
-#define ORM_SELECT(__OBJ_TYPE__, __WHERE__) \
-  (__OBJ_TYPE__ *)orm::select(#__OBJ_TYPE__, [&] (object *e) { \
-  __OBJ_TYPE__ *obj = (__OBJ_TYPE__ *)e; \
-  (void)obj; \
-  return __WHERE__; \
-})
+    object_type get_object_type();
 
-#define ORM_DESTROY(__OBJ__) \
-  orm::destroy((object *)__OBJ__)
+    memory *alloc(uint32_t size);
+    memory *realloc(memory *mem, uint32_t new_size);
+    void free(memory *mem);
+    uint32_t get_allocated_total();
 
-#endif // ORM_H
+    static virtual_memory *create(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
+protected:
+    memory *add_new_chunk_and_alloc(uint32_t size);
+    memory *solve_defragmentation_and_alloc(uint32_t size);
+    memory_chunk *find_memory_chunk(std::function<bool(memory_chunk *)> func);
+    memory_chunk *add_memory_chunk(uint32_t capacity);
+    memory *reserve(uint32_t size);
+    memory *reserve_from_chunk(memory_chunk *chunk, uint32_t size);
+
+    uint32_t allocated_total;
+    uint32_t max_allocated_bytes;
+    relationship *memory_chunk_relationship;
+};
+
+#endif // BOX_VIRTUAL_MEMORY_H

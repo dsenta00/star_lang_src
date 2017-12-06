@@ -20,30 +20,26 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#include "variable/var.h"
 
 /**
- * Main program.
+ * The constructor.
  *
- * @param argc
- * @param argv
- * @return
+ * @param id
+ * @param is_reference
  */
-int main(int argc, char *argv[])
+var::var(std::string id, bool is_reference) : object(std::move(id))
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    this->is_reference = is_reference;
 }
 
+/**
+ * Get is_reference.
+ * 
+ * @return
+ */
+bool
+var::get_is_reference()
+{
+    return this->is_reference;
+}

@@ -20,30 +20,28 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#include <cstdio>
+#include <ORM/orm.h>
+#include <error_handler/error_log.h>
+#include "../../../include/variable/primitive_data/data_type_test.h"
+#include "../../../test_assert.h"
+#include "variable/primitive_data/data_type.h"
 
 /**
- * Main program.
  *
- * @param argc
- * @param argv
- * @return
  */
-int main(int argc, char *argv[])
+static void data_type_detect_test()
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    ASSERT_EQUALS(data_type_detect(L"9"), OBJECT_TYPE_INT);
+    ASSERT_EQUALS(data_type_detect(L"+9"), OBJECT_TYPE_INT);
+    ASSERT_EQUALS(data_type_detect(L"\'a\'"), OBJECT_TYPE_CHAR);
+    ASSERT_EQUALS(data_type_detect(L"\'jabukica\'"), OBJECT_TYPE_STRING);
+    ASSERT_EQUALS(data_type_detect(L"4.09"), OBJECT_TYPE_FLOAT);
+    ASSERT_EQUALS(data_type_detect(L"+4.09"), OBJECT_TYPE_FLOAT);
+    ASSERT_EQUALS(data_type_detect(L"-4.09"), OBJECT_TYPE_FLOAT);
 }
 
+void data_type_test()
+{
+    RUN_TEST(data_type_detect_test());
+}

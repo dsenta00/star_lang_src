@@ -20,30 +20,39 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef BOX_METHOD_H
+#define BOX_METHOD_H
+
+#include "ORM/object.h"
+#include "variable/primitive_data/data_type.h"
+#include "fw_decl.h"
+
+typedef enum {
+    INSTRUCTION_OK,
+    INSTRUCTION_ERROR,
+    INSTRUCTION_FINISHED
+} instruction_result;
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * @brief The method class
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class method : public object {
+public:
+    method(std::string id, std::vector<abstract_instruction *> &instructions);
+    static method *create(std::string id, std::vector<abstract_instruction *> &instructions);
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+    object_type get_object_type();
 
-    run_tests();
+    instruction_result execute_next();
+    void add_local_object(object *o);
+    object *get_local_object(std::wstring id);
+    void push_stack(object *o);
+    object *pop_stack();
+protected:
+    object *result;
+    std::map<std::wstring, object *> local_objects;
+    std::vector<object *> stack;
+    abstract_instruction *current_instruction;
+};
 
-    return EXIT_SUCCESS;
-}
-
+#endif // BOX_METHOD_H

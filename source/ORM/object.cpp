@@ -23,7 +23,7 @@
 #include "ORM/object.h"
 #include "ORM/relationship.h"
 #include <sstream>
-#include "error_log.h"
+#include "error_handler/error_log.h"
 
 /**
  * The constructor.
@@ -31,10 +31,9 @@
  * @param type
  * @param id
  */
-object::object(std::string type, const uint64_t id)
+object::object(const uint64_t id)
 {
     this->marked = false;
-    this->type = std::move(type);
     this->id = std::to_string(id);
 }
 
@@ -44,10 +43,9 @@ object::object(std::string type, const uint64_t id)
  * @param type
  * @param id
  */
-object::object(std::string type, std::string id)
+object::object(std::string id)
 {
     this->marked = false;
-    this->type = std::move(type);
     this->id = std::move(id);
 }
 
@@ -108,17 +106,6 @@ object::master_relationships_clear_objects()
             e->slave_relationship_remove_object(r->get_name(), this);
         }
     }
-}
-
-/**
- * Get object type.
- *
- * @return object type.
- */
-std::string
-object::get_object_type()
-{
-    return this->type;
 }
 
 /**

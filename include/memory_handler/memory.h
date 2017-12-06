@@ -20,30 +20,44 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef MEMORY_H
+#define MEMORY_H
+
+#include <stdint.h>
+#include "ORM/object.h"
 
 /**
- * Main program.
+ * The memory object.
  *
- * @param argc
- * @param argv
- * @return
+ * Memory is obtained by memory chunk in order to data can keep
+ * memory information.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class memory : public object {
+public:
+    memory(uintptr_t address, uint32_t size);
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+    object_type get_object_type();
 
-    run_tests();
+    template<typename T>
+    T get_pointer();
 
-    return EXIT_SUCCESS;
-}
+    uintptr_t get_address() const;
 
+    template<typename T>
+    T &get_element();
+
+    void align(memory *adjacent_memory);
+    uint32_t get_size();
+    bool operator<(const memory &mem) const;
+    void operator+=(uint32_t size);
+    void operator-=(uint32_t size);
+    void assign(uintptr_t address, uint32_t size);
+    bool ready_to_remove();
+
+    static memory *create(uintptr_t address, uint32_t size);
+protected:
+    uintptr_t address;
+    uint32_t size;
+};
+
+#endif // MEMORY_H

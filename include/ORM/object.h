@@ -25,6 +25,7 @@
 
 #include "orm_fw.h"
 #include "relationship_type.h"
+#include "object_type.h"
 #include <cstdint>
 #include <map>
 #include <vector>
@@ -39,11 +40,14 @@ typedef std::shared_ptr<relationship> relationship_p;
  */
 class object {
 public:
-    object(std::string type, uint64_t id);
-    object(std::string type, std::string id);
+    explicit object(uint64_t id);
+    explicit object(std::string id);
+
     std::string get_id();
     void set_id(std::string new_id);
-    std::string get_object_type();
+
+    virtual object_type get_object_type() = 0;
+
     bool get_marked();
     void set_marked(bool marked);
 
@@ -72,7 +76,6 @@ public:
 protected:
     bool marked;
     std::string id;
-    std::string type;
     std::map<std::string, relationship_p> master_relationships;
     std::map<std::string, relationship_p> slave_relationships;
 };

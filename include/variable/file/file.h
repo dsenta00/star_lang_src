@@ -20,30 +20,38 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef FILE_H
+#define FILE_H
+
+#include "ORM/object.h"
+#include "fw_decl.h"
+#include "file_mode.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * The file object. Handles file streams.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class file : public object {
+public:
+    explicit file(const char *id);
+    file(const char *id, file_mode mode, const char *file_name);
+    object_type get_object_type() override;
+    void open(file_mode mode, const char *file_name);
+    void close();
+    bool is_opened();
+    primitive_data *read_all();
+    void write(object *o);
+    static file *create(const char *id, file_mode mode, const char *file_name);
+    static file *create(const char *id);
+    ~file() override;
+protected:
+    void read_into_buffer();
+    void write_from_buffer();
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+    bool is_already_read;
+    std::string file_name;
+    std::wstring buffer;
+    file_mode mode;
+};
 
-    run_tests();
 
-    return EXIT_SUCCESS;
-}
-
+#endif //FILE_H

@@ -29,7 +29,11 @@ class memory_chunk;
 
 class virtual_memory;
 
+class var;
+
 class primitive_data;
+
+class string_data;
 
 class collection;
 

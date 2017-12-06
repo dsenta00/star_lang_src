@@ -20,30 +20,35 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef PRIMITIVE_TYPE_H
+#define PRIMITIVE_TYPE_H
+
+#include "ORM/object.h"
+#include "data_type.h"
+#include "fw_decl.h"
+#include <string>
+#include <variable/var.h>
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * The primitive_data class. Represents primitive data type in
+ * this programming language and defines all operations in that scope.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class primitive_data : public var {
+public:
+    explicit primitive_data(std::string id, object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    primitive_data(std::string id, primitive_data &data, bool is_reference = false);
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+    static primitive_data *create(std::string id, object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    static primitive_data *create(std::string id, primitive_data &data, bool is_reference = false);
 
-    run_tests();
+    virtual bool default_value() = 0;
 
-    return EXIT_SUCCESS;
-}
+    memory *get_memory();
+    uintptr_t get_address();
 
+    static bool is_primitive(var *data);
+protected:
+    virtual_memory *vm;
+};
+
+#endif // PRIMITIVE_TYPE_H

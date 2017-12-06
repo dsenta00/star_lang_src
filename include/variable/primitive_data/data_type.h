@@ -20,30 +20,35 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef DATA_TYPE_H
+#define DATA_TYPE_H
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+#include <cstdint>
+#include <string>
+#include <ORM/object_type.h>
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
+const wchar_t DATA_TYPE_FORMAT[][8] =
+    {
+        L"%d",  // DATA_TYPE_BOOL,
+        L"%c",  // DATA_TYPE_CHAR,
+        L"%d",  // OBJECT_TYPE_INT,
+        L"%lf", // OBJECT_TYPE_FLOAT,
+        L"%ls", // OBJECT_TYPE_STRING,
+        L""     // DATA_TYPE_NULL
+    };
 
-    run_tests();
+const uint8_t DATA_TYPE_SIZE[] =
+    {
+        sizeof(bool),        // DATA_TYPE_BOOL,
+        sizeof(wchar_t),     // DATA_TYPE_CHAR,
+        sizeof(int32_t),     // OBJECT_TYPE_INT,
+        sizeof(double),      // OBJECT_TYPE_FLOAT,
+        sizeof(wchar_t) * 8, // OBJECT_TYPE_SIZE, default size
+        0                    // DATA_TYPE_NULL
+    };
 
-    return EXIT_SUCCESS;
-}
+object_type data_type_get_from_token(std::wstring str);
+object_type data_type_detect(std::wstring sample);
+std::wstring clean_constant_format(std::wstring &sample, object_type type);
 
+#endif // DATA_TYPE_H

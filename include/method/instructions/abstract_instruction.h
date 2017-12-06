@@ -20,30 +20,37 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef BOX_INSTRUCTION_H
+#define BOX_INSTRUCTION_H
+
+#include "ORM/object.h"
+#include "ORM/orm_fw.h"
+#include "fw_decl.h"
+#include "variable/primitive_data/data_type.h"
+#include "op_code.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * @brief The instruction class
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class abstract_instruction : public object {
+public:
+    explicit abstract_instruction(op_code op, std::vector<std::wstring> &arg);
+
+    object_type get_object_type();
+
+    op_code &get_op_code();
+    virtual abstract_instruction *execute() = 0;
+    virtual bool validate() = 0;
+protected:
+    op_code op;
+    std::vector<std::wstring> arg;
+    bool validated;
 
     /*
-     * Create global virtual memory.
+     * Helper methods
      */
-    virtual_memory::create();
+    method *get_method();
+    bool object_name_is_valid(std::wstring &sample);
+};
 
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+#endif // BOX_INSTRUCTION_H

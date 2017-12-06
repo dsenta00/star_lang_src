@@ -24,7 +24,7 @@
 
 #include "ORM/relationship.h"
 #include "ORM/object.h"
-#include "error_log.h"
+#include "error_handler/error_log.h"
 
 /**
  * The constructor.

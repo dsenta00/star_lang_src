@@ -639,7 +639,7 @@ GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       =
 
 # The MAX_INITIALIZER_LINES tag determines the maximum number of lines that the
-# initial value of a variable or macro / define can have for it to appear in the
+# initial value of a var or macro / define can have for it to appear in the
 # documentation. If the initializer consists of more lines than specified here
 # it will be hidden. Use a value of 0 to hide initializers completely. The
 # appearance of the value of individual variables and macros / defines can be
@@ -2166,7 +2166,7 @@ DOT_NUM_THREADS        = 0
 # When you want a differently looking font in the dot files that doxygen
 # generates you can specify the font name using DOT_FONTNAME. You need to make
 # sure dot is able to find the font, which can be done by putting it in a
-# standard location or by setting the DOTFONTPATH environment variable or by
+# standard location or by setting the DOTFONTPATH environment var or by
 # setting DOT_FONTPATH to the directory containing the font.
 # The default value is: Helvetica.
 # This tag requires that the tag HAVE_DOT is set to YES.

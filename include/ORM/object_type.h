@@ -20,30 +20,23 @@
  * THE SOFTWARE.
  */
 
-#include "ORM/orm.h"
-#include "memory_handler/virtual_memory.h"
-#include "../test/test.h"
-#include <cstdlib>
+#ifndef OBJECT_TYPE_H
+#define OBJECT_TYPE_H
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+typedef enum {
+    OBJECT_TYPE_BOOL,
+    OBJECT_TYPE_CHAR,
+    OBJECT_TYPE_INT,
+    OBJECT_TYPE_FLOAT,
+    OBJECT_TYPE_STRING,
+    OBJECT_TYPE_NULL,
+    OBJECT_TYPE_COLLECTION,
+    OBJECT_TYPE_INSTRUCTION,
+    OBJECT_TYPE_MEMORY,
+    OBJECT_TYPE_MEMORY_CHUNK,
+    OBJECT_TYPE_VIRTUAL_MEMORY,
+    OBJECT_TYPE_METHOD,
+    OBJECT_TYPE_FILE,
+} object_type;
 
-    /*
-     * Create global virtual memory.
-     */
-    virtual_memory::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+#endif //OBJECT_TYPE_H
