@@ -20,79 +20,51 @@
  * THE SOFTWARE.
  */
 
-#ifndef COLLECTION_H
-#define COLLECTION_H
+#ifndef NULL_H
+#define NULL_H
 
 #include <variable/value.h>
-#include <variable/primitive_data/data_type.h>
-#include "fw_decl.h"
-#include <string>
 
-/**
- * Represents data collection.
- */
-class collection : public value {
+class null : public value {
 public:
-    explicit collection(collection *c = nullptr);
-    static collection *create(collection *c = nullptr);
+    null();
 
-    object_type get_object_type() override;
-    bool is_reference() override;
-    uint32_t size();
-
-    value *operator[](uint32_t index);
-    value *operator[](std::string index);
-    void insert(std::string index, value *o);
-    void insert(uint32_t index, value *o);
-    bool operator+=(value &data) override;
-    bool operator-=(value &data) override;
-    void clear();
-
-    bool operator&=(value &data) override;
-    bool operator|=(value &data) override;
-    bool operator^=(value &data) override;
-    string_data &to_string() override;
     bool to_bool() override;
     wchar_t to_char() override;
     int32_t to_int() override;
     double to_float() override;
+    string_data &to_string() override;
 
+    object_type get_object_type() override;
+
+    bool is_reference() override;
+    bool default_value();
     bool operator=(const void *data) override;
     bool operator=(value &data) override;
+    bool operator&=(value &data) override;
+    bool operator|=(value &data) override;
+    bool operator^=(value &data) override;
+    bool operator+=(value &data) override;
+    bool operator-=(value &data) override;
     bool operator*=(value &data) override;
     bool operator/=(value &data) override;
     bool operator%=(value &data) override;
     bool operator++() override;
     bool operator--() override;
-    
     bool operator==(value &data) override;
     bool operator!=(value &data) override;
     bool operator>(value &data) override;
     bool operator<(value &data) override;
     bool operator>=(value &data) override;
     bool operator<=(value &data) override;
-    
+
     bool print() override;
     bool println() override;
     bool scan() override;
 
     std::wstring get_string() override;
-
-    ~collection() override;
-
-    /*
-     * Don't call this method on purpose!
-     *
-     * scan() use this function.
-     * Almost all scan() logic is contained in this function except
-     * keyboard insertion part.
-     */
-    void parse_stream(std::wstring input);
-protected:
-    void remove_data(std::string index);
-    void remove_data(value *o);
-    void insert_data(std::string index, value *o);
-    std::map<std::string, value *> data_cache;
+    static null *create();
 };
 
-#endif // COLLECTION_H
+
+#endif //NULL_H

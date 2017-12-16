@@ -30,6 +30,7 @@
 #include <method/method.h>
 #include <codecvt>
 #include <locale>
+#include <variable/var.h>
 
 /**
  * @inherit
@@ -59,21 +60,19 @@ create_and_assign_constant_instruction::execute()
     std::wstring_convert<convert_type, wchar_t> converter;
     std::string name = converter.to_bytes(name_w);
 
-    object *data = nullptr;
+    var *data = nullptr;
 
     if (type == L"collection")
     {
-        clean_constant_format(constant, const_data_type);
-        primitive_data *constant_data = primitive_data::create(name, const_data_type, constant.c_str());
+        /*
+         * 1. Create constant
+         */
+        data_type_clean_constant_format(constant, const_data_type);
+        auto &constant_data = *primitive_data::create(const_data_type, constant.c_str());
 
-        if (!constant_data)
-        {
-            return nullptr;
-        }
-
-        auto &array = *collection::create(name);
-        array += *constant_data;
-        data = &array;
+        collection &array = *collection::create();
+        array += constant_data;
+        data = var::create(name, &array);
     }
     else
     {
@@ -85,18 +84,18 @@ create_and_assign_constant_instruction::execute()
             return nullptr;
         }
 
-        clean_constant_format(constant, const_data_type);
+        data_type_clean_constant_format(constant, const_data_type);
 
-        data = primitive_data::create(name, actual_data_type, constant.c_str());
-
-        if (!data)
-        {
-            return nullptr;
-        }
+        data = var::create(
+            name,
+            primitive_data::create(
+                actual_data_type, constant.c_str()
+            )
+        );
     }
 
     auto *m = this->get_method();
-    m->add_local_object(data);
+    m->add_variable(data);
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
 }

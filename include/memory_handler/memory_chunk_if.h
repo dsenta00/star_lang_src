@@ -33,7 +33,7 @@ class memory_chunk_if : public object {
 public:
     memory_chunk_if();
 
-    object_type get_object_type();
+    object_type get_object_type() override;
 
     void free_memory_add(uintptr_t address, uint32_t size);
     void free_memory_remove(memory *mem);

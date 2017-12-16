@@ -26,6 +26,7 @@
 #include <ORM/relationship.h>
 #include <ORM/orm.h>
 #include <method/instructions/abstract_instruction.h>
+#include <variable/var.h>
 #include <locale>
 #include <codecvt>
 
@@ -38,7 +39,7 @@
 method::method(std::string id, std::vector<abstract_instruction *> &instructions) : object::object(std::move(id))
 {
     /*
-     * - var
+     * - value
      * - array
      * - function
      */
@@ -104,7 +105,7 @@ method::execute_next()
  * @param o - object
  */
 void
-method::add_local_object(object *o)
+method::add_variable(var *o)
 {
     std::wstring name;
 
@@ -114,13 +115,13 @@ method::add_local_object(object *o)
         name.push_back((wchar_t) letter);
     }
 
-    if (this->local_objects[name])
+    if (this->variables[name])
     {
         ERROR_LOG_ADD(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
         return;
     }
 
-    this->local_objects[name] = o;
+    this->variables[name] = o;
     this->master_relationship_add_object("method_objects", o);
 }
 
@@ -130,32 +131,37 @@ method::add_local_object(object *o)
  * @param id - object id.
  * @return
  */
-object *
-method::get_local_object(std::wstring id)
+var *
+method::get_variable(std::wstring id)
 {
-    return this->local_objects[id];
+    if (this->variables.find(id) == this->variables.end())
+    {
+        return (var *)orm::get_first(OBJECT_TYPE_NULL);
+    }
+
+    return this->variables[id];
 }
 
 /**
- * Push object to stack.
+ * Push value to stack.
  *
  * @param o
  */
 void
-method::push_stack(object *o)
+method::push_stack(value *o)
 {
     this->stack.push_back(o);
 }
 
 /**
- * Pop object from stack.
+ * Pop value from stack.
  *
- * @return object.
+ * @return value.
  */
-object *
+value *
 method::pop_stack()
 {
-    object *e = this->stack.back();
+    value *e = this->stack.back();
     this->stack.pop_back();
 
     return e;

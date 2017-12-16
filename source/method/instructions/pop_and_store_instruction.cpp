@@ -49,9 +49,9 @@ pop_and_store_instruction::execute()
     }
 
     auto *m = this->get_method();
-    auto *data2 = (var *) m->pop_stack();
+    auto *data2 = (value *) m->pop_stack();
 
-    var *data = (var *) m->get_local_object(this->arg[0]);
+    value *data = (value *) m->get_variable(this->arg[0]);
     *data = *data2;
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
@@ -97,7 +97,7 @@ pop_and_store_instruction::validate()
         return false;
     }
 
-    primitive_data *data = (primitive_data *) m->get_local_object(this->arg[0]);
+    primitive_data *data = (primitive_data *) m->get_variable(this->arg[0]);
 
     if (!data)
     {

@@ -152,6 +152,11 @@ relationship::add_object(object *o)
 void
 relationship::remove_object(object *o)
 {
+    if (!o)
+    {
+        return;
+    }
+
     for (auto it = this->begin(); it != this->end(); it++)
     {
         if (*it == o)

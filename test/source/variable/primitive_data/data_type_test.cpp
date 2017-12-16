@@ -28,20 +28,46 @@
 #include "variable/primitive_data/data_type.h"
 
 /**
- *
+ * @test data_type_detect()
  */
-static void data_type_detect_test()
+static void
+data_type_detect_test()
 {
     ASSERT_EQUALS(data_type_detect(L"9"), OBJECT_TYPE_INT);
     ASSERT_EQUALS(data_type_detect(L"+9"), OBJECT_TYPE_INT);
     ASSERT_EQUALS(data_type_detect(L"\'a\'"), OBJECT_TYPE_CHAR);
     ASSERT_EQUALS(data_type_detect(L"\'jabukica\'"), OBJECT_TYPE_STRING);
+    ASSERT_EQUALS(data_type_detect(L"\"jabukica\""), OBJECT_TYPE_STRING);
     ASSERT_EQUALS(data_type_detect(L"4.09"), OBJECT_TYPE_FLOAT);
     ASSERT_EQUALS(data_type_detect(L"+4.09"), OBJECT_TYPE_FLOAT);
     ASSERT_EQUALS(data_type_detect(L"-4.09"), OBJECT_TYPE_FLOAT);
+    ASSERT_EQUALS(data_type_detect(L"true"), OBJECT_TYPE_BOOL);
+    ASSERT_EQUALS(data_type_detect(L"false"), OBJECT_TYPE_BOOL);
 }
 
+static void
+data_type_clean_constant_format_test()
+{
+    std::wstring str;
+
+    str = L"\"miljenko\"";
+    data_type_clean_constant_format(str, OBJECT_TYPE_STRING);
+    ASSERT_EQUALS(str, L"miljenko");
+
+    str = L"\'miljenko\'";
+    data_type_clean_constant_format(str, OBJECT_TYPE_STRING);
+    ASSERT_EQUALS(str, L"miljenko");
+
+    str = L"\'m\'";
+    data_type_clean_constant_format(str, OBJECT_TYPE_CHAR);
+    ASSERT_EQUALS(str, L"m");
+}
+
+/**
+ * @covers data_type
+ */
 void data_type_test()
 {
     RUN_TEST(data_type_detect_test());
+    RUN_TEST(data_type_clean_constant_format_test());
 }

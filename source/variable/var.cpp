@@ -20,26 +20,121 @@
  * THE SOFTWARE.
  */
 
+#include <variable/value.h>
+#include <ORM/orm.h>
+#include <variable/primitive_data/primitive_data.h>
+
+#include <utility>
 #include "variable/var.h"
 
 /**
  * The constructor.
  *
- * @param id
- * @param is_reference
+ * @param container
  */
-var::var(std::string id, bool is_reference) : object(std::move(id))
+var::var(std::string id, value *container) : object::object(std::move(id))
 {
-    this->is_reference = is_reference;
+    this->master_relationship_add("val", ONE_TO_ONE);
+
+    if (container == nullptr)
+    {
+        container = dynamic_cast<value *>(orm::get_first(OBJECT_TYPE_NULL));
+    }
+
+    this->master_relationship_add_object("val", container);
 }
 
 /**
- * Get is_reference.
- * 
+ * Create variable.
+ *
+ * @param container
  * @return
  */
-bool
-var::get_is_reference()
+var *
+var::create(std::string id, value *container)
 {
-    return this->is_reference;
+    return dynamic_cast<var *>(orm::create(new var(std::move(id), container)));
 }
+
+/**
+ * Get container.
+ *
+ * @return
+ */
+value *
+var::get()
+{
+    return dynamic_cast<value *>(this->master_relationship_back("val"));
+}
+
+/**
+ * Set container.
+ *
+ * @param v
+ */
+void
+var::set(value *v)
+{
+    if (v == nullptr)
+    {
+        v = dynamic_cast<value *>(orm::get_first(OBJECT_TYPE_NULL));
+    }
+
+    value *v1 = this->get();
+    value *v2 = v;
+
+    /*
+     * +---------------------------------------+----------------------------------------------------+
+     * |  Conditions:                          |  Actions:                                          |
+     * +---------------------------------------+----------------------------------------------------+
+     * | v1 ref?   v2 ref?   v1type == v2type  | v1_ref      v1 refs as v2    v1 create     v1 = v2 |
+     * +---------------------------------------+----------------------------------------------------+
+     * |   0         0               0         |     1              0              1           1    |
+     * |   0         0               1         |     0              0              0           1    |
+     * |   0         1               0         |     1              1              0           0    |
+     * |   0         1               1         |     R              R              R           R    |
+     * |   1         0               0         |     1              0              1           1    |
+     * |   1         0               1         |     R              R              R           R    |
+     * |   1         1               0         |     1              1              0           0    |
+     * |   1         1               1         |     1              1              0           0    |
+     * +---------------------------------------+----------------------------------------------------+
+     *    Reference problem solved using Veitch diagram.
+     */
+
+    bool v1_ref = v1->is_reference() || v2->is_reference() || (v1->get_object_type() != v2->get_object_type());
+    bool v1_ref_v2 = v2->is_reference();
+    bool v1_create = (v1->get_object_type() != v2->get_object_type()) && !v2->is_reference();
+    bool v1_eq_v2 = !v2->is_reference();
+
+    if (v1_ref)
+    {
+        this->master_relationship_remove_object("val", v1);
+    }
+
+    if (v1_ref_v2)
+    {
+        this->master_relationship_add_object("val", v2);
+    }
+
+    if (v1_create)
+    {
+        v1 = primitive_data::create(v2->get_object_type());
+        this->master_relationship_add_object("val", v1);
+    }
+
+    if (v1_eq_v2)
+    {
+        *v1 = *v2;
+    }
+}
+
+/**
+ * @inherit
+ */
+object_type
+var::get_object_type()
+{
+    return OBJECT_TYPE_VARIABLE;
+}
+
+

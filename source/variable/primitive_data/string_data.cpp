@@ -31,12 +31,9 @@
 /**
  * The constructor.
  *
- * @param id
  * @param value
  */
-string_data::string_data(std::string id, const void *value) : primitive_data::primitive_data(
-    std::move(id), OBJECT_TYPE_STRING, value
-)
+string_data::string_data(const void *value) : primitive_data::primitive_data(OBJECT_TYPE_STRING, value)
 {
     if (!value)
     {
@@ -47,37 +44,32 @@ string_data::string_data(std::string id, const void *value) : primitive_data::pr
 /**
  * The constructor.
  *
- * @param id
  * @param data
  */
-string_data::string_data(std::string id, string_data &data) : primitive_data::primitive_data(
-    std::move(id), data, true
-)
+string_data::string_data(string_data &data) : primitive_data::primitive_data(data)
 {
 }
 
 /**
- * @param id
- * @param type
+ *
  * @param value
  * @return
  */
 string_data *
-string_data::create(std::string id, const void *value)
+string_data::create(const void *value)
 {
-    return (string_data *) orm::create((object *) new string_data(std::move(id), value));
+    return (string_data *) orm::create((object *) new string_data(value));
 }
 
 /**
- * @param id
- * @param type
- * @param value
+ *
+ * @param data
  * @return
  */
 string_data *
-string_data::create(std::string id, string_data &data)
+string_data::create(string_data &data)
 {
-    return (string_data *) orm::create((object *) new string_data(std::move(id), data));
+    return (string_data *) orm::create((object *) new string_data(data));
 }
 
 /**
@@ -182,7 +174,7 @@ string_data::to_string()
 {
     std::wstring string = this->get_string();
 
-    return *string_data::create(this->id.append(" as string"), string.c_str());
+    return *string_data::create(string.c_str());
 }
 
 /**
@@ -251,7 +243,7 @@ string_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator=(var &data)
+string_data::operator=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -273,7 +265,7 @@ string_data::operator=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator&=(var &data)
+string_data::operator&=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_STRING);
 
@@ -288,7 +280,7 @@ string_data::operator&=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator|=(var &data)
+string_data::operator|=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_STRING);
 
@@ -303,7 +295,7 @@ string_data::operator|=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator^=(var &data)
+string_data::operator^=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_STRING);
 
@@ -319,7 +311,7 @@ string_data::operator^=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator+=(var &data)
+string_data::operator+=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -369,7 +361,7 @@ string_data::operator+=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator-=(var &data)
+string_data::operator-=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_SUBTRACTING_STRING);
 
@@ -384,7 +376,7 @@ string_data::operator-=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator*=(var &data)
+string_data::operator*=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_MULTIPLYING_STRING);
 
@@ -399,7 +391,7 @@ string_data::operator*=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator/=(var &data)
+string_data::operator/=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_DIVIDING_STRING);
 
@@ -414,7 +406,7 @@ string_data::operator/=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-string_data::operator%=(var &data)
+string_data::operator%=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
 
@@ -455,7 +447,7 @@ string_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-string_data::operator==(var &data)
+string_data::operator==(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -486,7 +478,7 @@ string_data::operator==(var &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-string_data::operator!=(var &data)
+string_data::operator!=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -518,7 +510,7 @@ string_data::operator!=(var &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-string_data::operator>(var &data)
+string_data::operator>(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -549,7 +541,7 @@ string_data::operator>(var &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-string_data::operator<(var &data)
+string_data::operator<(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -580,7 +572,7 @@ string_data::operator<(var &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-string_data::operator>=(var &data)
+string_data::operator>=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -611,7 +603,7 @@ string_data::operator>=(var &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-string_data::operator<=(var &data)
+string_data::operator<=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -720,4 +712,13 @@ object_type
 string_data::get_object_type()
 {
     return OBJECT_TYPE_STRING;
+}
+
+/**
+ * @inherit
+ */
+bool
+string_data::is_reference()
+{
+    return true;
 }

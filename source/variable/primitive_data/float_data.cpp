@@ -31,12 +31,9 @@
 /**
  * The constructor.
  *
- * @param id
  * @param value
  */
-float_data::float_data(std::string id, const void *value) : primitive_data::primitive_data(
-    std::move(id), OBJECT_TYPE_FLOAT, value
-)
+float_data::float_data(const void *value) : primitive_data(OBJECT_TYPE_FLOAT, value)
 {
     if (!value)
     {
@@ -47,38 +44,43 @@ float_data::float_data(std::string id, const void *value) : primitive_data::prim
 /**
  * The constructor.
  *
- * @param id
  * @param data
- * @param is_reference
  */
-float_data::float_data(std::string id, float_data &data, bool is_reference) : primitive_data::primitive_data(
-    std::move(id), data, is_reference
-)
+float_data::float_data(double data) : primitive_data(OBJECT_TYPE_FLOAT, &data)
 {
 }
 
 /**
- * @param id
- * @param type
+ * The constructor.
+ *
+ * @param data
+ */
+float_data::float_data(float_data &data) : primitive_data(data)
+{
+}
+
+/**
+ * The constructor.
+ *
  * @param value
  * @return
  */
 float_data *
-float_data::create(std::string id, const void *value)
+float_data::create(const void *value)
 {
-    return (float_data *) orm::create((object *) new float_data(std::move(id), value));
+    return (float_data *) orm::create((object *) new float_data(value));
 }
 
 /**
- * @param id
+ * The constructor.
+ *
  * @param data
- * @param is_reference
  * @return
  */
 float_data *
-float_data::create(std::string id, float_data &data, bool is_reference)
+float_data::create(float_data &data)
 {
-    return (float_data *) orm::create((object *) new float_data(std::move(id), data, is_reference));
+    return (float_data *) orm::create((object *) new float_data(data));
 }
 
 /**
@@ -179,7 +181,7 @@ float_data::to_string()
 {
     std::wstring string = this->get_string();
 
-    return *string_data::create(this->id.append(" as string"), string.c_str());
+    return *string_data::create(string.c_str());
 }
 
 /**
@@ -235,7 +237,7 @@ float_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator=(var &data)
+float_data::operator=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -264,7 +266,7 @@ float_data::operator=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator&=(var &data)
+float_data::operator&=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_FLOAT);
 
@@ -279,7 +281,7 @@ float_data::operator&=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator|=(var &data)
+float_data::operator|=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_FLOAT);
 
@@ -294,7 +296,7 @@ float_data::operator|=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator^=(var &data)
+float_data::operator^=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_LOGICAL_OPERATION_FLOAT);
 
@@ -310,7 +312,7 @@ float_data::operator^=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator+=(var &data)
+float_data::operator+=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -339,7 +341,7 @@ float_data::operator+=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator-=(var &data)
+float_data::operator-=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -367,7 +369,7 @@ float_data::operator-=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator*=(var &data)
+float_data::operator*=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -395,7 +397,7 @@ float_data::operator*=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator/=(var &data)
+float_data::operator/=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -429,7 +431,7 @@ float_data::operator/=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-float_data::operator%=(var &data)
+float_data::operator%=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_MODULUS);
 
@@ -484,7 +486,7 @@ float_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-float_data::operator==(var &data)
+float_data::operator==(value &data)
 {
     return this->to_float() == data.to_float();
 }
@@ -497,7 +499,7 @@ float_data::operator==(var &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-float_data::operator!=(var &data)
+float_data::operator!=(value &data)
 {
     return this->to_float() != data.to_float();
 }
@@ -510,7 +512,7 @@ float_data::operator!=(var &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-float_data::operator>(var &data)
+float_data::operator>(value &data)
 {
     return this->to_float() > data.to_float();
 }
@@ -523,7 +525,7 @@ float_data::operator>(var &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-float_data::operator<(var &data)
+float_data::operator<(value &data)
 {
     return this->to_float() < data.to_float();
 }
@@ -536,7 +538,7 @@ float_data::operator<(var &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-float_data::operator>=(var &data)
+float_data::operator>=(value &data)
 {
     return this->to_float() >= data.to_float();
 }
@@ -549,7 +551,7 @@ float_data::operator>=(var &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-float_data::operator<=(var &data)
+float_data::operator<=(value &data)
 {
     return this->to_float() <= data.to_float();
 }
@@ -626,4 +628,35 @@ object_type
 float_data::get_object_type()
 {
     return OBJECT_TYPE_FLOAT;
+}
+
+/**
+ * Parse float from string.
+ *
+ * @param str
+ * @return
+ */
+double
+float_data::parse(std::wstring str)
+{
+    return std::stof(str);
+}
+
+/**
+ * @param data
+ * @return
+ */
+float_data *
+float_data::create(double data)
+{
+    return float_data::create(&data);
+}
+
+/**
+ * @inherit
+ */
+bool
+float_data::is_reference()
+{
+    return false;
 }

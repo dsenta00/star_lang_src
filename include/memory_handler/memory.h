@@ -23,7 +23,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stdint.h>
+#include <cstdint>
 #include "ORM/object.h"
 
 /**
@@ -36,7 +36,7 @@ class memory : public object {
 public:
     memory(uintptr_t address, uint32_t size);
 
-    object_type get_object_type();
+    object_type get_object_type() override;
 
     template<typename T>
     T get_pointer();

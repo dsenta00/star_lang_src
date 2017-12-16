@@ -20,32 +20,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_H
-#define ORM_H
-
-#include "object_repository.h"
-#include "object_type.h"
-#include <string>
-#include <functional>
+#include "variable/value.h"
 
 /**
- * ORM interface.
+ * The constructor.
  */
-namespace orm {
-    object_repository *find_object_repository(object_type type);
-    void add_object_repository(object_type type);
-    object *create(object *o);
-    void change_id(object *o, std::string new_id);
-    void destroy(object *o);
-    void sweep();
-    object *select(object_type type, std::function<bool(object *)> where);
-    object *select(object_type type, std::string id);
-    object *get_first(object_type type);
-    void remove_object_repository(object_type type);
-    void remove_all_repositories();
+value::value() : object("value")
+{
 }
-
-#define ORM_DESTROY(__OBJ__) \
-  orm::destroy((object *)(__OBJ__))
-
-#endif // ORM_H

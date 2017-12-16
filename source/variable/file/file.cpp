@@ -92,14 +92,11 @@ file::read_all()
 
     if (this->buffer.empty())
     {
-        data = string_data::create(std::string(this->id).append(":content"));
+        data = string_data::create();
     }
     else
     {
-        data = string_data::create(
-            std::string(this->id).append(":content"),
-            this->buffer.c_str()
-        );
+        data = string_data::create(this->buffer.c_str());
     }
 
     return data;
@@ -123,7 +120,7 @@ file::write(object *o)
         return;
     }
 
-    if (primitive_data::is_primitive((var *)o))
+    if (primitive_data::is_primitive((value *)o))
     {
         this->buffer.append(((primitive_data *) o)->get_string());
     }

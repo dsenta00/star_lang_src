@@ -24,7 +24,7 @@
 #include <ORM/relationship.h>
 #include <ORM/orm.h>
 #include <memory_handler/virtual_memory.h>
-#include <variable/var.h>
+#include <variable/value.h>
 #include <variable/primitive_data/primitive_data.h>
 #include <variable/primitive_data/string_data.h>
 #include <variable/primitive_data/char_data.h>
@@ -34,16 +34,16 @@
 #include <variable/collection/collection.h>
 #include <iostream>
 #include <sstream>
+#include <variable/null/null.h>
 
 #define MAX_SCAN_SIZE (8192)
 
 /**
  * The constructor.
  *
- * @param type - data type.
- * @param size - array size in members.
+ * @param c
  */
-collection::collection(std::string id, collection *c) : var::var(std::move(id), true)
+collection::collection(collection *c) : value::value()
 {
     this->master_relationship_add("collection", ONE_TO_MANY);
 
@@ -52,7 +52,7 @@ collection::collection(std::string id, collection *c) : var::var(std::move(id), 
         return;
     }
 
-    (*this) += (var &) *c;
+    (*this) += (value &) *c;
 }
 
 /**
@@ -72,7 +72,7 @@ collection::size()
  * @param index - element index.
  * @return data of found, otherwise return NULL.
  */
-var *
+value *
 collection::operator[](uint32_t index)
 {
     return (*this)[std::to_string(index)];
@@ -84,7 +84,7 @@ collection::operator[](uint32_t index)
  * @param index - element index.
  * @return data of found, otherwise return NULL.
  */
-var *
+value *
 collection::operator[](std::string index)
 {
     if (this->data_cache.find(index) == this->data_cache.end())
@@ -101,7 +101,7 @@ collection::operator[](std::string index)
  * @param o
  */
 void
-collection::insert(std::string index, var *o)
+collection::insert(std::string index, value *o)
 {
     this->remove_data(index);
     this->insert_data(index, o);
@@ -113,7 +113,7 @@ collection::insert(std::string index, var *o)
  * @param o
  */
 void
-collection::insert(uint32_t index, var *o)
+collection::insert(uint32_t index, value *o)
 {
     this->insert(std::to_string(index), o);
 }
@@ -125,7 +125,7 @@ collection::insert(uint32_t index, var *o)
  * @return true if operation success, otherwise return false.
  */
 bool
-collection::operator+=(var &var)
+collection::operator+=(value &var)
 {
     this->insert_data(std::to_string(this->size()), &var);
 
@@ -140,12 +140,11 @@ collection::operator+=(var &var)
 string_data &
 collection::to_string()
 {
-    std::string id = this->id + " as string";
     string_data *str;
 
     str = (this->size() == 0) ?
-          string_data::create(id) :
-          string_data::create(id, this->get_string().c_str());
+          string_data::create() :
+          string_data::create(this->get_string().c_str());
 
     return *str;
 }
@@ -160,7 +159,7 @@ collection::clear()
 
     while (!r->empty())
     {
-        this->remove_data((var *) r->front());
+        this->remove_data((value *) r->front());
     }
 
     this->data_cache.clear();
@@ -183,7 +182,7 @@ collection::remove_data(std::string index)
  * @param o
  */
 void
-collection::remove_data(var * o)
+collection::remove_data(value * o)
 {
     if (!o)
     {
@@ -200,7 +199,7 @@ collection::remove_data(var * o)
  * @param o
  */
 void
-collection::insert_data(std::string index, var *o)
+collection::insert_data(std::string index, value *o)
 {
     if (o == nullptr)
     {
@@ -208,33 +207,34 @@ collection::insert_data(std::string index, var *o)
         return;
     }
 
-    if (!o->get_is_reference())
+    if (!o->is_reference())
     {
         /*
          * Data is not a reference. Create a new data.
          */
-        primitive_data *new_data;
+        value *new_data;
 
         switch (o->get_object_type())
         {
             case OBJECT_TYPE_BOOL:
-                new_data = bool_data::create(o->get_id(), *(bool_data *) o);
+                new_data = bool_data::create(*(bool_data *) o);
                 break;
             case OBJECT_TYPE_CHAR:
-                new_data = char_data::create(o->get_id(), *(char_data *) o);
+                new_data = char_data::create(*(char_data *) o);
                 break;
             case OBJECT_TYPE_INT:
-                new_data = int_data::create(o->get_id(), *(int_data *) o);
+                new_data = int_data::create(*(int_data *) o);
                 break;
             case OBJECT_TYPE_FLOAT:
-                new_data = float_data::create(o->get_id(), *(float_data *) o);
+                new_data = float_data::create(*(float_data *) o);
                 break;
             case OBJECT_TYPE_STRING:
-                new_data = string_data::create(o->get_id(), *(string_data *) o);
+                new_data = string_data::create(*(string_data *) o);
                 break;
+            default:
             case OBJECT_TYPE_NULL:
                 ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
-                return;
+                new_data = (null *)orm::get_first(OBJECT_TYPE_NULL);
         }
 
         o = new_data;
@@ -254,14 +254,14 @@ collection::~collection()
 
 /**
  * @brief create
- * @param id
+ *
  * @param c
  * @return
  */
 collection *
-collection::create(std::string id, collection *c)
+collection::create(collection *c)
 {
-    return (collection *) orm::create((object *) new collection(std::move(id), c));
+    return (collection *) orm::create((object *) new collection(c));
 }
 
 /**
@@ -346,7 +346,7 @@ collection::get_string()
 
     for (auto &it : this->data_cache)
     {
-        var *data = it.second;
+        value *data = it.second;
 
         result += data->get_string();
         result += L" ";
@@ -378,20 +378,7 @@ collection::scan()
     wchar_t input[MAX_SCAN_SIZE];
 
     std::wcin.getline(input, MAX_SCAN_SIZE);
-
-    std::wstringstream wsstream(input);
-    std::wstring str;
-
-    while (wsstream.good())
-    {
-        wsstream >> str;
-
-        object_type type = data_type_detect(str);
-        this->insert(
-            static_cast<uint32_t>(this->data_cache.size()),
-            primitive_data::create("tmp", type, str.c_str())
-        );
-    }
+    this->parse_stream(input);
 
     return true;
 }
@@ -419,10 +406,73 @@ collection::operator--()
 }
 
 /**
+ * Parse stream string.
+ *
+ * @param input
+ */
+void
+collection::parse_stream(std::wstring input)
+{
+    std::wstringstream wsstream(input);
+    std::wstring str;
+
+    while (wsstream.good())
+    {
+        wsstream >> str;
+        object_type type = data_type_detect(str);
+
+        data_type_clean_constant_format(str, type);
+        value *data;
+
+        switch (type)
+        {
+            case OBJECT_TYPE_BOOL:
+                data = bool_data::create(bool_data::parse(str));
+                break;
+            case OBJECT_TYPE_CHAR:
+                data = char_data::create(str.c_str());
+                break;
+            case OBJECT_TYPE_INT:
+                data = int_data::create(int_data::parse(str));
+                break;
+            case OBJECT_TYPE_FLOAT:
+                data = float_data::create(float_data::parse(str));
+                break;
+            case OBJECT_TYPE_STRING:
+                data = string_data::create(str.c_str());
+                break;
+            case OBJECT_TYPE_NULL:
+                data = (null *)orm::get_first(OBJECT_TYPE_NULL);
+                break;
+            default:
+            case OBJECT_TYPE_COLLECTION:
+            case OBJECT_TYPE_INSTRUCTION:
+            case OBJECT_TYPE_MEMORY:
+            case OBJECT_TYPE_MEMORY_CHUNK:
+            case OBJECT_TYPE_VIRTUAL_MEMORY:
+            case OBJECT_TYPE_METHOD:
+            case OBJECT_TYPE_FILE:
+                continue;
+        }
+
+        this->insert(static_cast<uint32_t>(this->data_cache.size()), data);
+    }
+}
+
+/**
  * @inherit
  */
 bool
-collection::operator>(var & data)
+collection::is_reference()
+{
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+collection::operator>(value & data)
 {
     return this->size() > ((collection &) data).size();
 }
@@ -431,7 +481,7 @@ collection::operator>(var & data)
  * @inherit
  */
 bool
-collection::operator<(var & data)
+collection::operator<(value & data)
 {
     return this->size() < ((collection &) data).size();
 }
@@ -440,7 +490,7 @@ collection::operator<(var & data)
  * @inherit
  */
 bool
-collection::operator>=(var & data)
+collection::operator>=(value & data)
 {
     return this->size() >= ((collection &) data).size();
 }
@@ -449,7 +499,7 @@ collection::operator>=(var & data)
  * @inherit
  */
 bool
-collection::operator<=(var & data)
+collection::operator<=(value & data)
 {
     return this->size() <= ((collection &) data).size();
 }
@@ -458,7 +508,7 @@ collection::operator<=(var & data)
  * @inherit
  */
 bool
-collection::operator!=(var & data)
+collection::operator!=(value & data)
 {
     return !this->operator==(data);
 }
@@ -467,7 +517,7 @@ collection::operator!=(var & data)
  * @inherit
  */
 bool
-collection::operator==(var & data)
+collection::operator==(value & data)
 {
     collection &self = *this;
 
@@ -509,7 +559,7 @@ collection::operator==(var & data)
  * @inherit
  */
 bool
-collection::operator-=(var & data)
+collection::operator-=(value & data)
 {
     this->remove_data(&data);
 }
@@ -518,7 +568,7 @@ collection::operator-=(var & data)
  * @inherit
  */
 bool
-collection::operator^=(var & data)
+collection::operator^=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -529,7 +579,7 @@ collection::operator^=(var & data)
  * @inherit
  */
 bool
-collection::operator/=(var & data)
+collection::operator/=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -540,7 +590,7 @@ collection::operator/=(var & data)
  * @inherit
  */
 bool
-collection::operator%=(var & data)
+collection::operator%=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -551,7 +601,7 @@ collection::operator%=(var & data)
  * @inherit
  */
 bool
-collection::operator*=(var & data)
+collection::operator*=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -562,7 +612,7 @@ collection::operator*=(var & data)
  * @inherit
  */
 bool
-collection::operator|=(var & data)
+collection::operator|=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -573,7 +623,7 @@ collection::operator|=(var & data)
  * @inherit
  */
 bool
-collection::operator&=(var & data)
+collection::operator&=(value & data)
 {
     ERROR_LOG_ADD(ERROR_COLLECTION_UNSUPPORTED_OPERATOR);
 
@@ -584,7 +634,7 @@ collection::operator&=(var & data)
  * @inherit
  */
 bool
-collection::operator=(var & data)
+collection::operator=(value & data)
 {
     this->clear();
 

@@ -29,26 +29,26 @@
 
 const wchar_t DATA_TYPE_FORMAT[][8] =
     {
-        L"%d",  // DATA_TYPE_BOOL,
-        L"%c",  // DATA_TYPE_CHAR,
+        L"%d",  // OBJECT_TYPE_BOOL,
+        L"%c",  // OBJECT_TYPE_CHAR,
         L"%d",  // OBJECT_TYPE_INT,
         L"%lf", // OBJECT_TYPE_FLOAT,
         L"%ls", // OBJECT_TYPE_STRING,
-        L""     // DATA_TYPE_NULL
+        L""     // OBJECT_TYPE_NULL
     };
 
 const uint8_t DATA_TYPE_SIZE[] =
     {
-        sizeof(bool),        // DATA_TYPE_BOOL,
-        sizeof(wchar_t),     // DATA_TYPE_CHAR,
+        sizeof(bool),        // OBJECT_TYPE_BOOL,
+        sizeof(wchar_t),     // OBJECT_TYPE_CHAR,
         sizeof(int32_t),     // OBJECT_TYPE_INT,
         sizeof(double),      // OBJECT_TYPE_FLOAT,
         sizeof(wchar_t) * 8, // OBJECT_TYPE_SIZE, default size
-        0                    // DATA_TYPE_NULL
+        0                    // OBJECT_TYPE_NULL
     };
 
 object_type data_type_get_from_token(std::wstring str);
 object_type data_type_detect(std::wstring sample);
-std::wstring clean_constant_format(std::wstring &sample, object_type type);
+std::wstring data_type_clean_constant_format(std::wstring &sample, object_type type);
 
 #endif // DATA_TYPE_H

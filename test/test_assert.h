@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory_handler/virtual_memory.h>
+#include <variable/null/null.h>
 
 void assert_true(bool statement,
                  const char *file,
@@ -46,6 +47,7 @@ void assert_false(bool statement,
   { \
       orm::remove_all_repositories(); \
       vm = virtual_memory::create(); \
+      null::create(); \
       printf("\t-> " #__test__ "::Start\r\n"); \
       (__test__); \
       ERROR_LOG_IS_EMPTY; \
@@ -57,6 +59,7 @@ void assert_false(bool statement,
   { \
       orm::remove_all_repositories(); \
       virtual_memory::create(); \
+      null::create(); \
       printf("\t-> " #__test__ "::Start\r\n"); \
       (__test__); \
       ERROR_LOG_IS_EMPTY; \

@@ -88,9 +88,17 @@ data_type_detect(const std::wstring sample)
     {
         return OBJECT_TYPE_STRING;
     }
-    else if (std::regex_match(sample, std::wregex(L"true|false")))
+
+    std::wstring sample_temp = sample;
+    std::for_each(sample_temp.begin(), sample_temp.end(), [&](wchar_t &c) { c = std::tolower(c); });
+
+    if (std::regex_match(sample_temp, std::wregex(L"true|false")))
     {
         return OBJECT_TYPE_BOOL;
+    }
+    else if (std::regex_match(sample_temp, std::wregex(L"null")))
+    {
+        return OBJECT_TYPE_NULL;
     }
     else
     {
@@ -106,7 +114,7 @@ data_type_detect(const std::wstring sample)
  * @return
  */
 std::wstring
-clean_constant_format(std::wstring &sample, object_type type)
+data_type_clean_constant_format(std::wstring &sample, object_type type)
 {
     switch (type)
     {
@@ -120,12 +128,7 @@ clean_constant_format(std::wstring &sample, object_type type)
         case OBJECT_TYPE_STRING:
         {
             sample.erase(sample.begin());
-            sample.erase(sample.end());
-            break;
-        }
-        case OBJECT_TYPE_BOOL:
-        {
-            sample.assign(1, (wchar_t) (sample == L"true"));
+            sample.erase(sample.end() - 1);
             break;
         }
         default:

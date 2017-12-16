@@ -36,9 +36,10 @@
 /**
  * The constructor.
  *
- * @param type - data type.
+ * @param type
+ * @param value
  */
-primitive_data::primitive_data(std::string id, object_type type, const void *value) : var::var(std::move(id))
+primitive_data::primitive_data(object_type type, const void *value) : value::value()
 {
     this->master_relationship_add("primitive_data_memory", ONE_TO_MANY);
     this->vm = (virtual_memory *) orm::get_first(OBJECT_TYPE_VIRTUAL_MEMORY);
@@ -48,8 +49,6 @@ primitive_data::primitive_data(std::string id, object_type type, const void *val
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
         return;
     }
-
-    this->is_reference = (type == OBJECT_TYPE_STRING);
 
     if ((value == nullptr) || ((type == OBJECT_TYPE_STRING) && (wcslen((const wchar_t *)value) == 0)))
     {
@@ -85,10 +84,9 @@ primitive_data::primitive_data(std::string id, object_type type, const void *val
 /**
  * The copy constructor.
  *
- * @param id
  * @param data
  */
-primitive_data::primitive_data(std::string id, primitive_data &data, bool is_reference) : var::var(std::move(id))
+primitive_data::primitive_data(primitive_data &data) : value::value()
 {
     this->master_relationship_add("primitive_data_memory", ONE_TO_MANY);
 
@@ -107,20 +105,12 @@ primitive_data::primitive_data(std::string id, primitive_data &data, bool is_ref
     }
 
     this->vm = data.vm;
-    this->is_reference = (data.get_object_type() == OBJECT_TYPE_STRING) || is_reference;
-
-    if (this->is_reference)
-    {
-        this->master_relationship_add_object("primitive_data_memory", (object *) data_mem);
-        return;
-    }
 
     memory *mem = this->vm->alloc(data_mem->get_size());
     memcpy(mem->get_pointer<void *>(),
            data_mem->get_pointer<void *>(),
            data_mem->get_size());
     this->master_relationship_add_object("primitive_data_memory", (object *) mem);
-
 }
 
 /**
@@ -149,26 +139,25 @@ primitive_data::get_memory()
 /**
  * Create data.
  *
- * @param id
  * @param type
  * @param value
  * @return
  */
 primitive_data *
-primitive_data::create(std::string id, object_type type, const void *value)
+primitive_data::create(object_type type, const void *value)
 {
     switch (type)
     {
         case OBJECT_TYPE_BOOL:
-            return bool_data::create(std::move(id), value);
+            return bool_data::create(value);
         case OBJECT_TYPE_CHAR:
-            return char_data::create(std::move(id), value);
+            return char_data::create(value);
         case OBJECT_TYPE_INT:
-            return int_data::create(std::move(id), value);
+            return int_data::create(value);
         case OBJECT_TYPE_FLOAT:
-            return float_data::create(std::move(id), value);
+            return float_data::create(value);
         case OBJECT_TYPE_STRING:
-            return string_data::create(std::move(id), value);
+            return string_data::create(value);
         default:
         case OBJECT_TYPE_NULL:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
@@ -179,26 +168,24 @@ primitive_data::create(std::string id, object_type type, const void *value)
 /**
  * Create data
  *
- * @param id
  * @param data
- * @param is_reference
  * @return
  */
 primitive_data *
-primitive_data::create(std::string id, primitive_data &data, bool is_reference)
+primitive_data::create(primitive_data &data)
 {
     switch (data.get_object_type())
     {
         case OBJECT_TYPE_BOOL:
-            return bool_data::create(std::move(id), (bool_data &) data, is_reference);
+            return bool_data::create((bool_data &) data);
         case OBJECT_TYPE_CHAR:
-            return char_data::create(std::move(id), (char_data &) data, is_reference);
+            return char_data::create((char_data &) data);
         case OBJECT_TYPE_INT:
-            return int_data::create(std::move(id), (int_data &) data, is_reference);
+            return int_data::create((int_data &) data);
         case OBJECT_TYPE_FLOAT:
-            return float_data::create(std::move(id), (float_data &) data, is_reference);
+            return float_data::create((float_data &) data);
         case OBJECT_TYPE_STRING:
-            return string_data::create(std::move(id), (string_data &) data);
+            return string_data::create((string_data &) data);
         default:
         case OBJECT_TYPE_NULL:
             ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
@@ -213,7 +200,7 @@ primitive_data::create(std::string id, primitive_data &data, bool is_reference)
  * @return true if primitive, otherwise return false.
  */
 bool
-primitive_data::is_primitive(var *data)
+primitive_data::is_primitive(value *data)
 {
     return data->get_object_type() < OBJECT_TYPE_NULL;
 }

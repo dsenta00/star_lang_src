@@ -20,52 +20,24 @@
  * THE SOFTWARE.
  */
 
-#ifndef VARIABLE_H
-#define VARIABLE_H
+#ifndef VAR_H
+#define VAR_H
 
 #include <ORM/object.h>
-#include <fw_decl.h>
 
 /**
- * The variable object.
+ * The variable.
  */
 class var : public object {
 public:
-    explicit var(std::string id, bool is_reference = false);
-    bool get_is_reference();
+    explicit var(std::string id, value *container = nullptr);
+    static var *create(std::string id, value *container = nullptr);
 
-    virtual bool to_bool() = 0;
-    virtual wchar_t to_char() = 0;
-    virtual int32_t to_int() = 0;
-    virtual double to_float() = 0;
+    object_type get_object_type() override;
 
-    virtual string_data &to_string() = 0;
-    virtual bool operator=(const void *data) = 0;
-    virtual bool operator=(var &data) = 0;
-    virtual bool operator&=(var &data) = 0;
-    virtual bool operator|=(var &data) = 0;
-    virtual bool operator^=(var &data) = 0;
-    virtual bool operator+=(var &var) = 0;
-    virtual bool operator-=(var &data) = 0;
-    virtual bool operator*=(var &data) = 0;
-    virtual bool operator/=(var &data) = 0;
-    virtual bool operator%=(var &data) = 0;
-    virtual bool operator++() = 0;
-    virtual bool operator--() = 0;
-    virtual bool operator==(var &data) = 0;
-    virtual bool operator!=(var &data) = 0;
-    virtual bool operator>(var &data) = 0;
-    virtual bool operator<(var &data) = 0;
-    virtual bool operator>=(var &data) = 0;
-    virtual bool operator<=(var &data) = 0;
-
-    virtual bool print() = 0;
-    virtual bool println() = 0;
-    virtual bool scan() = 0;
-    virtual std::wstring get_string() = 0;
-protected:
-    bool is_reference;
+    value *get();
+    void set(value *v = nullptr);
 };
 
 
-#endif //VARIABLE_H
+#endif //VAR_H

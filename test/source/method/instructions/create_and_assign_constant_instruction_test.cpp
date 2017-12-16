@@ -192,7 +192,7 @@ instruction_test_create1()
     auto *data = (int_data *)orm::select(OBJECT_TYPE_INT, "int_name");
     ASSERT_NOT_NULL(data);
     ASSERT_EQUALS(data->get_object_type(), OBJECT_TYPE_INT);
-    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
+    ASSERT_NOT_NULL(foo->get_variable(L"int_name"));
     ASSERT_EQUALS(data->to_int(), 3);
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
     abstract_instruction *next = i->execute();
@@ -231,7 +231,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT]);
     auto *int_name = (int_data *)orm::select(OBJECT_TYPE_INT, "int_name");
     ASSERT_NOT_NULL(int_name);
-    ASSERT_NOT_NULL(foo->get_local_object(L"int_name"));
+    ASSERT_NOT_NULL(foo->get_variable(L"int_name"));
     ASSERT_EQUALS(int_name->to_int(), 3);
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
@@ -239,7 +239,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT] + DATA_TYPE_SIZE[OBJECT_TYPE_FLOAT]);
     auto *float_name = (float_data *)orm::select(OBJECT_TYPE_FLOAT, "float_name");
     ASSERT_NOT_NULL(float_name);
-    ASSERT_NOT_NULL(foo->get_local_object(L"float_name"));
+    ASSERT_NOT_NULL(foo->get_variable(L"float_name"));
     ASSERT_EQUALS(float_name->to_float(), 4.2);
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
@@ -247,7 +247,7 @@ instruction_test_create2()
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT] + DATA_TYPE_SIZE[OBJECT_TYPE_FLOAT]);
     auto *collection_name = (collection *)orm::select(OBJECT_TYPE_COLLECTION, "collection_name");
     ASSERT_NOT_NULL(collection_name);
-    ASSERT_NOT_NULL(foo->get_local_object(L"collection_name"));
+    ASSERT_NOT_NULL(foo->get_variable(L"collection_name"));
     auto *collection_data = (primitive_data *)(*collection_name)[0];
     ASSERT_NOT_NULL(collection_data);
     ASSERT_EQUALS(collection_data->to_float(), 14.2);

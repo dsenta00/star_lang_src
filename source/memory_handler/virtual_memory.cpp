@@ -181,7 +181,7 @@ virtual_memory::add_new_chunk_and_alloc(uint32_t size)
 
     for (object *o : *this->memory_chunk_relationship)
     {
-        memory_chunk *chunk = (memory_chunk *) o;
+        auto *chunk = (memory_chunk *) o;
         chunk->defragmentation();
     }
 
@@ -388,7 +388,7 @@ virtual_memory::free(memory *mem)
  * @return size in bytes.
  */
 uint32_t
-virtual_memory::get_allocated_total(void)
+virtual_memory::get_allocated_total()
 {
     return allocated_total;
 }

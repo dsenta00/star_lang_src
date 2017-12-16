@@ -41,17 +41,18 @@ public:
     method(std::string id, std::vector<abstract_instruction *> &instructions);
     static method *create(std::string id, std::vector<abstract_instruction *> &instructions);
 
-    object_type get_object_type();
-
+    object_type get_object_type() override;
     instruction_result execute_next();
-    void add_local_object(object *o);
-    object *get_local_object(std::wstring id);
-    void push_stack(object *o);
-    object *pop_stack();
+
+    void add_variable(var *o);
+    var *get_variable(std::wstring id);
+
+    void push_stack(value *o);
+    value *pop_stack();
 protected:
-    object *result;
-    std::map<std::wstring, object *> local_objects;
-    std::vector<object *> stack;
+    value *result;
+    std::map<std::wstring, var *> variables;
+    std::vector<value *> stack;
     abstract_instruction *current_instruction;
 };
 

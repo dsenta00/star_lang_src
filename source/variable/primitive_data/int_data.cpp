@@ -31,12 +31,9 @@
 /**
  * The constructor.
  *
- * @param id
  * @param value
  */
-int_data::int_data(std::string id, const void *value) : primitive_data::primitive_data(
-    std::move(id), OBJECT_TYPE_INT, value
-)
+int_data::int_data(const void *value) : primitive_data::primitive_data(OBJECT_TYPE_INT, value)
 {
     if (!value)
     {
@@ -49,36 +46,40 @@ int_data::int_data(std::string id, const void *value) : primitive_data::primitiv
  *
  * @param id
  * @param data
- * @param is_reference
  */
-int_data::int_data(std::string id, int_data &data, bool is_reference) : primitive_data::primitive_data(
-    std::move(id), data, is_reference
-)
+int_data::int_data(int data) : primitive_data::primitive_data(OBJECT_TYPE_STRING, &data)
 {
 }
 
 /**
- * @param id
+ * The constructor.
+ *
+ * @param data
+ */
+int_data::int_data(int_data &data) : primitive_data::primitive_data(data)
+{
+}
+
+/**
  * @param type
  * @param value
  * @return
  */
 int_data *
-int_data::create(std::string id, const void *value)
+int_data::create(const void *value)
 {
-    return (int_data *) orm::create((object *) new int_data(std::move(id), value));
+    return (int_data *) orm::create((object *) new int_data(value));
 }
 
 /**
- * @param id
  * @param data
  * @param is_reference
  * @return
  */
 int_data *
-int_data::create(std::string id, int_data &data, bool is_reference)
+int_data::create(int_data &data)
 {
-    return (int_data *) orm::create((object *) new int_data(std::move(id), data, is_reference));
+    return (int_data *) orm::create((object *) new int_data(data));
 }
 
 /**
@@ -178,7 +179,7 @@ int_data::to_string()
 {
     std::wstring string = this->get_string();
 
-    return *string_data::create(this->id.append(" as string"), string.c_str());
+    return *string_data::create(string.c_str());
 }
 
 /**
@@ -233,7 +234,7 @@ int_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator=(var &data)
+int_data::operator=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -262,7 +263,7 @@ int_data::operator=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator&=(var &data)
+int_data::operator&=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -289,7 +290,7 @@ int_data::operator&=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator|=(var &data)
+int_data::operator|=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -317,7 +318,7 @@ int_data::operator|=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator^=(var &data)
+int_data::operator^=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -346,7 +347,7 @@ int_data::operator^=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator+=(var &data)
+int_data::operator+=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -375,7 +376,7 @@ int_data::operator+=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator-=(var &data)
+int_data::operator-=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -403,7 +404,7 @@ int_data::operator-=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator*=(var &data)
+int_data::operator*=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -431,7 +432,7 @@ int_data::operator*=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator/=(var &data)
+int_data::operator/=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -465,7 +466,7 @@ int_data::operator/=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-int_data::operator%=(var &data)
+int_data::operator%=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -541,7 +542,7 @@ int_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-int_data::operator==(var &data)
+int_data::operator==(value &data)
 {
     return to_int() == data.to_int();
 }
@@ -554,7 +555,7 @@ int_data::operator==(var &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-int_data::operator!=(var &data)
+int_data::operator!=(value &data)
 {
     return to_int() != data.to_int();
 }
@@ -567,7 +568,7 @@ int_data::operator!=(var &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-int_data::operator>(var &data)
+int_data::operator>(value &data)
 {
     return to_int() > data.to_int();
 }
@@ -580,7 +581,7 @@ int_data::operator>(var &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-int_data::operator<(var &data)
+int_data::operator<(value &data)
 {
     return to_int() < data.to_int();
 }
@@ -593,7 +594,7 @@ int_data::operator<(var &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-int_data::operator>=(var &data)
+int_data::operator>=(value &data)
 {
     return to_int() >= data.to_int();
 }
@@ -606,7 +607,7 @@ int_data::operator>=(var &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-int_data::operator<=(var &data)
+int_data::operator<=(value &data)
 {
     return this->to_int() <= data.to_int();
 }
@@ -682,4 +683,34 @@ object_type
 int_data::get_object_type()
 {
     return OBJECT_TYPE_INT;
+}
+
+/**
+ * @inherit
+ */
+int_data *
+int_data::create(int data)
+{
+    return int_data::create(&data);
+}
+
+/**
+ * Parse integer from string.
+ *
+ * @param str
+ * @return
+ */
+int
+int_data::parse(std::wstring str)
+{
+    return std::stoi(str);
+}
+
+/**
+ * @inherit
+ */
+bool
+int_data::is_reference()
+{
+    return false;
 }

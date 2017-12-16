@@ -30,44 +30,50 @@
  */
 class bool_data : public primitive_data {
 public:
-    explicit bool_data(std::string id, const void *value = nullptr);
-    bool_data(std::string id, bool_data &data, bool is_reference = false);
-    static bool_data *create(std::string id, const void *value = nullptr);
-    static bool_data *create(std::string id, bool_data &data, bool is_reference = false);
+    explicit bool_data(const void *value = nullptr);
+    explicit bool_data(bool value);
+    bool_data(bool_data &data);
+    static bool_data *create(const void *value = nullptr);
+    static bool_data *create(bool value);
+    static bool_data *create(bool_data &data);
 
-    bool to_bool();
-    wchar_t to_char();
-    int32_t to_int();
-    double to_float();
-    string_data &to_string();
+    bool is_reference() override;
 
-    object_type get_object_type();
+    bool to_bool() override;
+    wchar_t to_char() override;
+    int32_t to_int() override;
+    double to_float() override;
+    string_data &to_string() override;
 
-    bool default_value();
-    bool operator=(const void *data);
-    bool operator=(var &data);
-    bool operator&=(var &data);
-    bool operator|=(var &data);
-    bool operator^=(var &data);
-    bool operator+=(var &data);
-    bool operator-=(var &data);
-    bool operator*=(var &data);
-    bool operator/=(var &data);
-    bool operator%=(var &data);
-    bool operator++();
-    bool operator--();
-    bool operator==(var &data);
-    bool operator!=(var &data);
-    bool operator>(var &data);
-    bool operator<(var &data);
-    bool operator>=(var &data);
-    bool operator<=(var &data);
+    object_type get_object_type() override;
 
-    bool print();
-    bool println();
-    bool scan();
+    bool default_value() override;
+    bool operator=(const void *data) override;
+    bool operator=(value &data) override;
+    bool operator&=(value &data) override;
+    bool operator|=(value &data) override;
+    bool operator^=(value &data) override;
+    bool operator+=(value &data) override;
+    bool operator-=(value &data) override;
+    bool operator*=(value &data) override;
+    bool operator/=(value &data) override;
+    bool operator%=(value &data) override;
+    bool operator++() override;
+    bool operator--() override;
+    bool operator==(value &data) override;
+    bool operator!=(value &data) override;
+    bool operator>(value &data) override;
+    bool operator<(value &data) override;
+    bool operator>=(value &data) override;
+    bool operator<=(value &data) override;
 
-    std::wstring get_string();
+    bool print() override;
+    bool println() override;
+    bool scan() override;
+
+    std::wstring get_string() override;
+
+    static bool parse(std::wstring str);
 };
 
 

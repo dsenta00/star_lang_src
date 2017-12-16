@@ -64,7 +64,7 @@ static void
 collection_test_basic()
 {
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
-    collection &empty_collection = *collection::create("empty_collection");
+    collection &empty_collection = *collection::create();
     ASSERT_VIRTUAL_MEMORY(*vm, 0);
 
     ASSERT_EQUALS(empty_collection.size(), 0);
@@ -91,14 +91,14 @@ collection_test_basic()
     {
         if (i % 2 == 0)
         {
-            primitive_data *data = string_data::create("temp_name", random_name(i));
+            primitive_data *data = string_data::create(random_name(i));
             empty_collection.insert(i, data);
             ASSERT_OK;
             comparision.append(random_name(i));
         }
         else if (i % 3 == 0)
         {
-            primitive_data *data = int_data::create("temp_name", &i);
+            primitive_data *data = int_data::create(&i);
             empty_collection.insert(i, data);
             ASSERT_OK;
             comparision.append(std::to_wstring(i));
@@ -106,7 +106,7 @@ collection_test_basic()
         else
         {
             auto fi = (double) i;
-            primitive_data *data = float_data::create("temp_name", &fi);
+            primitive_data *data = float_data::create(&fi);
             empty_collection.insert(i, data);
             ASSERT_OK;
             comparision.append(std::to_wstring(fi));
@@ -171,25 +171,25 @@ collection_test_basic()
                 comparision.c_str(),
                 (const wchar_t *) str2.get_address());
 
-    collection &c = *collection::create("array");
+    collection &c = *collection::create();
 
     for (uint32_t i = 0; i < ARRAY_SIZE; i++)
     {
         if (i % 2 == 0)
         {
-            var *data = string_data::create("temp_name", random_name(i));
+            value *data = string_data::create(random_name(i));
             c.insert(i, data);
             ASSERT_OK;
         }
         else if (i % 3 == 0)
         {
-            var *data = int_data::create("temp_name", &i);
+            value *data = int_data::create(&i);
             c.insert(i, data);
             ASSERT_OK;
         }
         else
         {
-            c.insert(i, (var *) &empty_collection);
+            c.insert(i, (value *) &empty_collection);
             ASSERT_OK;
         }
     }
@@ -231,6 +231,55 @@ collection_test_basic()
 }
 
 /**
+ * Test collection operators.
+ */
+static void
+collection_test_operators()
+{
+    collection &c = *collection::create();
+
+    c.parse_stream(L"\"ante\" 19 28.0 +45 -45 -45.3 \'a\' true");
+    ASSERT_OK;
+    ASSERT_EQUALS(c.size(), 8);
+
+    value *v;
+
+    v = c[0];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_STRING);
+    ASSERT_EQUALS(v->get_string(), L"ante");
+
+    v = c[1];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_INT);
+    ASSERT_EQUALS(v->to_int(), 19);
+
+    v = c[2];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_FLOAT);
+    ASSERT_EQUALS(v->to_float(), 28.0);
+
+    v = c[3];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_INT);
+    ASSERT_EQUALS(v->to_int(), 45);
+
+    v = c[4];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_INT);
+    ASSERT_EQUALS(v->to_int(), -45);
+
+    v = c[5];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_FLOAT);
+    ASSERT_TRUE((v->to_float() == -45.3) || (v->to_float() < -45.29) || (v->to_float() > -45.31), "should be around 45.3");
+
+    v = c[6];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_CHAR);
+    ASSERT_EQUALS(v->to_char(), L'a');
+
+    v = c[7];
+    ASSERT_EQUALS(v->get_object_type(), OBJECT_TYPE_BOOL);
+    ASSERT_TRUE(v->to_bool(), "should be true!");
+}
+
+
+
+/**
  * Test collection.
  */
 void
@@ -238,4 +287,5 @@ collection_test()
 {
     vm = (virtual_memory *) orm::get_first(OBJECT_TYPE_VIRTUAL_MEMORY);
     RUN_TEST_VM(collection_test_basic());
+    RUN_TEST_VM(collection_test_operators());
 }

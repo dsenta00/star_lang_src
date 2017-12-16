@@ -29,7 +29,7 @@ class memory_chunk;
 
 class virtual_memory;
 
-class var;
+class value;
 
 class primitive_data;
 
@@ -40,5 +40,9 @@ class collection;
 class abstract_instruction;
 
 class method;
+
+class var;
+
+class value;
 
 #endif // FW_DECL_H

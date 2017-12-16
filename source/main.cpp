@@ -24,6 +24,7 @@
 #include "memory_handler/virtual_memory.h"
 #include "../test/test.h"
 #include <cstdlib>
+#include <variable/null/null.h>
 
 /**
  * Main program.
@@ -38,9 +39,13 @@ int main(int argc, char *argv[])
     (void) argv;
 
     /*
-     * Create global virtual memory.
+     * Create once:
+     *
+     * - global virtual memory.
+     * - global null
      */
     virtual_memory::create();
+    null::create();
 
     run_tests();
 

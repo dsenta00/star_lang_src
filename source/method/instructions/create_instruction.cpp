@@ -29,6 +29,7 @@
 #include <ORM/orm.h>
 #include <codecvt>
 #include <locale>
+#include <variable/var.h>
 
 /**
  * @inherit
@@ -50,7 +51,7 @@ create_instruction::execute()
 
     auto &name_w = this->arg[0];
     auto &type = this->arg[1];
-    object *data = nullptr;
+    var *data = nullptr;
 
     using convert_type = std::codecvt_utf8<wchar_t>;
     std::wstring_convert<convert_type, wchar_t> converter;
@@ -58,11 +59,11 @@ create_instruction::execute()
 
     if (type == L"collection")
     {
-        data = collection::create(name);
+        data = var::create(name, collection::create());
     }
     else
     {
-        data = primitive_data::create(name, data_type_get_from_token(type));
+        data = var::create(name, primitive_data::create(data_type_get_from_token(type)));
     }
 
     if (!data)
@@ -71,7 +72,7 @@ create_instruction::execute()
     }
 
     auto *m = this->get_method();
-    m->add_local_object(data);
+    m->add_variable(data);
 
     return dynamic_cast<abstract_instruction *>(this->master_relationship_get("next_instruction")->front());
 }

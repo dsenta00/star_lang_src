@@ -136,7 +136,6 @@ file_test_read()
 
     auto *str = f->read_all();
     ASSERT_NOT_NULL(str);
-    ASSERT_EQUALS(str->get_id(), "fr:content");
     ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(), TEST_TEXT) == 0,
                 "Should be equal! \"%ls\"",
                 (const wchar_t *) str->get_address());
@@ -144,7 +143,6 @@ file_test_read()
     /* try again */
     str = f->read_all();
     ASSERT_NOT_NULL(str);
-    ASSERT_EQUALS(str->get_id(), "fr:content");
     ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(), TEST_TEXT) == 0,
                 "Should be equal! \"%ls\"",
                 (const wchar_t *) str->get_address());
@@ -173,7 +171,7 @@ file_test_write1()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    primitive_data *str = string_data::create("str", L"Miljenko 123");
+    primitive_data *str = string_data::create(L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
@@ -200,13 +198,13 @@ file_test_write2()
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
     /* fill collection */
-    collection *c = collection::create("c");
+    collection *c = collection::create();
     int var1 = 42;
-    *c += *int_data::create("var1", &var1);
+    *c += *int_data::create(&var1);
     double var2 = 41.0f;
-    *c += *float_data::create("var2", &var2);
+    *c += *float_data::create(&var2);
     const wchar_t *var3 = L"40";
-    *c += *string_data::create("var3", var3);
+    *c += *string_data::create(var3);
     /* fill collection end */
     f->write(c);
     ASSERT_OK;
@@ -236,8 +234,6 @@ file_test_read_empty_file()
 
     auto *str = f->read_all();
     ASSERT_NOT_NULL(str);
-    ASSERT_EQUALS(str->get_id(), "fr:content");
-
     ASSERT_TRUE(strcmp((const char *) str->get_address(), "") == 0,
                 "Should be equal! %s",
                 (const char *) str->get_address());
@@ -245,7 +241,6 @@ file_test_read_empty_file()
     /* try again */
     str = f->read_all();
     ASSERT_NOT_NULL(str);
-    ASSERT_EQUALS(str->get_id(), "fr:content");
     ASSERT_TRUE(strcmp((const char *) str->get_address(), "") == 0,
                 "Should be equal! %s",
                 (const char *) str->get_address());
@@ -275,7 +270,7 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    auto *str = string_data::create("str", L"Miljenko 123");
+    auto *str = string_data::create(L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
 
@@ -292,7 +287,7 @@ file_test_append()
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
 
-    str = string_data::create("str", L"74, 345");
+    str = string_data::create(L"74, 345");
     f->write(str);
     ASSERT_OK;
 
@@ -317,13 +312,13 @@ file_test_reopen()
     ASSERT_OK;
     ASSERT_TRUE(f->is_opened(), "file should be open!");
 
-    auto *str = string_data::create("str", L"Miljenko 123");
+    auto *str = string_data::create(L"Miljenko 123");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_APPEND, file_name);
-    str = string_data::create("str", L"74, 345");
+    str = string_data::create(L"74, 345");
     f->write(str);
     ASSERT_OK;
     ORM_DESTROY(str);

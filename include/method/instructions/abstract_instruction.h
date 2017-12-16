@@ -36,7 +36,7 @@ class abstract_instruction : public object {
 public:
     explicit abstract_instruction(op_code op, std::vector<std::wstring> &arg);
 
-    object_type get_object_type();
+    object_type get_object_type() override;
 
     op_code &get_op_code();
     virtual abstract_instruction *execute() = 0;

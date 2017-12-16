@@ -31,11 +31,9 @@
 /**
  * The constructor.
  *
- * @param id
  * @param value
  */
-bool_data::bool_data(std::string id, const void *value) : primitive_data::primitive_data(
-    std::move(id), OBJECT_TYPE_CHAR, value)
+bool_data::bool_data(const void *value) : primitive_data(OBJECT_TYPE_BOOL, value)
 {
     if (!value)
     {
@@ -46,36 +44,52 @@ bool_data::bool_data(std::string id, const void *value) : primitive_data::primit
 /**
  * The constructor.
  *
- * @param id
  * @param data
- * @param is_reference
  */
-bool_data::bool_data(std::string id, bool_data &data, bool is_reference) : primitive_data::primitive_data(
-    std::move(id), data, is_reference)
+bool_data::bool_data(bool_data &data) : primitive_data(data)
 {
 }
 
 /**
- * @param id
+ * The constructor.
+ *
+ * @param value
+ */
+bool_data::
+bool_data(bool value) : primitive_data(OBJECT_TYPE_BOOL, &value)
+{
+}
+
+/**
  * @param value
  * @return
  */
 bool_data *
-bool_data::create(std::string id, const void *value)
+bool_data::create(const void *value)
 {
-    return (bool_data *) orm::create((object *) new bool_data(std::move(id), value));
+    return (bool_data *) orm::create((object *) new bool_data(value));
 }
 
 /**
- * @param id
- * @param data
- * @param is_reference
+ *
+ * @param value
  * @return
  */
 bool_data *
-bool_data::create(std::string id, bool_data &data, bool is_reference)
+bool_data::create(bool value)
 {
-    return (bool_data *) orm::create((object *) new bool_data(std::move(id), data, is_reference));
+    return bool_data::create(&value);
+}
+
+/**
+ *
+ * @param data
+ * @return
+ */
+bool_data *
+bool_data::create(bool_data &data)
+{
+    return (bool_data *) orm::create((object *) new bool_data(data));
 }
 
 /**
@@ -176,7 +190,7 @@ bool_data::to_string()
 {
     std::wstring string = this->get_string();
 
-    return *string_data::create(this->id.append(" as string"), string.c_str());
+    return *string_data::create(string.c_str());
 }
 
 /**
@@ -231,7 +245,7 @@ bool_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator=(var &data)
+bool_data::operator=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -260,7 +274,7 @@ bool_data::operator=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator&=(var &data)
+bool_data::operator&=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -288,7 +302,7 @@ bool_data::operator&=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator|=(var &data)
+bool_data::operator|=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -316,7 +330,7 @@ bool_data::operator|=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator^=(var &data)
+bool_data::operator^=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -345,7 +359,7 @@ bool_data::operator^=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator+=(var &data)
+bool_data::operator+=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -360,7 +374,7 @@ bool_data::operator+=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator-=(var &data)
+bool_data::operator-=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -375,7 +389,7 @@ bool_data::operator-=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator*=(var &data)
+bool_data::operator*=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -390,7 +404,7 @@ bool_data::operator*=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator/=(var &data)
+bool_data::operator/=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -405,7 +419,7 @@ bool_data::operator/=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator%=(var &data)
+bool_data::operator%=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -446,7 +460,7 @@ bool_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-bool_data::operator==(var &data)
+bool_data::operator==(value &data)
 {
     return this->to_bool() == data.to_bool();
 }
@@ -459,7 +473,7 @@ bool_data::operator==(var &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-bool_data::operator!=(var &data)
+bool_data::operator!=(value &data)
 {
     return this->to_bool() != data.to_bool();
 }
@@ -472,7 +486,7 @@ bool_data::operator!=(var &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-bool_data::operator>(var &data)
+bool_data::operator>(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -487,7 +501,7 @@ bool_data::operator>(var &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-bool_data::operator<(var &data)
+bool_data::operator<(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -502,7 +516,7 @@ bool_data::operator<(var &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-bool_data::operator>=(var &data)
+bool_data::operator>=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -517,7 +531,7 @@ bool_data::operator>=(var &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-bool_data::operator<=(var &data)
+bool_data::operator<=(value &data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -594,4 +608,27 @@ object_type
 bool_data::get_object_type()
 {
     return OBJECT_TYPE_BOOL;
+}
+
+/**
+ * Parse boolean from string.
+ *
+ * @param str
+ * @return
+ */
+bool
+bool_data::parse(std::wstring str)
+{
+    std::for_each(str.begin(), str.end(), [&](wchar_t &c) { c = std::tolower(c); });
+
+    return str == L"true";
+}
+
+/**
+ * @inherit
+ */
+bool
+bool_data::is_reference()
+{
+    return false;
 }

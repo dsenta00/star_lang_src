@@ -30,6 +30,7 @@
 #include <method/method.h>
 #include <codecvt>
 #include <locale>
+#include <variable/var.h>
 
 /**
  * @inherit
@@ -58,26 +59,10 @@ create_and_assign_object_instruction::execute()
     std::wstring_convert<convert_type, wchar_t> converter;
     std::string name = converter.to_bytes(name_w);
 
-    auto *object_to_assign = m->get_local_object(obj_name);
-    object *object = nullptr;
+    var *object_to_assign = m->get_variable(obj_name);
+    var *object = var::create(name, object_to_assign->get());
 
-    if (primitive_data::is_primitive((var *)object_to_assign))
-    {
-        auto *data_to_assign = dynamic_cast<primitive_data *>(object_to_assign);
-
-        object = primitive_data::create(name, *data_to_assign);
-
-        if (!object)
-        {
-            return nullptr;
-        }
-    }
-    else if (object_to_assign->get_object_type() == OBJECT_TYPE_COLLECTION)
-    {
-        object = collection::create(name, (collection *) object_to_assign);
-    }
-
-    m->add_local_object(object);
+    m->add_variable(object);
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
 }
@@ -130,7 +115,7 @@ create_and_assign_object_instruction::validate()
     }
 
     auto &obj_name = this->arg[1];
-    auto object_to_assign = m->get_local_object(obj_name);
+    auto object_to_assign = m->get_variable(obj_name);
 
     if (!object_to_assign)
     {

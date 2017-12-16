@@ -27,26 +27,26 @@
 #include "data_type.h"
 #include "fw_decl.h"
 #include <string>
-#include <variable/var.h>
+#include <variable/value.h>
 
 /**
  * The primitive_data class. Represents primitive data type in
  * this programming language and defines all operations in that scope.
  */
-class primitive_data : public var {
+class primitive_data : public value {
 public:
-    explicit primitive_data(std::string id, object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
-    primitive_data(std::string id, primitive_data &data, bool is_reference = false);
+    explicit primitive_data(object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    primitive_data(primitive_data &data);
 
-    static primitive_data *create(std::string id, object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
-    static primitive_data *create(std::string id, primitive_data &data, bool is_reference = false);
+    static primitive_data *create(object_type type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    static primitive_data *create(primitive_data &data);
 
     virtual bool default_value() = 0;
 
     memory *get_memory();
     uintptr_t get_address();
 
-    static bool is_primitive(var *data);
+    static bool is_primitive(value *data);
 protected:
     virtual_memory *vm;
 };

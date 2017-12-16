@@ -24,6 +24,7 @@
 #include <error_handler/error_log.h>
 #include <memory_handler/memory.h>
 #include <memory_handler/virtual_memory.h>
+#include <variable/value.h>
 #include <variable/primitive_data/string_data.h>
 #include <variable/primitive_data/char_data.h>
 #include <iostream>
@@ -31,11 +32,9 @@
 /**
  * The constructor.
  *
- * @param id
  * @param value
  */
-char_data::char_data(std::string id, const void *value) : primitive_data::primitive_data(
-    std::move(id), OBJECT_TYPE_CHAR, value)
+char_data::char_data(const void *value) : primitive_data::primitive_data(OBJECT_TYPE_CHAR, value)
 {
     if (!value)
     {
@@ -46,26 +45,21 @@ char_data::char_data(std::string id, const void *value) : primitive_data::primit
 /**
  * The constructor.
  *
- * @param id
  * @param data
- * @param is_reference
  */
-char_data::char_data(std::string id, char_data &data, bool is_reference) : primitive_data::primitive_data(
-    std::move(id), data, is_reference
-)
+char_data::char_data(char_data &data) : primitive_data::primitive_data(data)
 {
 }
 
 /**
- * @param id
- * @param type
+ *
  * @param value
  * @return
  */
 char_data *
-char_data::create(std::string id, const void *value)
+char_data::create(const void *value)
 {
-    return (char_data *) orm::create((object *) new char_data(std::move(id), value));
+    return (char_data *) orm::create((object *) new char_data(value));
 }
 
 /**
@@ -75,9 +69,9 @@ char_data::create(std::string id, const void *value)
  * @return
  */
 char_data *
-char_data::create(std::string id, char_data &data, bool is_reference)
+char_data::create(char_data &data)
 {
-    return (char_data *) orm::create((object *) new char_data(std::move(id), data, is_reference));
+    return (char_data *) orm::create((object *) new char_data(data));
 }
 
 /**
@@ -178,7 +172,7 @@ char_data::to_string()
 {
     std::wstring string = this->get_string();
 
-    return *string_data::create(this->id.append(" as string"), string.c_str());
+    return *string_data::create(string.c_str());
 }
 
 /**
@@ -233,7 +227,7 @@ char_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator=(var &data)
+char_data::operator=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -262,7 +256,7 @@ char_data::operator=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator&=(var &data)
+char_data::operator&=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -290,7 +284,7 @@ char_data::operator&=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator|=(var &data)
+char_data::operator|=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -318,7 +312,7 @@ char_data::operator|=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator^=(var &data)
+char_data::operator^=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -347,7 +341,7 @@ char_data::operator^=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator+=(var &data)
+char_data::operator+=(value &data)
 {
     memory *mem = this->get_memory();
 
@@ -376,7 +370,7 @@ char_data::operator+=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator-=(var &data)
+char_data::operator-=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -404,7 +398,7 @@ char_data::operator-=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator*=(var &data)
+char_data::operator*=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -432,7 +426,7 @@ char_data::operator*=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator/=(var &data)
+char_data::operator/=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -466,7 +460,7 @@ char_data::operator/=(var &data)
  * @return true if success, otherwise return false.
  */
 bool
-char_data::operator%=(var &data)
+char_data::operator%=(value &data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -542,7 +536,7 @@ char_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-char_data::operator==(var &data)
+char_data::operator==(value &data)
 {
     return this->to_char() == data.to_char();
 }
@@ -555,7 +549,7 @@ char_data::operator==(var &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-char_data::operator!=(var &data)
+char_data::operator!=(value &data)
 {
     return this->to_char() != data.to_char();
 }
@@ -568,7 +562,7 @@ char_data::operator!=(var &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-char_data::operator>(var &data)
+char_data::operator>(value &data)
 {
     return this->to_char() > data.to_char();
 }
@@ -581,7 +575,7 @@ char_data::operator>(var &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-char_data::operator<(var &data)
+char_data::operator<(value &data)
 {
     return this->to_char() < data.to_char();
 }
@@ -594,7 +588,7 @@ char_data::operator<(var &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-char_data::operator>=(var &data)
+char_data::operator>=(value &data)
 {
     return this->to_char() >= data.to_char();
 }
@@ -607,7 +601,7 @@ char_data::operator>=(var &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-char_data::operator<=(var &data)
+char_data::operator<=(value &data)
 {
     return this->to_char() <= data.to_char();
 }
@@ -684,4 +678,13 @@ object_type
 char_data::get_object_type()
 {
     return OBJECT_TYPE_CHAR;
+}
+
+/**
+ * @inherit
+ */
+bool
+char_data::is_reference()
+{
+    return false;
 }
