@@ -21,14 +21,13 @@
  */
 #include <cstdio>
 #include <variable/collection/collection.h>
+#include <variable/primitive_data/string_data.h>
 #include <codecvt>
 #include <locale>
-#include <variable/primitive_data/string_data.h>
 #include <variable/primitive_data/float_data.h>
 #include <variable/primitive_data/int_data.h>
 #include "error_handler/error_log.h"
 #include "ORM/orm.h"
-#include "../../../include/variable/file/file_test.h"
 #include "variable/file/file.h"
 #include "../../../test_assert.h"
 
@@ -115,7 +114,7 @@ file_test_read()
     /*
      * Negative test case
      */
-    file *f = file::create("fr", FILE_MODE_READ, "miljenkoooooo");
+    file *f = file::create(FILE_MODE_READ, "miljenkoooooo");
 
     ASSERT_ERROR(ERROR_FILE_UNKNOWN_FILE);
     ASSERT_NOT_NULL(f);
@@ -128,7 +127,7 @@ file_test_read()
      */
     const char *file_name = "test_star.txt";
     create_file("test_star.txt", TEST_TEXT);
-    f = file::create("fr", FILE_MODE_READ, file_name);
+    f = file::create( FILE_MODE_READ, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
@@ -165,18 +164,21 @@ static void
 file_test_write1()
 {
     const char *file_name = "test_star_write.txt";
-    file *f = file::create("fw1", FILE_MODE_WRITE, file_name);
+    file *f = file::create(FILE_MODE_WRITE, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
     ASSERT_TRUE(f->is_opened(), "file should be opened!");
+    ASSERT_EQUALS(f->get_mode(), FILE_MODE_WRITE);
 
     primitive_data *str = string_data::create(L"Miljenko 123");
     f->write(str);
+    ASSERT_EQUALS(f->get_mode(), FILE_MODE_WRITE);
     ASSERT_OK;
 
     f->close();
     ASSERT_OK;
+    ASSERT_EQUALS(f->get_mode(), FILE_MODE_NOT_OPEN);
     ASSERT_TRUE(compare_file_content(file_name, "Miljenko 123"), "Should be equal!");
 
     ORM_DESTROY(f);
@@ -191,7 +193,7 @@ static void
 file_test_write2()
 {
     const char *file_name = "test_star_write.txt";
-    file *f = file::create("fw2", FILE_MODE_WRITE, file_name);
+    file *f = file::create(FILE_MODE_WRITE, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
@@ -226,7 +228,7 @@ file_test_read_empty_file()
 {
     const char *file_name = "test_star.txt";
     create_file("test_star.txt", L"");
-    file *f = file::create("fr", FILE_MODE_READ, file_name);
+    file *f = file::create(FILE_MODE_READ, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
@@ -264,7 +266,7 @@ static void
 file_test_append()
 {
     const char *file_name = "test_star_write.txt";
-    file *f = file::create("fw1", FILE_MODE_APPEND, file_name);
+    file *f = file::create(FILE_MODE_APPEND, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
@@ -281,7 +283,7 @@ file_test_append()
     ORM_DESTROY(f);
     ORM_DESTROY(str);
 
-    f = file::create("fw1", FILE_MODE_APPEND, file_name);
+    f = file::create(FILE_MODE_APPEND, file_name);
 
     ASSERT_OK;
     ASSERT_NOT_NULL(f);
@@ -304,7 +306,7 @@ static void
 file_test_reopen()
 {
     const char *file_name = "test_star_write.txt";
-    file *f = file::create("f");
+    file *f = file::create();
     ASSERT_OK;
     ASSERT_FALSE(f->is_opened(), "file should not be open!");
 
@@ -324,7 +326,7 @@ file_test_reopen()
     ORM_DESTROY(str);
 
     f->open(FILE_MODE_READ, file_name);
-    str = dynamic_cast<string_data *>(f->read_all());
+    str = f->read_all();
     ASSERT_TRUE(wcscmp((const wchar_t *) str->get_address(),
                        L"Miljenko 12374, 345") == 0, "should be equal");
 

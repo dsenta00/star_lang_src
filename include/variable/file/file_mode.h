@@ -36,7 +36,6 @@ typedef enum {
 
 bool file_mode_can_read(file_mode mode);
 bool file_mode_can_write(file_mode mode);
-const char *file_mode_get_format(file_mode mode);
 bool file_mode_is_valid(file_mode mode);
 
 #endif //FILE_MODE_H

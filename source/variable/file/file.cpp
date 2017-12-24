@@ -33,11 +33,10 @@
 /**
  * The constructor.
  *
- * @param id
  * @param mode
  * @param file_name
  */
-file::file(const char *id, file_mode mode, const char *file_name) : object::object(id)
+file::file(file_mode mode, const char *file_name) : value::value()
 {
     this->mode = FILE_MODE_NOT_OPEN;
     this->is_already_read = false;
@@ -47,10 +46,8 @@ file::file(const char *id, file_mode mode, const char *file_name) : object::obje
 
 /**
  * The constructor.
- *
- * @param id
  */
-file::file(const char *id) : object::object(id)
+file::file() : value::value()
 {
     this->mode = FILE_MODE_NOT_OPEN;
     this->is_already_read = false;
@@ -72,7 +69,7 @@ file::is_opened()
  *
  * @return
  */
-primitive_data *
+string_data *
 file::read_all()
 {
     if (!this->is_opened())
@@ -88,7 +85,7 @@ file::read_all()
 
     this->read_into_buffer();
 
-    primitive_data *data = nullptr;
+    string_data *data = nullptr;
 
     if (this->buffer.empty())
     {
@@ -107,7 +104,7 @@ file::read_all()
  * @param o
  */
 void
-file::write(object *o)
+file::write(value *o)
 {
     if (!this->is_opened())
     {
@@ -120,14 +117,7 @@ file::write(object *o)
         return;
     }
 
-    if (primitive_data::is_primitive((value *)o))
-    {
-        this->buffer.append(((primitive_data *) o)->get_string());
-    }
-    else if (o->get_object_type() == OBJECT_TYPE_COLLECTION)
-    {
-        this->buffer.append(((collection *) o)->to_string().get_string());
-    }
+    this->buffer.append(o->get_string());
 }
 
 /**
@@ -153,27 +143,25 @@ file::close()
 /**
  * Create file object.
  *
- * @param id
  * @param mode
  * @param file_name
  * @return
  */
 file *
-file::create(const char *id, file_mode mode, const char *file_name)
+file::create(file_mode mode, const char *file_name)
 {
-    return (file *) orm::create(new file(id, mode, file_name));
+    return (file *) orm::create(new file(mode, file_name));
 }
 
 /**
  * Create file object.
  *
- * @param id
  * @return
  */
 file *
-file::create(const char *id)
+file::create()
 {
-    return (file *) orm::create(new file(id));
+    return (file *) orm::create(new file());
 }
 
 /**
@@ -290,6 +278,354 @@ file::get_object_type()
 {
     return OBJECT_TYPE_FILE;
 }
+
+/**
+ * @inherit
+ */
+bool
+file::to_bool()
+{
+    return false;
+}
+
+/**
+ * @inherit
+ */
+wchar_t
+file::to_char()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+int32_t
+file::to_int()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+double
+file::to_float()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+string_data &
+file::to_string()
+{
+    return *string_data::create(this->buffer.c_str());
+}
+
+/**
+ * @inherit
+ */
+bool
+file::is_reference()
+{
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::default_value()
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator=(const void *data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator=(value &data)
+{
+    if (file_mode_can_write(this->mode))
+    {
+        ERROR_LOG_ADD(ERROR_FILE_WRITE_ON_READ_MODE);
+        return false;
+    }
+
+    this->buffer.clear();
+    this->write(&data);
+
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator&=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator|=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator^=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator+=(value &data)
+{
+    this->write(&data);
+
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator-=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator*=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator/=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator%=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator++()
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator--()
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator==(value &data)
+{
+    if (file_mode_can_read(this->mode))
+    {
+        if (!this->is_already_read)
+        {
+            this->read_into_buffer();
+        }
+
+        return this->buffer == data.get_string();
+    }
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator!=(value &data)
+{
+    return !this->operator==(data);
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator>(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator<(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator>=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::operator<=(value &data)
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::print()
+{
+    if (!file_mode_can_read(this->mode))
+    {
+        ERROR_LOG_ADD(ERROR_FILE_READ_ON_WRITE_MODE);
+
+        return false;
+    }
+
+    if (!this->is_already_read)
+    {
+        this->read_into_buffer();
+    }
+
+    std::wcout << this->buffer;
+
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::println()
+{
+    if (this->print())
+    {
+        std::cout << std::endl;
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+file::scan()
+{
+    ERROR_LOG_ADD(ERROR_FILE_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+std::wstring
+file::get_string()
+{
+    return this->buffer;
+}
+
+/**
+ * Get file mode.
+ *
+ * @return file mode.
+ */
+file_mode
+file::get_mode()
+{
+    return this->mode;
+}
+
+
 
 
 

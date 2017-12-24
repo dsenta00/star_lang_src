@@ -23,25 +23,61 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "ORM/object.h"
 #include "fw_decl.h"
+#include "ORM/object.h"
 #include "file_mode.h"
+#include <variable/value.h>
 
 /**
  * The file object. Handles file streams.
  */
-class file : public object {
+class file : public value {
 public:
-    explicit file(const char *id);
-    file(const char *id, file_mode mode, const char *file_name);
+    explicit file();
+    file(file_mode mode, const char *file_name);
+    static file *create(file_mode mode, const char *file_name);
+    static file *create();
+
     object_type get_object_type() override;
+    file_mode get_mode();
     void open(file_mode mode, const char *file_name);
     void close();
     bool is_opened();
-    primitive_data *read_all();
-    void write(object *o);
-    static file *create(const char *id, file_mode mode, const char *file_name);
-    static file *create(const char *id);
+    string_data *read_all();
+    void write(value *o);
+
+    bool to_bool() override;
+    wchar_t to_char() override;
+    int32_t to_int() override;
+    double to_float() override;
+    string_data &to_string() override;
+
+    bool is_reference() override;
+    bool default_value();
+    bool operator=(const void *data) override;
+    bool operator=(value &data) override;
+    bool operator&=(value &data) override;
+    bool operator|=(value &data) override;
+    bool operator^=(value &data) override;
+    bool operator+=(value &data) override;
+    bool operator-=(value &data) override;
+    bool operator*=(value &data) override;
+    bool operator/=(value &data) override;
+    bool operator%=(value &data) override;
+    bool operator++() override;
+    bool operator--() override;
+    bool operator==(value &data) override;
+    bool operator!=(value &data) override;
+    bool operator>(value &data) override;
+    bool operator<(value &data) override;
+    bool operator>=(value &data) override;
+    bool operator<=(value &data) override;
+
+    bool print() override;
+    bool println() override;
+    bool scan() override;
+
+    std::wstring get_string() override;
     ~file() override;
 protected:
     void read_into_buffer();
@@ -52,6 +88,5 @@ protected:
     std::wstring buffer;
     file_mode mode;
 };
-
 
 #endif //FILE_H

@@ -30,18 +30,18 @@
 /**
  * The constructor.
  *
- * @param container
+ * @param v
  */
-var::var(std::string id, value *container) : object::object(std::move(id))
+var::var(std::string id, value *v) : object::object(std::move(id))
 {
     this->master_relationship_add("val", ONE_TO_ONE);
 
-    if (container == nullptr)
+    if (v == nullptr)
     {
-        container = dynamic_cast<value *>(orm::get_first(OBJECT_TYPE_NULL));
+        v = dynamic_cast<value *>(orm::get_first(OBJECT_TYPE_NULL));
     }
 
-    this->master_relationship_add_object("val", container);
+    this->master_relationship_add_object("val", v);
 }
 
 /**
@@ -87,7 +87,7 @@ var::set(value *v)
      * +---------------------------------------+----------------------------------------------------+
      * |  Conditions:                          |  Actions:                                          |
      * +---------------------------------------+----------------------------------------------------+
-     * | v1 ref?   v2 ref?   v1type == v2type  | v1_ref      v1 refs as v2    v1 create     v1 = v2 |
+     * | v1 ref?   v2 ref?   v1type == v2type  | v1_remove   v1 refs as v2    v1 create     v1 = v2 |
      * +---------------------------------------+----------------------------------------------------+
      * |   0         0               0         |     1              0              1           1    |
      * |   0         0               1         |     0              0              0           1    |
@@ -101,12 +101,12 @@ var::set(value *v)
      *    Reference problem solved using Veitch diagram.
      */
 
-    bool v1_ref = v1->is_reference() || v2->is_reference() || (v1->get_object_type() != v2->get_object_type());
+    bool v1_remove = v1->is_reference() || v2->is_reference() || (v1->get_object_type() != v2->get_object_type());
     bool v1_ref_v2 = v2->is_reference();
     bool v1_create = (v1->get_object_type() != v2->get_object_type()) && !v2->is_reference();
     bool v1_eq_v2 = !v2->is_reference();
 
-    if (v1_ref)
+    if (v1_remove)
     {
         this->master_relationship_remove_object("val", v1);
     }

@@ -30,7 +30,7 @@
  */
 class var : public object {
 public:
-    explicit var(std::string id, value *container = nullptr);
+    explicit var(std::string id, value *v = nullptr);
     static var *create(std::string id, value *container = nullptr);
 
     object_type get_object_type() override;

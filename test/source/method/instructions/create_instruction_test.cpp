@@ -178,7 +178,7 @@ instruction_test_create1()
     ASSERT_NOT_NULL(foo->get_variable(L"int_name"));
     foo->get_variable(L"int_name")->get()->println();
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT]);
-    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, [&](object *obj) { return obj->get_id() == "int_name"; }));
+    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, "int_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
     abstract_instruction *next = i->execute();
@@ -215,13 +215,13 @@ instruction_test_create2()
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT]);
-    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, [&](object *obj) { return obj->get_id() == "int_name"; }));
+    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, "int_name"));
     ASSERT_NOT_NULL(foo->get_variable(L"int_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DATA_TYPE_SIZE[OBJECT_TYPE_INT] + DATA_TYPE_SIZE[OBJECT_TYPE_FLOAT]);
-    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, [&](object *obj) { return obj->get_id() == "float_name"; }));
+    ASSERT_NOT_NULL(orm::select(OBJECT_TYPE_VARIABLE, "float_name"));
     ASSERT_NOT_NULL(foo->get_variable(L"float_name"));
 
     ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);

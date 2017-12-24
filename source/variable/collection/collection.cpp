@@ -562,6 +562,8 @@ bool
 collection::operator-=(value & data)
 {
     this->remove_data(&data);
+
+    return true;
 }
 
 /**

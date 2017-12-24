@@ -23,12 +23,12 @@
 #ifndef TEST_ASSERT_H
 #define TEST_ASSERT_H
 
+#include <memory_handler/virtual_memory.h>
+#include <variable/null/null.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <memory_handler/virtual_memory.h>
-#include <variable/null/null.h>
 
 void assert_true(bool statement,
                  const char *file,
