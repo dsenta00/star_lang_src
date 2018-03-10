@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -70,6 +70,7 @@ public:
     void master_relationship_add_object(std::string relationship_name, object *o);
     void master_relationship_remove_object(std::string relationship_name, object *o);
     object *master_relationship_back(std::string relationship_name);
+    object *master_relationship_front(std::string relationship_name);
     void master_relationships_clear_objects();
 
     virtual ~object();

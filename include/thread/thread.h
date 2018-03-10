@@ -20,35 +20,23 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_MEMORY_CHUNK_IF_H
-#define BOX_MEMORY_CHUNK_IF_H
+#ifndef THREAD_H
+#define THREAD_H
 
-#include "ORM/object.h"
-#include "fw_decl.h"
-#include <cstdint>
-#include <cstdlib>
-#include <functional>
+#include <fw_decl.h>
+#include <ORM/object.h>
+#include <stack>
 
-class memory_chunk_if : public object {
+class thread : public object, std::stack<method *> {
 public:
-    memory_chunk_if();
+    thread(uint64_t id, method *m);
+    bool step();
+    void run();
+    void sleep(uint64_t milliseconds);
 
-    object_type get_object_type() override;
-
-    void free_memory_add(uintptr_t address, uint32_t size);
-    void free_memory_remove(memory *mem);
-    memory *free_memory_find(std::function<bool(memory *)> foo);
-    memory *free_memory_front();
-    uint32_t free_memory_num();
-    void free_memory_delete_all();
-    void free_memory_union();
-
-    memory *reserved_memory_add(uintptr_t address, uint32_t size);
-    void reserved_memory_remove(memory *mem);
-    memory *reserved_memory_front();
-    memory *reserved_memory_back();
-    uint32_t reserved_memory_num();
-    void reserved_memory_sort();
+private:
+    bool pause;
 };
 
-#endif // BOX_MEMORY_CHUNK_IF_H
+
+#endif //THREAD_H

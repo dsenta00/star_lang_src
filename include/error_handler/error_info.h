@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -71,7 +71,9 @@ typedef enum {
     ERROR_VIRTUAL_MEMORY_ZERO_CAPACITY,
     ERROR_VIRTUAL_MEMORY_UNKNOWN_FAULT,
 
-    ERROR_NULL_OPERATION
+    ERROR_NULL_OPERATION,
+
+    ERROR_THREAD_INSTRUCTION_ERROR,
 } error_status;
 
 class error_info {

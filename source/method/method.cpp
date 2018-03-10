@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -136,7 +136,7 @@ method::get_variable(std::wstring id)
 {
     if (this->variables.find(id) == this->variables.end())
     {
-        return (var *)orm::get_first(OBJECT_TYPE_NULL);
+        return (var *) orm::get_first(OBJECT_TYPE_NULL);
     }
 
     return this->variables[id];
@@ -187,4 +187,24 @@ object_type
 method::get_object_type()
 {
     return OBJECT_TYPE_METHOD;
+}
+
+/**
+ * Get result.
+ *
+ * @return
+ */
+value *
+method::get_result()
+{
+    return this->result;
+}
+
+void
+method::clear()
+{
+    this->result = nullptr;
+    this->stack.clear();
+    this->variables.clear();
+    this->current_instruction = (abstract_instruction *)this->master_relationship_front("method_instructions");
 }

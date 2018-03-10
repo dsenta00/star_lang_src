@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -380,4 +380,24 @@ object::slave_relationship_notify_destroyed()
             e->master_relationship_remove_object(r->get_name(), this);
         }
     }
+}
+
+/**
+ * Get front from master relationship.
+ *
+ * @param relationship_name
+ * @return
+ */
+object *
+object::master_relationship_front(std::string relationship_name)
+{
+    relationship *r = this->master_relationship_get(std::move(relationship_name));
+
+    if (!r)
+    {
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
+        return nullptr;
+    }
+
+    return r->front();
 }

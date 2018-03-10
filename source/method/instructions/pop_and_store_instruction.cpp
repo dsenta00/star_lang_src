@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,7 +49,7 @@ pop_and_store_instruction::execute()
     }
 
     auto *m = this->get_method();
-    auto *data2 = (value *) m->pop_stack();
+    auto *data2 = m->pop_stack();
 
     value *data = (value *) m->get_variable(this->arg[0]);
     *data = *data2;

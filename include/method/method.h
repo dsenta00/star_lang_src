@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta, Tomislav Radanovic
+ * Copyright 2017 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,6 +49,9 @@ public:
 
     void push_stack(value *o);
     value *pop_stack();
+    value *get_result();
+
+    void clear();
 protected:
     value *result;
     std::map<std::wstring, var *> variables;
