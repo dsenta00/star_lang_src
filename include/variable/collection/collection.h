@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef COLLECTION_H
-#define COLLECTION_H
+#pragma once
 
 #include <variable/value.h>
 #include <variable/primitive_data/data_type.h>
@@ -94,5 +93,3 @@ protected:
     void insert_data(std::string index, value *o);
     std::map<std::string, value *> data_cache;
 };
-
-#endif // COLLECTION_H

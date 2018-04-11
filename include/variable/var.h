@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef VAR_H
-#define VAR_H
+#pragma once
 
 #include <ORM/object.h>
 
@@ -38,6 +37,3 @@ public:
     value *get();
     void set(value *v = nullptr);
 };
-
-
-#endif //VAR_H

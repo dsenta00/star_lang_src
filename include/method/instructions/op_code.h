@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef OP_CODE_H
-#define OP_CODE_H
+#pragma once
 
 typedef enum {
     OP_CODE_CREATE,
@@ -29,5 +28,3 @@ typedef enum {
     OP_CODE_CREATE_AND_ASSIGN_OBJECT,
     OP_CODE_POP_AND_STORE
 } op_code;
-
-#endif //OP_CODE_H

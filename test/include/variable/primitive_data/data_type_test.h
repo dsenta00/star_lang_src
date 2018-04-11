@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef DATA_TYPE_TEST_H
-#define DATA_TYPE_TEST_H
+#pragma once
 
 void data_type_test();
-
-#endif //DATA_TYPE_TEST_H

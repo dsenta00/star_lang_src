@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef DATA_TYPE_H
-#define DATA_TYPE_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -50,5 +49,3 @@ const uint8_t DATA_TYPE_SIZE[] =
 object_type data_type_get_from_token(std::wstring str);
 object_type data_type_detect(std::wstring sample);
 std::wstring data_type_clean_constant_format(std::wstring &sample, object_type type);
-
-#endif // DATA_TYPE_H

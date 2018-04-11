@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#pragma once
 
 #include <cstdint>
 #include "ORM/object.h"
@@ -59,5 +58,3 @@ protected:
     uintptr_t address;
     uint32_t size;
 };
-
-#endif // MEMORY_H

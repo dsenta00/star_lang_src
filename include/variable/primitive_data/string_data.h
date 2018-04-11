@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef STRING_DATA_H
-#define STRING_DATA_H
+#pragma once
 
 #include <string>
 #include "primitive_data.h"
@@ -70,6 +69,3 @@ public:
 
     std::wstring get_string() override;
 };
-
-
-#endif //STRING_DATA_H

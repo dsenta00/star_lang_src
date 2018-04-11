@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOOL_DATA_H
-#define BOOL_DATA_H
+#pragma once
 
 #include "primitive_data.h"
 
@@ -75,6 +74,3 @@ public:
 
     static bool parse(std::wstring str);
 };
-
-
-#endif //BOOL_DATA_H

@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef FLOAT_DATA_H
-#define FLOAT_DATA_H
+#pragma once
 
 #include "primitive_data.h"
 
@@ -72,6 +71,3 @@ public:
     std::wstring get_string() override;
     static double parse(std::wstring str);
 };
-
-
-#endif //FLOAT_DATA_H

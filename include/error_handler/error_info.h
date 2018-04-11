@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef ERROR_INFO_H
-#define ERROR_INFO_H
+#pragma once
 
 typedef enum {
     STATUS_OK,
@@ -87,5 +86,3 @@ protected:
     error_status status;
     const char *func;
 };
-
-#endif // ERROR_INFO_H

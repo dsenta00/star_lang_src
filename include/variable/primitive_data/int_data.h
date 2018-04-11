@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef INT_DATA_H
-#define INT_DATA_H
+#pragma once
 
 #include "primitive_data.h"
 
@@ -72,6 +71,3 @@ public:
     std::wstring get_string() override;
     static int parse(std::wstring str);
 };
-
-
-#endif //INT_DATA_H

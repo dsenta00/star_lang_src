@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H
-#define CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H
+#pragma once
 
 #include "abstract_instruction.h"
 
@@ -35,6 +34,3 @@ public:
     abstract_instruction *execute() override;
     bool validate() override;
 };
-
-
-#endif //CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_H

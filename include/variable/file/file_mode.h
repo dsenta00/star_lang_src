@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_MODE_H
-#define FILE_MODE_H
+#pragma once
 
 /**
  * File stream modes.
@@ -37,5 +36,3 @@ typedef enum {
 bool file_mode_can_read(file_mode mode);
 bool file_mode_can_write(file_mode mode);
 bool file_mode_is_valid(file_mode mode);
-
-#endif //FILE_MODE_H

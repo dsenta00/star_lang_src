@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef ENTITY_REPOSITORY_H
-#define ENTITY_REPOSITORY_H
+#pragma once
 
 #include "orm_fw.h"
 #include <map>
@@ -54,5 +53,3 @@ protected:
      */
     std::map<std::string, std::vector<object_p>> object_map;
 };
-
-#endif // ENTITY_REPOSITORY_H

@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_ASSERT_H
-#define TEST_ASSERT_H
+#pragma once
 
 #include <memory_handler/virtual_memory.h>
 #include <variable/null/null.h>
@@ -97,5 +96,3 @@ void assert_false(bool statement,
   "Total allocated should be %u (%u)", \
   (__BYTES__), \
   (__VM__).get_allocated_total())
-
-#endif // TEST_ASSERT_H

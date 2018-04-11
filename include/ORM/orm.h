@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_H
-#define ORM_H
+#pragma once
 
 #include "object_repository.h"
 #include "object_type.h"
@@ -47,5 +46,3 @@ namespace orm {
 
 #define ORM_DESTROY(__OBJ__) \
   orm::destroy((object *)(__OBJ__))
-
-#endif // ORM_H

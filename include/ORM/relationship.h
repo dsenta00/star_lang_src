@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef RELATIONSHIP_H
-#define RELATIONSHIP_H
+#pragma once
 
 #include "orm_fw.h"
 #include "relationship_type.h"
@@ -58,5 +57,3 @@ protected:
     std::string relationship_name;
     relationship_type type;
 };
-
-#endif // RELATIONSHIP_H

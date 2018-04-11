@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_TEST_H
-#define ORM_TEST_H
+#pragma once
 
 void orm_test();
-
-#endif // ORM_TEST_H

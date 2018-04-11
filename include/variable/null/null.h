@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef NULL_H
-#define NULL_H
+#pragma once
 
 #include <variable/value.h>
 
@@ -65,6 +64,3 @@ public:
     std::wstring get_string() override;
     static null *create();
 };
-
-
-#endif //NULL_H

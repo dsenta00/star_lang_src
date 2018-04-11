@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_MEMORY_CHUNK_H
-#define BOX_MEMORY_CHUNK_H
+#pragma once
 
 #include "memory_chunk_if.h"
 #include <cstdint>
@@ -66,5 +65,3 @@ protected:
     uintptr_t start_address;
     std::vector<uint8_t> field;
 };
-
-#endif // BOX_MEMORY_CHUNK_H

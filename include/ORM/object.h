@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef OBJECT_H
-#define OBJECT_H
+#pragma once
 
 #include "orm_fw.h"
 #include "relationship_type.h"
@@ -80,5 +79,3 @@ protected:
     std::map<std::string, relationship_p> master_relationships;
     std::map<std::string, relationship_p> slave_relationships;
 };
-
-#endif // OBJECT_H

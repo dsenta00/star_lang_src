@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef ERROR_LOG_H
-#define ERROR_LOG_H
+#pragma once
 
 #include "error_info.h"
 
@@ -36,5 +35,3 @@ void error_log_clear();
 #define ERROR_LOG_LAST_ERROR (error_log_last_error())
 #define ERROR_LOG_LAST_ERROR_STRING (error_log_last_error_string())
 #define ERROR_LOG_CLEAR (error_log_clear())
-
-#endif // ERROR_LOG_H

@@ -74,8 +74,6 @@ virtual_memory::virtual_memory(uint32_t init_capacity) : object::object("MAIN")
     this->add_memory_chunk(init_capacity);
 }
 
-
-
 /**
  * @brief virtual_memory::find_memory_chunk
  * @param func

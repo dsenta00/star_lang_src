@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef FILE_H
-#define FILE_H
+#pragma once
 
 #include "fw_decl.h"
 #include "ORM/object.h"
@@ -88,5 +87,3 @@ protected:
     std::wstring buffer;
     file_mode mode;
 };
-
-#endif //FILE_H

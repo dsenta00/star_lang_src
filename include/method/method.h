@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_METHOD_H
-#define BOX_METHOD_H
+#pragma once
 
 #include "ORM/object.h"
 #include "variable/primitive_data/data_type.h"
@@ -58,5 +57,3 @@ protected:
     std::vector<value *> stack;
     abstract_instruction *current_instruction;
 };
-
-#endif // BOX_METHOD_H

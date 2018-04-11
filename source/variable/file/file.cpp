@@ -624,9 +624,3 @@ file::get_mode()
 {
     return this->mode;
 }
-
-
-
-
-
-

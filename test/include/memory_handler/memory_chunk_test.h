@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef MEMORY_CHUNK_TEST_H
-#define MEMORY_CHUNK_TEST_H
+#pragma once
 
 void memory_chunk_test();
-
-#endif // MEMORY_CHUNK_TEST_H

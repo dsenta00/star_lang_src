@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef POP_AND_STORE_INSTRUCTION_H
-#define POP_AND_STORE_INSTRUCTION_H
+#pragma once
 
 #include "abstract_instruction.h"
 
@@ -35,5 +34,3 @@ public:
     abstract_instruction *execute() override;
     bool validate() override;
 };
-
-#endif //POP_AND_STORE_INSTRUCTION_H

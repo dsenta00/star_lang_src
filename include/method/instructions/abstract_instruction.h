@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_INSTRUCTION_H
-#define BOX_INSTRUCTION_H
+#pragma once
 
 #include "ORM/object.h"
 #include "ORM/orm_fw.h"
@@ -52,5 +51,3 @@ protected:
     method *get_method();
     bool object_name_is_valid(std::wstring &sample);
 };
-
-#endif // BOX_INSTRUCTION_H

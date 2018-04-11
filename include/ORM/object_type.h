@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef OBJECT_TYPE_H
-#define OBJECT_TYPE_H
+#pragma once
 
 typedef enum {
     OBJECT_TYPE_BOOL,
@@ -39,5 +38,3 @@ typedef enum {
     OBJECT_TYPE_METHOD,
     OBJECT_TYPE_FILE,
 } object_type;
-
-#endif //OBJECT_TYPE_H

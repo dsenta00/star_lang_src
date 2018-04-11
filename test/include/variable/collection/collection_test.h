@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef COLLECTION_TEST_H
-#define COLLECTION_TEST_H
+#pragma once
 
 void collection_test();
-
-#endif // COLLECTION_TEST_H

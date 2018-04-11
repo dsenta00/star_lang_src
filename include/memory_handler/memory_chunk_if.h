@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_MEMORY_CHUNK_IF_H
-#define BOX_MEMORY_CHUNK_IF_H
+#pragma once
 
 #include "ORM/object.h"
 #include "fw_decl.h"
@@ -50,5 +49,3 @@ public:
     uint32_t reserved_memory_num();
     void reserved_memory_sort();
 };
-
-#endif // BOX_MEMORY_CHUNK_IF_H

@@ -20,11 +20,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef ORM_FW_H
-#define ORM_FW_H
+#pragma once
 
 class object;
 
 class relationship;
-
-#endif // ORM_FW_H

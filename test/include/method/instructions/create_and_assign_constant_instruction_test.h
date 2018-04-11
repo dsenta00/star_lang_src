@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_TEST_H
-#define CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_TEST_H
+#pragma once
 
 void create_and_assign_constant_instruction_test();
-
-#endif //CREATE_AND_ASSIGN_CONSTANT_INSTRUCTION_TEST_H

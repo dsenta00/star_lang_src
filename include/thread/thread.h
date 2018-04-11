@@ -20,23 +20,19 @@
  * THE SOFTWARE.
  */
 
-#ifndef THREAD_H
-#define THREAD_H
+#pragma once
 
 #include <fw_decl.h>
 #include <ORM/object.h>
 #include <stack>
 
-class thread : public object, std::stack<method *> {
+class thread : public object {
 public:
     thread(uint64_t id, method *m);
     bool step();
     void run();
     void sleep(uint64_t milliseconds);
-
 private:
     bool pause;
+    std::stack<method *> methodStack;
 };
-
-
-#endif //THREAD_H

@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef BOX_VIRTUAL_MEMORY_H
-#define BOX_VIRTUAL_MEMORY_H
+#pragma once
 
 #include "ORM/object.h"
 #include "fw_decl.h"
@@ -38,7 +37,7 @@ class virtual_memory : public object {
 public:
     explicit virtual_memory(uint32_t init_capacity = CHUNK_MINIMUM_CAPACITY);
 
-    object_type get_object_type();
+    object_type get_object_type() override;
 
     memory *alloc(uint32_t size);
     memory *realloc(memory *mem, uint32_t new_size);
@@ -58,5 +57,3 @@ protected:
     uint32_t max_allocated_bytes;
     relationship *memory_chunk_relationship;
 };
-
-#endif // BOX_VIRTUAL_MEMORY_H

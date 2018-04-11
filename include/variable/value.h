@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef VAR_CONTAINER_H
-#define VAR_CONTAINER_H
+#pragma once
 
 #include <ORM/object.h>
 #include <fw_decl.h>
@@ -66,6 +65,3 @@ public:
     virtual bool scan() = 0;
     virtual std::wstring get_string() = 0;
 };
-
-
-#endif //VAR_CONTAINER_H

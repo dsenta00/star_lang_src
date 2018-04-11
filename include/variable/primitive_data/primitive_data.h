@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef PRIMITIVE_TYPE_H
-#define PRIMITIVE_TYPE_H
+#pragma once
 
 #include "ORM/object.h"
 #include "data_type.h"
@@ -50,5 +49,3 @@ public:
 protected:
     virtual_memory *vm;
 };
-
-#endif // PRIMITIVE_TYPE_H

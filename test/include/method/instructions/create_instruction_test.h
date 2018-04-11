@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef CREATE_INSTRUCTION_TEST_H
-#define CREATE_INSTRUCTION_TEST_H
+#pragma once
 
 void create_instruction_test();
-
-#endif //CREATE_INSTRUCTION_TEST_H

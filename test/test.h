@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef TEST_H
-#define TEST_H
+#pragma once
 
 void run_tests();
-
-#endif // TEST_H

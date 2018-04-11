@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef VIRTUAL_MEMORY_TEST_H
-#define VIRTUAL_MEMORY_TEST_H
+#pragma once
 
 void virtual_memory_test();
-
-#endif // VIRTUAL_MEMORY_TEST_H

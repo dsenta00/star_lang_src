@@ -20,9 +20,6 @@
  * THE SOFTWARE.
  */
 
-#ifndef PRIMITIVE_DATA_TEST_H
-#define PRIMITIVE_DATA_TEST_H
+#pragma once
 
 void primitive_data_test();
-
-#endif

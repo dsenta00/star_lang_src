@@ -20,8 +20,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef FW_DECL_H
-#define FW_DECL_H
+#pragma once
 
 class memory;
 
@@ -44,5 +43,3 @@ class method;
 class var;
 
 class value;
-
-#endif // FW_DECL_H

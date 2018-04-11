@@ -26,6 +26,7 @@
 #include <memory_handler/virtual_memory.h>
 #include <variable/primitive_data/bool_data.h>
 #include <variable/primitive_data/string_data.h>
+#include <variable/value.h>
 #include <iostream>
 
 /**
@@ -245,7 +246,7 @@ bool_data::operator=(const void *data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator=(value &data)
+bool_data::operator=(value & data)
 {
     memory *mem = this->get_memory();
 
@@ -274,7 +275,7 @@ bool_data::operator=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator&=(value &data)
+bool_data::operator&=(value & data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -302,7 +303,7 @@ bool_data::operator&=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator|=(value &data)
+bool_data::operator|=(value & data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -330,7 +331,7 @@ bool_data::operator|=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator^=(value &data)
+bool_data::operator^=(value & data)
 {
     memory *mem = this->get_memory();
     if (!mem)
@@ -359,7 +360,7 @@ bool_data::operator^=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator+=(value &data)
+bool_data::operator+=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -374,7 +375,7 @@ bool_data::operator+=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator-=(value &data)
+bool_data::operator-=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -389,7 +390,7 @@ bool_data::operator-=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator*=(value &data)
+bool_data::operator*=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -404,7 +405,7 @@ bool_data::operator*=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator/=(value &data)
+bool_data::operator/=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -419,7 +420,7 @@ bool_data::operator/=(value &data)
  * @return true if success, otherwise return false.
  */
 bool
-bool_data::operator%=(value &data)
+bool_data::operator%=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -460,7 +461,7 @@ bool_data::operator--()
  * @return true if equal, otherwise return false.
  */
 bool
-bool_data::operator==(value &data)
+bool_data::operator==(value & data)
 {
     return this->to_bool() == data.to_bool();
 }
@@ -473,7 +474,7 @@ bool_data::operator==(value &data)
  * @return true if not equal, otherwise return false.
  */
 bool
-bool_data::operator!=(value &data)
+bool_data::operator!=(value & data)
 {
     return this->to_bool() != data.to_bool();
 }
@@ -486,7 +487,7 @@ bool_data::operator!=(value &data)
  * @return true if this value is bigger, otherwise return false.
  */
 bool
-bool_data::operator>(value &data)
+bool_data::operator>(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -501,7 +502,7 @@ bool_data::operator>(value &data)
  * @return true if this value is lesser, otherwise return false.
  */
 bool
-bool_data::operator<(value &data)
+bool_data::operator<(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -516,7 +517,7 @@ bool_data::operator<(value &data)
  * @return true if this value is bigger or equal, otherwise return false.
  */
 bool
-bool_data::operator>=(value &data)
+bool_data::operator>=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
@@ -531,7 +532,7 @@ bool_data::operator>=(value &data)
  * @return true if this value is smaller, otherwise return false.
  */
 bool
-bool_data::operator<=(value &data)
+bool_data::operator<=(value & data)
 {
     ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_BOOL_ARITHMETIC);
 
