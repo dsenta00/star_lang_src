@@ -29,7 +29,7 @@
 #include <functional>
 #include <memory>
 
-typedef std::shared_ptr<object> object_p;
+using object_p = std::shared_ptr<object>;
 
 /**
  * The object_repository class.

@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 
-typedef std::shared_ptr<relationship> relationship_p;
+using relationship_p = std::shared_ptr<relationship>;
 
 /**
  * The object class.

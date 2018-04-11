@@ -35,7 +35,7 @@ typedef enum {
     FOREACH_IT1_REMOVED
 } foreach_result;
 
-typedef std::vector<object *> obj_vector;
+using obj_vector = std::vector<object *>;
 
 /**
  * The relationship class.

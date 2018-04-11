@@ -92,8 +92,7 @@ thread::step()
 void
 thread::run()
 {
-    while (this->step())
-    {}
+    while (this->step());
 }
 
 void

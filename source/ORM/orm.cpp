@@ -25,7 +25,7 @@
 #include "ORM/orm.h"
 #include "ORM/object.h"
 
-typedef std::unique_ptr<object_repository> object_repository_p;
+using object_repository_p = std::unique_ptr<object_repository>;
 
 /**
  * @brief repo - repository map.

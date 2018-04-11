@@ -25,7 +25,7 @@
 
 #define MAX_BOX_ERROR_QUEUE (32)
 
-typedef std::shared_ptr<error_info> error_info_p;
+using error_info_p = std::shared_ptr<error_info>;
 static std::queue<error_info_p> error_queue;
 
 /**
