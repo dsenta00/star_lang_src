@@ -29,6 +29,7 @@
 #include <variable/var.h>
 #include <locale>
 #include <codecvt>
+#include <thread/thread.h>
 
 /**
  * The constructor.
@@ -43,7 +44,7 @@ method::method(std::string id, std::vector<abstract_instruction *> &instructions
      * - array
      * - function
      */
-    this->master_relationship_add("method_objects", ONE_TO_MANY);
+    this->master_relationship_add("method_vars", ONE_TO_MANY);
 
     /*
      * - instructions
@@ -100,57 +101,23 @@ method::execute_next()
 }
 
 /**
- * Add local object.
- *
- * @param o - object
- */
-void
-method::add_variable(var *o)
-{
-    std::wstring name;
-
-    /* this is workaround */
-    for (char &letter : o->get_id())
-    {
-        name.push_back((wchar_t) letter);
-    }
-
-    if (this->variables[name])
-    {
-        ERROR_LOG_ADD(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
-        return;
-    }
-
-    this->variables[name] = o;
-    this->master_relationship_add_object("method_objects", o);
-}
-
-/**
- * Get local object.
- *
- * @param id - object id.
- * @return
- */
-var *
-method::get_variable(std::wstring id)
-{
-    if (this->variables.find(id) == this->variables.end())
-    {
-        return (var *) orm::get_first(OBJECT_TYPE_NULL);
-    }
-
-    return this->variables[id];
-}
-
-/**
  * Push value to stack.
  *
  * @param o
  */
 void
-method::push_stack(value *o)
+method::push_stack(value *v)
 {
-    this->stack.push_back(o);
+    auto *thread_relationship = this->slave_relationship_get("thread");
+
+    if (!thread_relationship)
+    {
+        ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
+        return;
+    }
+
+    auto *t = (thread *)thread_relationship->front();
+    t->push_stack(v);
 }
 
 /**
@@ -161,10 +128,18 @@ method::push_stack(value *o)
 value *
 method::pop_stack()
 {
-    value *e = this->stack.back();
-    this->stack.pop_back();
+    auto *thread_relationship = this->slave_relationship_get("thread");
 
-    return e;
+    if (!thread_relationship)
+    {
+        ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
+
+        return (value *)orm::get_first(OBJECT_TYPE_NULL);
+    }
+
+    auto *t = (thread *)thread_relationship->front();
+
+    return t->pop_stack();
 }
 
 /**
@@ -189,22 +164,37 @@ method::get_object_type()
     return OBJECT_TYPE_METHOD;
 }
 
-/**
- * Get result.
- *
- * @return
- */
-value *
-method::get_result()
-{
-    return this->result;
-}
-
 void
 method::clear()
 {
-    this->result = nullptr;
-    this->stack.clear();
-    this->variables.clear();
-    this->current_instruction = (abstract_instruction *)this->master_relationship_front("method_instructions");
+    this->current_instruction = (abstract_instruction *) this->master_relationship_front("method_instructions");
+    this->master_relationships_clear_objects("method_vars");
+}
+
+void
+method::add_var(var *v)
+{
+    relationship *r = this->master_relationship_get("method_vars");
+
+    var *v2 = (var *)r->find(v->get_id());
+
+    if (v2)
+    {
+        ERROR_LOG_ADD(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
+        return;
+    }
+
+    this->master_relationship_add_object("method_vars", v);
+}
+
+var *
+method::get_var(std::wstring id)
+{
+    relationship *r = this->master_relationship_get("method_vars");
+
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string name = converter.to_bytes(id);
+
+    return (var *)r->find(name);
 }

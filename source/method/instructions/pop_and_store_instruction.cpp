@@ -51,7 +51,7 @@ pop_and_store_instruction::execute()
     auto *m = this->get_method();
     auto *data2 = m->pop_stack();
 
-    value *data = (value *) m->get_variable(this->arg[0]);
+    value *data = (value *) m->get_var(this->arg[0]);
     *data = *data2;
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
@@ -97,7 +97,7 @@ pop_and_store_instruction::validate()
         return false;
     }
 
-    primitive_data *data = (primitive_data *) m->get_variable(this->arg[0]);
+    primitive_data *data = (primitive_data *) m->get_var(this->arg[0]);
 
     if (!data)
     {

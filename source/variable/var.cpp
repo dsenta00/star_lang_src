@@ -98,7 +98,8 @@ var::set(value *v)
      * |   1         1               0         |     1              1              0           0    |
      * |   1         1               1         |     1              1              0           0    |
      * +---------------------------------------+----------------------------------------------------+
-     *    Reference problem solved using Veitch diagram.
+     *
+     * Reference problem solved using Veitch diagram.
      */
 
     bool v1_remove = v1->is_reference() || v2->is_reference() || (v1->get_object_type() != v2->get_object_type());
@@ -136,5 +137,3 @@ var::get_object_type()
 {
     return OBJECT_TYPE_VARIABLE;
 }
-
-

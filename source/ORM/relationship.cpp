@@ -184,3 +184,17 @@ relationship::back()
 {
     return obj_vector::empty() ? nullptr : obj_vector::back();
 }
+
+object *
+relationship::find(std::string id)
+{
+    for (object *o : (*this))
+    {
+        if (o->get_id() == id)
+        {
+            return o;
+        }
+    }
+
+    return nullptr;
+}

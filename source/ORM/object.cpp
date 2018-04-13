@@ -23,6 +23,7 @@
 #include "ORM/object.h"
 #include "ORM/relationship.h"
 #include <sstream>
+#include <utility>
 #include "error_handler/error_log.h"
 
 /**
@@ -105,6 +106,29 @@ object::master_relationships_clear_objects()
             r->remove_object(e);
             e->slave_relationship_remove_object(r->get_name(), this);
         }
+    }
+}
+
+/**
+ *
+ * @param relationship_name
+ */
+void
+object::master_relationships_clear_objects(std::string relationship_name)
+{
+    relationship *r = this->master_relationship_get(std::move(relationship_name));
+
+    if (!r)
+    {
+        return;
+    }
+
+    while (!r->empty())
+    {
+        object *e = r->front();
+
+        r->remove_object(e);
+        e->slave_relationship_remove_object(r->get_name(), this);
     }
 }
 

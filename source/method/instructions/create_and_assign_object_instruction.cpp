@@ -59,10 +59,10 @@ create_and_assign_object_instruction::execute()
     std::wstring_convert<convert_type, wchar_t> converter;
     std::string name = converter.to_bytes(name_w);
 
-    var *object_to_assign = m->get_variable(obj_name);
+    var *object_to_assign = m->get_var(obj_name);
     var *object = var::create(name, object_to_assign->get());
 
-    m->add_variable(object);
+    m->add_var(object);
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
 }
@@ -115,7 +115,7 @@ create_and_assign_object_instruction::validate()
     }
 
     auto &obj_name = this->arg[1];
-    auto object_to_assign = m->get_variable(obj_name);
+    auto object_to_assign = m->get_var(obj_name);
 
     if (!object_to_assign)
     {

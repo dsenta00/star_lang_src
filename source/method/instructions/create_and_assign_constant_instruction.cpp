@@ -95,7 +95,7 @@ create_and_assign_constant_instruction::execute()
     }
 
     auto *m = this->get_method();
-    m->add_variable(data);
+    m->add_var(data);
 
     return (abstract_instruction *) this->master_relationship_get("next_instruction")->front();
 }

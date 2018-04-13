@@ -32,7 +32,14 @@ public:
     bool step();
     void run();
     void sleep(uint64_t milliseconds);
+
+    void push_method(method *m);
+    void pop_method();
+
+    void push_stack(value *v);
+    value *pop_stack();
 private:
     bool pause;
-    std::stack<method *> methodStack;
+    std::stack<method *> method_stack;
+    std::stack<value *> value_stack;
 };

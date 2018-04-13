@@ -43,17 +43,13 @@ public:
     object_type get_object_type() override;
     instruction_result execute_next();
 
-    void add_variable(var *o);
-    var *get_variable(std::wstring id);
-
-    void push_stack(value *o);
+    void push_stack(value *v);
     value *pop_stack();
-    value *get_result();
+
+    void add_var(var *v);
+    var *get_var(std::wstring id);
 
     void clear();
 protected:
-    value *result;
-    std::map<std::wstring, var *> variables;
-    std::vector<value *> stack;
     abstract_instruction *current_instruction;
 };

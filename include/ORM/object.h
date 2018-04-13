@@ -71,6 +71,7 @@ public:
     object *master_relationship_back(std::string relationship_name);
     object *master_relationship_front(std::string relationship_name);
     void master_relationships_clear_objects();
+    void master_relationships_clear_objects(std::string relationship_name);
 
     virtual ~object();
 protected:

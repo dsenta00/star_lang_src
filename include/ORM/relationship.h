@@ -44,13 +44,17 @@ using obj_vector = std::vector<object *>;
 class relationship : public obj_vector {
 public:
     relationship(std::string relationship_name, relationship_type type);
+
     std::string &get_name();
     relationship_type get_type();
-    object *find(const std::function<bool(object *)> &func);
+
     void sort(const std::function<bool(object *, object *)> &func);
     void for_each(const std::function<foreach_result(object *, object *)> &func);
     void add_object(object *o);
     void remove_object(object *o);
+
+    object *find(const std::function<bool(object *)> &func);
+    object *find(std::string id);
     object *front();
     object *back();
 protected:
