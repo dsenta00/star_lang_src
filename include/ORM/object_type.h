@@ -37,4 +37,5 @@ typedef enum {
     OBJECT_TYPE_VIRTUAL_MEMORY,
     OBJECT_TYPE_METHOD,
     OBJECT_TYPE_FILE,
+    OBJECT_TYPE_THREAD
 } object_type;

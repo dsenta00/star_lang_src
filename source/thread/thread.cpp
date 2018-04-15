@@ -140,3 +140,15 @@ thread::pop_method()
 
     this->method_stack.pop();
 }
+
+thread *
+thread::create(uint64_t id, method *m)
+{
+    return (thread *)orm::create(new thread(id, m));
+}
+
+object_type
+thread::get_object_type()
+{
+    return OBJECT_TYPE_THREAD;
+}

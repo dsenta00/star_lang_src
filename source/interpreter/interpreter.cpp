@@ -20,30 +20,59 @@
  * THE SOFTWARE.
  */
 
-#pragma once
+#include "interpreter/interpreter.h"
+#include <error_handler/error_log.h>
+#include <ORM/orm.h>
 
-#include <fw_decl.h>
-#include <ORM/object.h>
-#include <stack>
 
-class thread : public object {
-public:
-    thread(uint64_t id, method *m);
-    bool step();
-    void run();
-    void sleep(uint64_t milliseconds);
+interpreter::interpreter(uint64_t id, std::string fname) : object(id)
+{
+    //TOOO: do something here
+}
 
-    void push_method(method *m);
-    void pop_method();
+void
+interpreter::add_thread(method *m)
+{
+    auto id = interpreter::next_id++;
 
-    void push_stack(value *v);
-    value *pop_stack();
+    thread *t = thread::create(id, m);
 
-    object_type get_object_type();
+    interpreter::threads[id] = std::thread([&]() {
+        t->run();
 
-    static thread *create(uint64_t id, method *m);
-private:
-    bool pause;
-    std::stack<method *> method_stack;
-    std::stack<value *> value_stack;
-};
+        if (error_log_is_empty())
+        {
+            interpreter::remove_thread(id);
+        }
+        else
+        {
+            interpreter::stop();
+        }
+
+        orm::destroy(t);
+    });
+
+    interpreter::threads[id].join();
+}
+
+void
+interpreter::run()
+{
+    while (!interpreter::threads.empty())
+    {}
+}
+
+void
+interpreter::remove_thread(uint32_t id)
+{
+    interpreter::threads.erase(id);
+}
+
+void
+interpreter::stop()
+{
+    for (auto &t : interpreter::threads) {
+        //TOOO: do something here
+        t.second.detach();
+    }
+}

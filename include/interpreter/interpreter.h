@@ -22,28 +22,19 @@
 
 #pragma once
 
-#include <fw_decl.h>
-#include <ORM/object.h>
-#include <stack>
+#include <thread>
+#include "thread/thread.h"
 
-class thread : public object {
+using circular_threads = std::map<uint32_t, std::thread>;
+
+class interpreter : object {
 public:
-    thread(uint64_t id, method *m);
-    bool step();
+    interpreter(uint64_t id, std::string fname);
     void run();
-    void sleep(uint64_t milliseconds);
-
-    void push_method(method *m);
-    void pop_method();
-
-    void push_stack(value *v);
-    value *pop_stack();
-
-    object_type get_object_type();
-
-    static thread *create(uint64_t id, method *m);
-private:
-    bool pause;
-    std::stack<method *> method_stack;
-    std::stack<value *> value_stack;
+    void add_thread(method *m);
+    void remove_thread(uint32_t id);
+protected:
+    circular_threads threads;
+    uint32_t next_id;
+    void stop();
 };
