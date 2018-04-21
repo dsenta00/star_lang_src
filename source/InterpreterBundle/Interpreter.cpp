@@ -21,34 +21,57 @@
  */
 
 #include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#include <ErrorBundle/ErrorLog.h>
+#include <InterpreterBundle/Interpreter.h>
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
+Interpreter::Interpreter(uint64_t id, std::string fname) : Object(id)
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    //TOOO: do something here
 }
 
+void
+Interpreter::addThread(Method *m)
+{
+    auto id = Interpreter::next_id++;
+
+    Thread *t = Thread::create(id, m);
+
+    Interpreter::threads[id] = std::thread([&]() {
+        t->run();
+
+        if (errorLogIsEmpty())
+        {
+            Interpreter::removeThread(id);
+        }
+        else
+        {
+            Interpreter::stop();
+        }
+
+        ORM::destroy(t);
+    });
+
+    Interpreter::threads[id].join();
+}
+
+void
+Interpreter::run()
+{
+    while (!Interpreter::threads.empty())
+    {}
+}
+
+void
+Interpreter::removeThread(uint32_t id)
+{
+    Interpreter::threads.erase(id);
+}
+
+void
+Interpreter::stop()
+{
+    for (auto &t : Interpreter::threads) {
+        //TOOO: do something here
+        t.second.detach();
+    }
+}

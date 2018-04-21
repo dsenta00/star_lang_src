@@ -20,35 +20,32 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
+#pragma once
+
+#include "ORM/Object.h"
+#include "fw_decl.h"
+#include <cstdint>
 #include <cstdlib>
+#include <functional>
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class MemoryChunkIf : public Object {
+public:
+    MemoryChunkIf();
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    eObjectType getObjectType() override;
 
-    run_tests();
+    void freeMemoryAdd(uintptr_t address, uint32_t size);
+    void freeMemoryRemove(Memory *mem);
+    Memory *freeMemoryFind(std::function<bool(Memory *)> foo);
+    Memory *freeMemoryFront();
+    uint32_t freeMemoryCount();
+    void freeMemoryDeleteAll();
+    void freeMemoryUnion();
 
-    return EXIT_SUCCESS;
-}
-
+    Memory *reservedMemoryAdd(uintptr_t address, uint32_t size);
+    void reservedMemoryRemove(Memory *mem);
+    Memory *reservedMemoryFront();
+    Memory *reservedMemoryBack();
+    uint32_t reservedMemoryCount();
+    void reservedMemorySort();
+};

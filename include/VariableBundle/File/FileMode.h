@@ -20,35 +20,22 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * File stream modes.
  */
-int main(int argc, char *argv[])
+typedef enum {
+                               // awr
+    FILE_MODE_NOT_OPEN = 0x00, // 000
+    FILE_MODE_READ     = 0x01, // 001b
+    FILE_MODE_WRITE    = 0x02, // 010b
+    FILE_MODE_APPEND   = 0x06  // 110b
+} eFileMode ;
+
+namespace FileMode
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    bool canRead(eFileMode mode);
+    bool canWrite(eFileMode mode);
+    bool isValid(eFileMode mode);
 }
-

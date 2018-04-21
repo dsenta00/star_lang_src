@@ -20,35 +20,30 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+#include <fw_decl.h>
+#include <ORM/Object.h>
+#include <stack>
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+class Thread : public Object {
+public:
+    Thread(uint64_t id, Method *m);
+    bool step();
+    void run();
+    void sleep(uint64_t milliseconds);
 
-    run_tests();
+    void pushMethod(Method *m);
+    void popMethod();
 
-    return EXIT_SUCCESS;
-}
+    void pushStack(Value *v);
+    Value *popStack();
 
+    eObjectType getObjectType();
+
+    static Thread *create(uint64_t id, Method *m);
+private:
+    bool pause;
+    std::stack<Method *> methodStack;
+    std::stack<Value *> valueStack;
+};

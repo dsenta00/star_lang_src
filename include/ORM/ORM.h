@@ -20,35 +20,29 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "ObjectRepository.h"
+#include "eObjectType.h"
+#include <string>
+#include <functional>
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * ORM interface.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+namespace ORM {
+    ObjectRepository *findObjectRepository(eObjectType type);
+    void addObjectRepository(eObjectType type);
+    Object *create(Object *o);
+    void changeId(Object *o, std::string new_id);
+    void destroy(Object *o);
+    void sweep();
+    Object *select(eObjectType type, std::function<bool(Object *)> where);
+    Object *select(eObjectType type, std::string id);
+    Object *getFirst(eObjectType type);
+    void removeObjectRepository(eObjectType type);
+    void removeAllRepositories();
 }
 
+#define ORM_DESTROY(__OBJ__) \
+  ORM::destroy((Object *)(__OBJ__))

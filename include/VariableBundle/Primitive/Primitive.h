@@ -20,35 +20,32 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "ORM/Object.h"
+#include "DataType.h"
+#include "fw_decl.h"
+#include <string>
+#include <VariableBundle/Value.h>
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * The primitive_data class. Represents primitive data type in
+ * this programming language and defines all operations in that scope.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Primitive : public Value {
+public:
+    explicit Primitive(eObjectType type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    Primitive(Primitive &data);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    static Primitive *create(eObjectType type = OBJECT_TYPE_NULL, const void *value = nullptr);
+    static Primitive *create(Primitive &data);
 
-    run_tests();
+    virtual bool defaultValue() = 0;
 
-    return EXIT_SUCCESS;
-}
+    Memory *getMemory();
+    uintptr_t getAddress();
 
+    static bool isPrimitive(Value *data);
+protected:
+    VirtualMemory *vm;
+};

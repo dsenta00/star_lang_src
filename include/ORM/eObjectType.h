@@ -20,35 +20,22 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+typedef enum {
+    OBJECT_TYPE_BOOL,
+    OBJECT_TYPE_CHAR,
+    OBJECT_TYPE_INT,
+    OBJECT_TYPE_FLOAT,
+    OBJECT_TYPE_STRING,
+    OBJECT_TYPE_NULL,
+    OBJECT_TYPE_COLLECTION,
+    OBJECT_TYPE_VARIABLE,
+    OBJECT_TYPE_INSTRUCTION,
+    OBJECT_TYPE_MEMORY,
+    OBJECT_TYPE_MEMORY_CHUNK,
+    OBJECT_TYPE_VIRTUAL_MEMORY,
+    OBJECT_TYPE_METHOD,
+    OBJECT_TYPE_FILE,
+    OBJECT_TYPE_THREAD
+} eObjectType;

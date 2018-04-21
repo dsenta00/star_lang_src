@@ -1,0 +1,76 @@
+/*
+ * Copyright 2017 Duje Senta
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+#pragma once
+
+#include "Primitive.h"
+
+/**
+ * Boolean data type.
+ */
+class Bool : public Primitive {
+public:
+    explicit Bool(const void *value = nullptr);
+    explicit Bool(bool value);
+    Bool(Bool &data);
+    static Bool *create(const void *value = nullptr);
+    static Bool *create(bool value);
+    static Bool *create(Bool &data);
+
+    bool isReference() override;
+
+    bool toBool() override;
+    wchar_t toChar() override;
+    int32_t toInt() override;
+    double toFloat() override;
+    String &toString() override;
+
+    eObjectType getObjectType() override;
+
+    bool defaultValue() override;
+    bool operator=(const void *data) override;
+    bool operator=(Value &data) override;
+    bool operator&=(Value &data) override;
+    bool operator|=(Value &data) override;
+    bool operator^=(Value &data) override;
+    bool operator+=(Value &data) override;
+    bool operator-=(Value &data) override;
+    bool operator*=(Value &data) override;
+    bool operator/=(Value &data) override;
+    bool operator%=(Value &data) override;
+    bool operator++() override;
+    bool operator--() override;
+    bool operator==(Value &data) override;
+    bool operator!=(Value &data) override;
+    bool operator>(Value &data) override;
+    bool operator<(Value &data) override;
+    bool operator>=(Value &data) override;
+    bool operator<=(Value &data) override;
+
+    bool print() override;
+    bool println() override;
+    bool scan() override;
+
+    std::wstring getString() override;
+
+    static bool parse(std::wstring str);
+};

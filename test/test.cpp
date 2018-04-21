@@ -22,14 +22,14 @@
 
 #include "test.h"
 #include "include/ORM/orm_test.h"
-#include "include/variable/primitive_data/primitive_data_test.h"
-#include "include/variable/collection/collection_test.h"
-#include "include/memory_handler/memory_chunk_test.h"
-#include "include/memory_handler/virtual_memory_test.h"
-#include "include/variable/file/file_test.h"
-#include "include/method/instructions/create_instruction_test.h"
-#include "include/method/instructions/create_and_assign_constant_instruction_test.h"
-#include "include/variable/primitive_data/data_type_test.h"
+#include "include/VariableBundle/Collection/collection_test.h"
+#include "include/MemoryBundle/memory_chunk_test.h"
+#include "include/MemoryBundle/virtual_memory_test.h"
+#include "include/VariableBundle/file/file_test.h"
+#include "include/MethodBundle/Instruction/create_instruction_test.h"
+#include "include/MethodBundle/Instruction/create_and_assign_constant_instruction_test.h"
+#include "include/VariableBundle/Primitive/data_type_test.h"
+#include "include/VariableBundle/Primitive/primitive_data_test.h"
 #include <cstdio>
 
 #define RUN_TEST_SECTION(__test__) \

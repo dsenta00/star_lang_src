@@ -20,35 +20,41 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include <cstdint>
+#include "ORM/Object.h"
 
 /**
- * Main program.
+ * The memory object.
  *
- * @param argc
- * @param argv
- * @return
+ * Memory is obtained by memory chunk in order to data can keep
+ * memory information.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Memory : public Object {
+public:
+    Memory(uintptr_t address, uint32_t size);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    eObjectType getObjectType() override;
 
-    run_tests();
+    template<typename T>
+    T getPointer();
 
-    return EXIT_SUCCESS;
-}
+    uintptr_t getAddress() const;
 
+    template<typename T>
+    T &getElement();
+
+    void align(Memory *adjacentMemory);
+    uint32_t getSize();
+    bool operator<(const Memory &mem) const;
+    void operator+=(uint32_t size);
+    void operator-=(uint32_t size);
+    void assign(uintptr_t address, uint32_t size);
+    bool isReadyToRemove();
+
+    static Memory *create(uintptr_t address, uint32_t size);
+protected:
+    uintptr_t address;
+    uint32_t size;
+};

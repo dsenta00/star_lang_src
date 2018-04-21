@@ -20,35 +20,21 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+#include <ThreadBundle/Thread.h>
+#include <thread>
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+using CircularThreads = std::map<uint32_t, std::thread>;
 
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+class Interpreter : Object {
+public:
+    Interpreter(uint64_t id, std::string fname);
+    void run();
+    void addThread(Method *m);
+    void removeThread(uint32_t id);
+protected:
+    CircularThreads threads;
+    uint32_t next_id;
+    void stop();
+};

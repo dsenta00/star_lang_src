@@ -20,35 +20,17 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "Instruction.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * OP_CODE_CREATE_AND_ASSIGN_OBJECT <name> <obj_name>
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+class CreateAndAssignObjectInstruction : public Instruction {
+public:
+    explicit CreateAndAssignObjectInstruction(std::vector<std::wstring> &arg);
+    static CreateAndAssignObjectInstruction *create(std::wstring name, std::wstring obj_name);
+    Instruction *execute() override;
+    bool validate() override;
+};

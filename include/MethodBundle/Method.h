@@ -20,35 +20,36 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "ORM/Object.h"
+#include "VariableBundle/Primitive/DataType.h"
+#include "fw_decl.h"
+
+typedef enum {
+    INSTRUCTION_OK,
+    INSTRUCTION_ERROR,
+    INSTRUCTION_FINISHED
+} instruction_result;
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * @brief The method class
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Method : public Object {
+public:
+    Method(std::string id, std::vector<Instruction *> &instructions);
+    static Method *create(std::string id, std::vector<Instruction *> &instructions);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    eObjectType getObjectType() override;
+    instruction_result execute_next();
 
-    run_tests();
+    void push_stack(Value *v);
+    Value *pop_stack();
 
-    return EXIT_SUCCESS;
-}
+    void add_var(Var *v);
+    Var *get_var(std::wstring id);
 
+    void clear();
+protected:
+    Instruction *current_instruction;
+};

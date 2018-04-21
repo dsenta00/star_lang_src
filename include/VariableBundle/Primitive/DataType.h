@@ -20,35 +20,34 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
 
-/**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+#include <cstdint>
+#include <string>
+#include <ORM/eObjectType.h>
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+namespace DataType {
+    const uint8_t SIZE[] = {
+            sizeof(bool),        // OBJECT_TYPE_BOOL,
+            sizeof(wchar_t),     // OBJECT_TYPE_CHAR,
+            sizeof(int32_t),     // OBJECT_TYPE_INT,
+            sizeof(double),      // OBJECT_TYPE_FLOAT,
+            sizeof(wchar_t) * 8, // OBJECT_TYPE_STRING, default size
+            0                    // OBJECT_TYPE_NULL
+    };
 
-    run_tests();
+    const wchar_t FORMAT[][8] = {
+            L"%d",  // OBJECT_TYPE_BOOL,
+            L"%c",  // OBJECT_TYPE_CHAR,
+            L"%d",  // OBJECT_TYPE_INT,
+            L"%lf", // OBJECT_TYPE_FLOAT,
+            L"%ls", // OBJECT_TYPE_STRING,
+            L""     // OBJECT_TYPE_NULL
+    };
 
-    return EXIT_SUCCESS;
+    eObjectType getFromToken(std::wstring str);
+
+    eObjectType detect(std::wstring sample);
+
+    std::wstring cleanConstantFormat(std::wstring &sample, eObjectType type);
 }
-

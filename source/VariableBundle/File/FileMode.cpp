@@ -20,35 +20,49 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#include "VariableBundle/File/FileMode.h"
 
 /**
- * Main program.
+ * Check if can read in this file mode.
  *
- * @param argc
- * @param argv
+ * @param mode
  * @return
  */
-int main(int argc, char *argv[])
+bool
+FileMode::canRead(eFileMode mode)
 {
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
+    return (mode & FILE_MODE_READ) == FILE_MODE_READ;
 }
 
+/**
+ * Check if can write in this mode.
+ *
+ * @param mode
+ * @return
+ */
+bool
+FileMode::canWrite(eFileMode mode)
+{
+    return (mode & FILE_MODE_WRITE) == FILE_MODE_WRITE;
+}
+
+/**
+ * Check if mode is valid for opening file.
+ *
+ * @param mode
+ * @return
+ */
+bool
+FileMode::isValid(eFileMode mode)
+{
+    switch (mode)
+    {
+        case FILE_MODE_READ:
+        case FILE_MODE_WRITE:
+        case FILE_MODE_APPEND:
+            return true;
+        default:
+        case FILE_MODE_NOT_OPEN:
+            return false;
+    }
+}

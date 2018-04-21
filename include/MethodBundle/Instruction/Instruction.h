@@ -20,35 +20,34 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "ORM/Object.h"
+#include "ORM/FwDecl.h"
+#include "fw_decl.h"
+#include "VariableBundle/Primitive/DataType.h"
+#include "OpCode.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * @brief The instruction class
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Instruction : public Object {
+public:
+    explicit Instruction(eOpCode op, std::vector<std::wstring> &arg);
+
+    eObjectType getObjectType() override;
+
+    eOpCode &getOpCode();
+    virtual Instruction *execute() = 0;
+    virtual bool validate() = 0;
+protected:
+    eOpCode op;
+    std::vector<std::wstring> arg;
+    bool validated;
 
     /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
+     * Helper methods
      */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+    Method *getMethod();
+    bool objectNameIsValid(std::wstring &sample);
+};

@@ -20,35 +20,44 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "FwDecl.h"
+#include "eRelationshipType.h"
+#include <vector>
+#include <string>
+#include <functional>
+#include <memory>
+
+typedef enum {
+    FOREACH_CONTINUE,
+    FOREACH_IT2_REMOVED,
+    FOREACH_IT1_REMOVED
+} eForEachResult;
+
+using ObjVector = std::vector<Object *>;
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * The relationship class.
+ * Contains and manages all objects in relationship.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Relationship : public ObjVector {
+public:
+    Relationship(std::string relationshipName, eRelationshipType type);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    std::string &getName();
+    eRelationshipType getType();
 
-    run_tests();
+    void sort(const std::function<bool(Object *, Object *)> &func);
+    void forEach(const std::function<eForEachResult(Object *, Object *)> &func);
+    void addObject(Object *o);
+    void removeObject(Object *o);
 
-    return EXIT_SUCCESS;
-}
-
+    Object *find(const std::function<bool(Object *)> &func);
+    Object *find(std::string id);
+    Object *front();
+    Object *back();
+protected:
+    std::string name;
+    eRelationshipType type;
+};

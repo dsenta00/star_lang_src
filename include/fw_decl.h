@@ -22,24 +22,24 @@
 
 #pragma once
 
-class memory;
+class Memory;
 
-class memory_chunk;
+class MemoryChunk;
 
-class virtual_memory;
+class VirtualMemory;
 
-class value;
+class Value;
 
-class primitive_data;
+class Primitive;
 
-class string_data;
+class String;
 
-class collection;
+class Collection;
 
-class abstract_instruction;
+class Instruction;
 
-class method;
+class Method;
 
-class var;
+class Var;
 
-class value;
+class Value;

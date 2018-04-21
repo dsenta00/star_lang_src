@@ -20,35 +20,17 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "Instruction.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * OP_CODE_CREATE_AND_ASSIGN_CONSTANT <name> <type> <constant>
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
-
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+class CreateAndAssignConstantInstruction : public Instruction {
+public:
+    explicit CreateAndAssignConstantInstruction(std::vector<std::wstring> &arg);
+    static CreateAndAssignConstantInstruction *create(std::wstring name, std::wstring type, std::wstring constant);
+    Instruction *execute() override;
+    bool validate() override;
+};

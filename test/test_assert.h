@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <memory_handler/virtual_memory.h>
-#include <variable/null/null.h>
+#include <MemoryBundle/VirtualMemory.h>
+#include <VariableBundle/Null/Null.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -44,9 +44,9 @@ void assert_false(bool statement,
 #define RUN_TEST_VM(__test__) \
   do \
   { \
-      orm::remove_all_repositories(); \
-      vm = virtual_memory::create(); \
-      null::create(); \
+      ORM::removeAllRepositories(); \
+      vm = VirtualMemory::create(); \
+      Null::create(); \
       printf("\t-> " #__test__ "::Start\r\n"); \
       (__test__); \
       ERROR_LOG_IS_EMPTY; \
@@ -56,9 +56,9 @@ void assert_false(bool statement,
 #define RUN_TEST(__test__) \
   do \
   { \
-      orm::remove_all_repositories(); \
-      virtual_memory::create(); \
-      null::create(); \
+      ORM::removeAllRepositories(); \
+      VirtualMemory::create(); \
+      Null::create(); \
       printf("\t-> " #__test__ "::Start\r\n"); \
       (__test__); \
       ERROR_LOG_IS_EMPTY; \
@@ -92,7 +92,7 @@ void assert_false(bool statement,
               ERROR_LOG_LAST_ERROR_STRING)
 
 #define ASSERT_VIRTUAL_MEMORY(__VM__, __BYTES__) \
-  ASSERT_TRUE((__VM__).get_allocated_total() == (__BYTES__), \
+  ASSERT_TRUE((__VM__).getAllocatedTotal() == (__BYTES__), \
   "Total allocated should be %u (%u)", \
   (__BYTES__), \
-  (__VM__).get_allocated_total())
+  (__VM__).getAllocatedTotal())

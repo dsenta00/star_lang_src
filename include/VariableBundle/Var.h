@@ -20,35 +20,21 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include <ORM/Object.h>
+#include "fw_decl.h"
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * The variable.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class Var : public Object {
+public:
+    explicit Var(std::string id, Value *v = nullptr);
+    static Var *create(std::string id, Value *container = nullptr);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    eObjectType getObjectType() override;
 
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+    Value *get();
+    void set(Value *v = nullptr);
+};

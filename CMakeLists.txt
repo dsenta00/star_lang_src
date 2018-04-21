@@ -32,47 +32,47 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(include/)
 
 set(INCLUDE_FILES
-        include/variable/collection/collection.h
+        include/VariableBundle/Collection/Collection.h
         test/test_assert.h
-        include/variable/primitive_data/primitive_data.h
-        test/include/variable/primitive_data/primitive_data_test.h
-        include/variable/primitive_data/data_type.h
-        include/error_handler/error_info.h
+        include/VariableBundle/Primitive/Primitive.h
+        test/include/VariableBundle/Primitive/primitive_data_test.h
+        include/VariableBundle/Primitive/DataType.h
+        include/ErrorBundle/ErrorInfo.h
         include/fw_decl.h
-        include/method/instructions/abstract_instruction.h
-        include/memory_handler/memory_chunk.h
-        include/memory_handler/memory_chunk_if.h
-        include/method/method.h
-        include/error_handler/error_log.h
-        include/memory_handler/virtual_memory.h
-        include/memory_handler/memory.h
-        include/ORM/object.h
-        include/ORM/object_repository.h
-        include/ORM/orm.h
-        include/ORM/orm_fw.h
+        include/MethodBundle/Instruction/Instruction.h
+        include/MemoryBundle/MemoryChunk.h
+        include/MemoryBundle/MemoryChunkIf.h
+        include/MethodBundle/Method.h
+        include/ErrorBundle/ErrorLog.h
+        include/MemoryBundle/VirtualMemory.h
+        include/MemoryBundle/Memory.h
+        include/ORM/Object.h
+        include/ORM/ObjectRepository.h
+        include/ORM/ORM.h
+        include/ORM/FwDecl.h
         test/include/ORM/orm_test.h
-        include/ORM/relationship.h
-        include/ORM/relationship_type.h)
+        include/ORM/Relationship.h
+        include/ORM/eRelationshipType.h)
 
 set(SOURCE_FILES
-        source/variable/collection/collection.cpp
+        source/VariableBundle/Collection/Collection.cpp
         test/test_assert.cpp
-        source/variable/primitive_data/primitive_data.cpp
-        source/variable/primitive_data/data_type.cpp
-        source/error_handler/error_info.cpp
-        source/method/instructions/abstract_instruction.cpp
-        source/memory_handler/memory_chunk.cpp
-        source/memory_handler/memory_chunk_if.cpp
-        source/method/method.cpp
-        source/error_handler/error_log.cpp
-        source/memory_handler/virtual_memory.cpp
+        source/VariableBundle/Primitive/Primitive.cpp
+        source/VariableBundle/Primitive/DataType.cpp
+        source/ErrorBundle/ErrorInfo.cpp
+        source/MethodBundle/Instruction/Instruction.cpp
+        source/MemoryBundle/MemoryChunk.cpp
+        source/MemoryBundle/MemoryChunkIf.cpp
+        source/MethodBundle/Method.cpp
+        source/ErrorBundle/ErrorLog.cpp
+        source/MemoryBundle/VirtualMemory.cpp
         source/main.cpp
-        source/memory_handler/memory.cpp
-        source/ORM/object.cpp
-        source/ORM/object_repository.cpp
-        source/ORM/orm.cpp
+        source/MemoryBundle/Memory.cpp
+        source/ORM/Object.cpp
+        source/ORM/ObjectRepository.cpp
+        source/ORM/ORM.cpp
         test/source/ORM/orm_test.cpp
-        source/ORM/relationship.cpp)
+        source/ORM/Relationship.cpp)
 
 ###################################################################
 # Application Tests
@@ -81,15 +81,15 @@ set(SOURCE_FILES
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
 
 set(TEST_FILES
-        test/source/variable/collection/collection_test.cpp
-        test/include/variable/collection/collection_test.h
-        test/source/variable/primitive_data/primitive_data_test.cpp
-        test/source/memory_handler/memory_chunk_test.cpp
-        test/include/memory_handler/memory_chunk_test.h
-        test/source/memory_handler/virtual_memory_test.cpp
-        test/include/memory_handler/virtual_memory_test.h
+        test/source/VariableBundle/Collection/collection_test.cpp
+        test/include/VariableBundle/Collection/collection_test.h
+        test/source/VariableBundle/Primitive/primitive_data_test.cpp
+        test/source/MemoryBundle/memory_chunk_test.cpp
+        test/include/MemoryBundle/memory_chunk_test.h
+        test/source/MemoryBundle/virtual_memory_test.cpp
+        test/include/MemoryBundle/virtual_memory_test.h
         test/test.cpp
-        test/test.h source/variable/file/file.cpp include/variable/file/file.h test/source/variable/file/file_test.cpp test/include/variable/file/file_test.h source/variable/file/file_mode.cpp include/variable/file/file_mode.h test/source/method/instructions/create_instruction_test.cpp test/include/method/instructions/create_instruction_test.h include/method/instructions/op_code.h source/method/instructions/create_instruction.cpp include/method/instructions/create_instruction.h source/method/instructions/create_and_assign_constant_instruction.cpp include/method/instructions/create_and_assign_constant_instruction.h source/method/instructions/create_and_assign_object_instruction.cpp include/method/instructions/create_and_assign_object_instruction.h source/method/instructions/pop_and_store_instruction.cpp include/method/instructions/pop_and_store_instruction.h test/source/method/instructions/create_and_assign_constant_instruction_test.cpp test/include/method/instructions/create_and_assign_constant_instruction_test.h source/variable/primitive_data/int_data.cpp include/variable/primitive_data/int_data.h source/variable/primitive_data/string_data.cpp include/variable/primitive_data/string_data.h source/variable/primitive_data/float_data.cpp include/variable/primitive_data/float_data.h source/variable/primitive_data/char_data.cpp include/variable/primitive_data/char_data.h source/variable/primitive_data/bool_data.cpp include/variable/primitive_data/bool_data.h test/source/variable/primitive_data/data_type_test.cpp test/include/variable/primitive_data/data_type_test.h include/ORM/object_type.h source/variable/value.cpp include/variable/value.h source/variable/null/null.cpp include/variable/null/null.h source/variable/var.cpp include/variable/var.h source/thread/thread.cpp include/thread/thread.h source/interpreter/interpreter.cpp include/interpreter/interpreter.h)
+        test/test.h source/VariableBundle/File/File.cpp include/VariableBundle/File/File.h test/source/VariableBundle/File/file_test.cpp test/include/VariableBundle/File/file_test.h source/VariableBundle/File/FileMode.cpp include/VariableBundle/File/FileMode.h test/source/MethodBundle/Instruction/create_instruction_test.cpp test/include/MethodBundle/Instruction/create_instruction_test.h include/MethodBundle/Instruction/OpCode.h source/MethodBundle/Instruction/CreateInstruction.cpp include/MethodBundle/Instruction/CreateInstruction.h source/MethodBundle/Instruction/CreateAndAssignConstantInstruction.cpp include/MethodBundle/Instruction/CreateAndAssignConstantInstruction.h source/MethodBundle/Instruction/CreateAndAssignObjectInstruction.cpp include/MethodBundle/Instruction/CreateAndAssignObjectInstruction.h source/MethodBundle/Instruction/PopAndStoreInstruction.cpp include/MethodBundle/Instruction/PopAndStoreInstruction.h test/source/MethodBundle/Instruction/create_and_assign_constant_instruction_test.cpp test/include/MethodBundle/Instruction/create_and_assign_constant_instruction_test.h source/VariableBundle/Primitive/Int.cpp include/VariableBundle/Primitive/Int.h source/VariableBundle/Primitive/String.cpp include/VariableBundle/Primitive/String.h source/VariableBundle/Primitive/Float.cpp include/VariableBundle/Primitive/Float.h source/VariableBundle/Primitive/Char.cpp include/VariableBundle/Primitive/Char.h source/VariableBundle/Primitive/Bool.cpp include/VariableBundle/Primitive/Bool.h test/source/VariableBundle/Primitive/data_type_test.cpp test/include/VariableBundle/Primitive/data_type_test.h include/ORM/eObjectType.h source/VariableBundle/Value.cpp include/VariableBundle/Value.h source/VariableBundle/Null/Null.cpp include/VariableBundle/Null/Null.h source/VariableBundle/Var.cpp include/VariableBundle/Var.h source/ThreadBundle/Thread.cpp include/ThreadBundle/Thread.h source/InterpreterBundle/Interpreter.cpp include/InterpreterBundle/Interpreter.h include/ErrorBundle/eErrorStatus.h)
 
 add_executable(runUnitTest
         ${INCLUDE_FILES}

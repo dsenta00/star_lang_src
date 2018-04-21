@@ -20,35 +20,40 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "ORM/Object.h"
+#include "fw_decl.h"
+#include <cstdint>
+#include <functional>
+
+#define CHUNK_MINIMUM_CAPACITY (32768)
+#define CHUNK_MAXIMUM_CAPACITY (134217728)
 
 /**
- * Main program.
- *
- * @param argc
- * @param argv
- * @return
+ * Virtual memory object.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
+class VirtualMemory : public Object {
+public:
+    explicit VirtualMemory(uint32_t initCapacity = CHUNK_MINIMUM_CAPACITY);
 
-    /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
-     */
-    VirtualMemory::create();
-    Null::create();
+    eObjectType getObjectType() override;
 
-    run_tests();
+    Memory *alloc(uint32_t size);
+    Memory *realloc(Memory *mem, uint32_t newSize);
+    void free(Memory *mem);
+    uint32_t getAllocatedTotal();
 
-    return EXIT_SUCCESS;
-}
+    static VirtualMemory *create(uint32_t initCapacity = CHUNK_MINIMUM_CAPACITY);
+protected:
+    Memory *addChunkAndAlloc(uint32_t size);
+    Memory *solveDefragmentationAndAlloc(uint32_t size);
+    MemoryChunk *findMemoryChunk(std::function<bool(MemoryChunk *)> func);
+    MemoryChunk *addMemoryChunk(uint32_t capacity);
+    Memory *reserve(uint32_t size);
+    Memory *reserveFromChunk(MemoryChunk *chunk, uint32_t size);
 
+    uint32_t allocatedTotal;
+    uint32_t maxAllocatedBytes;
+    Relationship *memoryChunkRelationship;
+};

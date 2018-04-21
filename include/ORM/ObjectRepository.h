@@ -20,35 +20,36 @@
  * THE SOFTWARE.
  */
 
-#include <ORM/ORM.h>
-#include <MemoryBundle/VirtualMemory.h>
-#include <VariableBundle/Null/Null.h>
-#include "../test/test.h"
-#include <cstdlib>
+#pragma once
+
+#include "FwDecl.h"
+#include <map>
+#include <vector>
+#include <string>
+#include <functional>
+#include <memory>
+
+using ObjectPtr = std::shared_ptr<Object>;
 
 /**
- * Main program.
+ * The object_repository class.
  *
- * @param argc
- * @param argv
- * @return
+ * All created objects of same type are stored right here.
+ * Each object type has its own object_repository.
  */
-int main(int argc, char *argv[])
-{
-    (void) argc;
-    (void) argv;
-
+class ObjectRepository {
+public:
+    Object *find(const std::function<bool(Object *)> &func);
+    Object *get(std::string &id);
+    void add(Object *o);
+    void remove(Object *o);
+    void changeId(Object *o, std::string &newId);
+    void sweep();
+    ~ObjectRepository();
+protected:
     /*
-     * Create once:
-     *
-     * - global virtual Memory.
-     * - global Null
+     * key    -> Object ID
+     * values -> Object array
      */
-    VirtualMemory::create();
-    Null::create();
-
-    run_tests();
-
-    return EXIT_SUCCESS;
-}
-
+    std::map<std::string, std::vector<ObjectPtr>> objectMap;
+};
