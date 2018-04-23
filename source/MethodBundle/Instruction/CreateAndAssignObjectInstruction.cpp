@@ -23,6 +23,7 @@
 #include <ErrorBundle/ErrorLog.h>
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <VariableBundle/Primitive/Primitive.h>
 #include <VariableBundle/Collection/Collection.h>
 #include <VariableBundle/Var.h>
@@ -59,12 +60,12 @@ CreateAndAssignObjectInstruction::execute()
     std::wstring_convert<convert_type, wchar_t> converter;
     std::string name = converter.to_bytes(name_w);
 
-    Var *object_to_assign = m->get_var(obj_name);
+    Var *object_to_assign = m->getVar(obj_name);
     Var *object = Var::create(name, object_to_assign->get());
 
-    m->add_var(object);
+    m->addVar(object);
 
-    return (Instruction *) this->masterRelationshipGet("next_instruction")->front();
+    return (Instruction *) this->getMaster()->get("next_instruction")->front();
 }
 
 /**
@@ -115,7 +116,7 @@ CreateAndAssignObjectInstruction::validate()
     }
 
     auto &obj_name = this->arg[1];
-    auto object_to_assign = m->get_var(obj_name);
+    auto object_to_assign = m->getVar(obj_name);
 
     if (!object_to_assign)
     {

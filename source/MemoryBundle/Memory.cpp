@@ -22,6 +22,7 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/SlaveRelationships.h>
 #include <MemoryBundle/Memory.h>
 #include <cstring>
 
@@ -162,7 +163,7 @@ Memory::assign(uintptr_t address, uint32_t size)
 bool
 Memory::isReadyToRemove()
 {
-    auto r = this->slaveRelationshipGet("primitive_data_memory");
+    auto r = this->getSlave()->get("primitive_data_memory");
 
     if (!r)
     {

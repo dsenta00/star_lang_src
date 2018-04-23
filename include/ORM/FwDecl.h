@@ -25,3 +25,9 @@
 class Object;
 
 class Relationship;
+
+class Relationships;
+
+class MasterRelationships;
+
+class SlaveRelationships;

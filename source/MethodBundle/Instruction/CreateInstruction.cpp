@@ -22,6 +22,7 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <VariableBundle/Var.h>
 #include <VariableBundle/Collection/Collection.h>
@@ -72,9 +73,9 @@ CreateInstruction::execute()
     }
 
     auto *m = this->getMethod();
-    m->add_var(data);
+    m->addVar(data);
 
-    return dynamic_cast<Instruction *>(this->masterRelationshipGet("next_instruction")->front());
+    return dynamic_cast<Instruction *>(this->getMaster()->get("next_instruction")->front());
 }
 
 /**

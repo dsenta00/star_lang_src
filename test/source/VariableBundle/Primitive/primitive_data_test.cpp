@@ -94,7 +94,7 @@ primitive_data_test_float()
     ASSERT_FALSE(float_data <= int_data, "Float should be bigger or equal than Int");
     ASSERT_OK;
 
-    ASSERT_TRUE(float_data += int_data, "Float and Int should add");
+    ASSERT_TRUE(float_data += int_data, "Float and Int should init");
     ASSERT_EQUALS(float_data.toFloat(), 100.0);
 
     ASSERT_TRUE(float_data -= int_data, "Float and Int should substract");
@@ -156,7 +156,7 @@ primitive_data_test_float()
                  "Float should be bigger or equal than float_data2");
     ASSERT_OK;
 
-    ASSERT_TRUE(float_data += float_data2, "Float and float_data2 should add");
+    ASSERT_TRUE(float_data += float_data2, "Float and float_data2 should init");
     ASSERT_EQUALS(float_data.toFloat(), 100.0);
 
     ASSERT_TRUE(float_data -= float_data2,
@@ -218,7 +218,7 @@ primitive_data_test_float()
     ASSERT_FALSE(float_data <= string_data, "Float should be bigger or equal than String");
     ASSERT_OK;
 
-    ASSERT_FALSE(float_data += string_data, "Float and String shouldn't add");
+    ASSERT_FALSE(float_data += string_data, "Float and String shouldn't init");
     ASSERT_EQUALS(float_data.toFloat(), 65.0);
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_ADDING_STRING);
     ERROR_LOG_CLEAR;
@@ -270,7 +270,7 @@ primitive_data_test_float()
     ASSERT_FALSE(float_data <= string_data, "Float should be bigger or equal than String");
     ASSERT_OK;
 
-    ASSERT_FALSE(float_data += string_data, "Float and String shouldn't add");
+    ASSERT_FALSE(float_data += string_data, "Float and String shouldn't init");
     ASSERT_TRUE(float_data.toFloat() == 65.0, "String should be 65.0!");
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_ADDING_STRING);
     ERROR_LOG_CLEAR;
@@ -405,7 +405,7 @@ primitive_data_test_string()
                           sizeof(L"31"));
 
     ASSERT_TRUE(string_data += string_data2,
-                "String and string_data2 should add");
+                "String and string_data2 should init");
     ASSERT_OK;
     ASSERT_TRUE(wcscmp((const wchar_t *) string_data.getAddress(), L"3231") == 0,
                 "String should be 3231! (%ls)",
@@ -469,7 +469,7 @@ primitive_data_test_string()
     ASSERT_FALSE(string_data <= int_data, "String should be bigger or equal than Int");
     ASSERT_OK;
 
-    ASSERT_TRUE(string_data += int_data, "String and Int should add");
+    ASSERT_TRUE(string_data += int_data, "String and Int should init");
     ASSERT_TRUE(wcscmp((const wchar_t *) string_data.getAddress(), L"323131") == 0,
                 "String should be 323131! (%ls)",
                 (const wchar_t *) string_data.getAddress());
@@ -532,7 +532,7 @@ primitive_data_test_string()
                  "String should be bigger or equal than Float");
     ASSERT_OK;
 
-    ASSERT_TRUE(string_data += float_data, "String and Float should add");
+    ASSERT_TRUE(string_data += float_data, "String and Float should init");
     ASSERT_TRUE(wcscmp((const wchar_t *) string_data.getAddress(),
                        L"32313131.000000") == 0,
                 "String should be 32313131.000000! (%ls)",
@@ -629,14 +629,14 @@ primitive_data_test_int()
                 65.0);
     ASSERT_OK;
 
-    Primitive &str = int_data.toString();
+    String &str = int_data.toString();
     ASSERT_OK;
     ASSERT_TRUE(wcscmp((const wchar_t *) str.getAddress(), L"65") == 0,
                 "string should be 65! (%ls)",
                 (const wchar_t *) str.getAddress());
 
     int32_t num2 = 35;
-    Primitive &int_data2 = *Int::create(&num2);
+    Int &int_data2 = *Int::create(&num2);
 
     ASSERT_FALSE(int_data == int_data2, "Int and int_data2 should not be equal");
     ASSERT_OK;
@@ -657,7 +657,7 @@ primitive_data_test_int()
                  "Int should be bigger or equal than int_data2");
     ASSERT_OK;
 
-    ASSERT_TRUE(int_data += int_data2, "Int and int_data2 should add");
+    ASSERT_TRUE(int_data += int_data2, "Int and int_data2 should init");
     ASSERT_EQUALS(int_data.toInt(), 100);
 
     ASSERT_TRUE(int_data -= int_data2, "Int and int_data2 should substract");
@@ -713,7 +713,7 @@ primitive_data_test_int()
     ASSERT_FALSE(int_data <= float_data, "Int should be bigger or equal than Float");
     ASSERT_OK;
 
-    ASSERT_TRUE(int_data += float_data, "Int and Float should add");
+    ASSERT_TRUE(int_data += float_data, "Int and Float should init");
     ASSERT_EQUALS(int_data.toInt(), 100);
 
     ASSERT_TRUE(int_data -= float_data, "Int and Float should substract");
@@ -762,7 +762,7 @@ primitive_data_test_int()
     ASSERT_FALSE(int_data <= string_data, "Int should be bigger or equal than String");
     ASSERT_OK;
 
-    ASSERT_FALSE(int_data += string_data, "Int and String shouldn't add");
+    ASSERT_FALSE(int_data += string_data, "Int and String shouldn't init");
     ASSERT_EQUALS(int_data.toInt(), 65);
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_ADDING_STRING);
     ERROR_LOG_CLEAR;
@@ -803,7 +803,7 @@ primitive_data_test_int()
     ASSERT_FALSE(int_data <= string_data, "Int should be bigger or equal than String");
     ASSERT_OK;
 
-    ASSERT_FALSE(int_data += string_data, "Int and String shouldn't add");
+    ASSERT_FALSE(int_data += string_data, "Int and String shouldn't init");
     ASSERT_EQUALS(int_data.toInt(), 65);
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_ADDING_STRING);
     ERROR_LOG_CLEAR;

@@ -21,6 +21,7 @@
  */
 
 #include <ORM/ORM.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <MethodBundle/Method.h>
 #include <ThreadBundle/Thread.h>
@@ -28,7 +29,7 @@
 
 Thread::Thread(uint64_t id, Method *m) : Object(id)
 {
-    this->masterRelationshipAdd("Thread", ONE_TO_MANY);
+    this->getMaster()->init("Thread", ONE_TO_MANY);
     this->pushMethod(m);
 
     this->pause = false;
@@ -49,7 +50,7 @@ Thread::step()
         return false;
     }
 
-    instruction_result instruction_result = current_method->execute_next();
+    instruction_result instruction_result = current_method->step();
 
     switch (instruction_result)
     {
@@ -121,7 +122,7 @@ Thread::pushStack(Value *v)
 void
 Thread::pushMethod(Method *m)
 {
-    this->masterRelationshipAddObject("Thread", m);
+    this->getMaster()->add("Thread", m);
     this->methodStack.push(m);
 }
 
@@ -136,7 +137,7 @@ Thread::popMethod()
     }
 
     current_method->clear();
-    this->masterRelationshipRemoveObject("Thread", current_method);
+    this->getMaster()->remove("Thread", current_method);
 
     this->methodStack.pop();
 }

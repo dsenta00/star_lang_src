@@ -36,6 +36,9 @@ Object::Object(const uint64_t id)
 {
     this->marked = false;
     this->id = std::to_string(id);
+
+    this->masterRelationshipsPtr = MasterRelationshipsPtr(new MasterRelationships(this));
+    this->slaveRelationshipsPtr = SlaveRelationshipsPtr(new SlaveRelationships(this));
 }
 
 /**
@@ -48,88 +51,9 @@ Object::Object(std::string id)
 {
     this->marked = false;
     this->id = std::move(id);
-}
 
-/**
- * Get master relationship.
- *
- * @param relationshipName
- * @return relationship if exists, otherwise return NULL.
- */
-Relationship *
-Object::masterRelationshipGet(std::string relationshipName)
-{
-    auto it = this->masterRelationships.find(relationshipName);
-
-    if (it != this->masterRelationships.end())
-    {
-        return (*it).second.get();
-    }
-
-    return nullptr;
-}
-
-/**
- * Add master relationship.
- *
- * @param relationshipName
- * @param type
- */
-void
-Object::masterRelationshipAdd(std::string relationshipName,
-                              eRelationshipType type)
-{
-    if (this->masterRelationshipGet(relationshipName))
-    {
-        return;
-    }
-
-    RelationshipPtr rp(new Relationship(relationshipName, type));
-
-    this->masterRelationships[relationshipName] = rp;
-}
-
-/**
- * Remove all relationships.
- */
-void
-Object::masterRelationshipsClearObjects()
-{
-    for (auto &masterRelationship : this->masterRelationships)
-    {
-        Relationship *r = masterRelationship.second.get();
-
-        while (!r->empty())
-        {
-            Object *e = r->front();
-
-            r->removeObject(e);
-            e->slaveRelationshipRemoveObject(r->getName(), this);
-        }
-    }
-}
-
-/**
- *
- * @param relationshipName
- */
-void
-Object::masterRelationshipsClearObjects(std::string relationshipName)
-{
-    Relationship *r = this->masterRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        return;
-    }
-
-    while (!r->empty())
-    {
-        Object *e = r->front();
-
-        r->removeObject(e);
-        e->slaveRelationshipRemoveObject(r->getName(), this);
-    }
+    this->masterRelationshipsPtr = MasterRelationshipsPtr(new MasterRelationships(this));
+    this->slaveRelationshipsPtr = SlaveRelationshipsPtr(new SlaveRelationships(this));
 }
 
 /**
@@ -177,251 +101,23 @@ Object::setMarked(bool marked)
 }
 
 /**
- * Add object to master relationship.
+ * Get master relationships.
  *
- * @param relationshipName - relationship name.
- * @param o - the object.
- */
-void
-Object::masterRelationshipAddObject(std::string relationshipName, Object *o)
-{
-    Relationship *r = this->masterRelationshipGet(relationshipName);
-
-    if (!r)
-    {
-        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
-        return;
-    }
-
-    r->addObject(o);
-
-    switch (r->getType())
-    {
-        case ONE_TO_MANY:
-            o->slaveRelationshipAdd(relationshipName, ONE_TO_MANY);
-            break;
-        case ONE_TO_ONE:
-            o->slaveRelationshipAdd(relationshipName, ONE_TO_ONE);
-            break;
-        default:
-            return;
-    }
-
-    o->slaveRelationshipAddObject(std::move(relationshipName), this);
-}
-
-/**
- * Remove object from master relationship.
- *
- * @param relationshipName - relationship name.
- * @param o - the object.
- */
-void
-Object::masterRelationshipRemoveObject(std::string relationshipName, Object *o)
-{
-    Relationship *r = this->masterRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        return;
-    }
-
-    if (!o)
-    {
-        return;
-    }
-
-    r->removeObject(o);
-    o->slaveRelationshipRemoveObject(r->getName(), this);
-}
-
-/**
- * Check if object has slave relations.
- *
- * @return true if have, otherwise return false.
- */
-bool
-Object::slaveRelationshipHasRelations()
-{
-    for (auto &slaveRelationship : this->slaveRelationships)
-    {
-        Relationship *r = slaveRelationship.second.get();
-
-        if (!r->empty())
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Notify this object that another object is removing
- * it from relationship.
- *
- * @param relationshipName - relationship name.
- * @param o - the object.
- */
-void
-Object::slaveRelationshipRemoveObject(std::string relationshipName, Object *o)
-{
-    Relationship *r = this->slaveRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        return;
-    }
-
-    r->removeObject(o);
-
-    if (!this->slaveRelationshipHasRelations())
-    {
-        this->setMarked(true);
-        this->masterRelationshipsClearObjects();
-    }
-}
-
-/**
- * @brief object::back
- * @param relationshipName
  * @return
  */
-Object *
-Object::masterRelationshipBack(std::string relationshipName)
+MasterRelationships *
+Object::getMaster()
 {
-    Relationship *r = this->masterRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
-        return nullptr;
-    }
-
-    return r->back();
+    return this->masterRelationshipsPtr.get();
 }
 
 /**
- * @param relationshipName
+ * Get slave relationships.
+ *
  * @return
  */
-Object *
-Object::slaveRelationshipBack(std::string relationshipName)
+SlaveRelationships *
+Object::getSlave()
 {
-    Relationship *r = this->slaveRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
-        return nullptr;
-    }
-
-    return r->back();
-}
-
-/**
- * The destructor.
- */
-Object::~Object()
-{
-    this->slaveRelationshipNotifyDestroyed();
-    this->masterRelationshipsClearObjects();
-}
-
-/**
- * Add slave relationship.
- *
- * @param relationshipName
- * @param type
- */
-void
-Object::slaveRelationshipAdd(std::string relationshipName, eRelationshipType type)
-{
-    if (this->slaveRelationshipGet(relationshipName))
-    {
-        return;
-    }
-
-    RelationshipPtr rp(new Relationship(relationshipName, type));
-    this->slaveRelationships[relationshipName] = rp;
-}
-
-/**
- * Get slave relationship.
- *
- * @param relationshipName
- * @return
- */
-Relationship *
-Object::slaveRelationshipGet(std::string relationshipName)
-{
-    auto it = this->slaveRelationships.find(relationshipName);
-
-    if (it != this->slaveRelationships.end())
-    {
-        return (*it).second.get();
-    }
-
-    return nullptr;
-}
-
-/**
- * Add object to slave relationship.
- *
- * @param relationshipName
- * @param o
- */
-void
-Object::slaveRelationshipAddObject(std::string relationshipName, Object *o)
-{
-    Relationship *r = this->slaveRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
-        return;
-    }
-
-    r->addObject(o);
-}
-
-/**
- * Notify through slave relationship that this object is being destroyed.
- */
-void
-Object::slaveRelationshipNotifyDestroyed()
-{
-    for (auto &slaveRelationship : this->slaveRelationships)
-    {
-        Relationship *r = slaveRelationship.second.get();
-
-        while (!r->empty())
-        {
-            /*
-             * Tell master Object to remove this Object.
-             */
-            Object *e = r->front();
-            e->masterRelationshipRemoveObject(r->getName(), this);
-        }
-    }
-}
-
-/**
- * Get front from master relationship.
- *
- * @param relationshipName
- * @return
- */
-Object *
-Object::masterRelationshipFront(std::string relationshipName)
-{
-    Relationship *r = this->masterRelationshipGet(std::move(relationshipName));
-
-    if (!r)
-    {
-        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
-        return nullptr;
-    }
-
-    return r->front();
+    return this->slaveRelationshipsPtr.get();
 }

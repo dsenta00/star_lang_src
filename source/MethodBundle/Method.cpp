@@ -22,6 +22,8 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/SlaveRelationships.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <MethodBundle/Method.h>
 #include <MethodBundle/Instruction/Instruction.h>
@@ -38,37 +40,39 @@
  */
 Method::Method(std::string id, std::vector<Instruction *> &instructions) : Object::Object(std::move(id))
 {
+    MasterRelationships *master = this->getMaster();
+
     /*
      * - Value
      * - array
      * - function
      */
-    this->masterRelationshipAdd("method_vars", ONE_TO_MANY);
+    master->init("method_vars", ONE_TO_MANY);
 
     /*
      * - Instruction
      */
-    this->masterRelationshipAdd("method_instructions", ONE_TO_MANY);
+    master->init("method_instructions", ONE_TO_MANY);
 
     if (instructions.empty())
     {
-        this->current_instruction = nullptr;
+        this->currentInstruction = nullptr;
         return;
     }
 
     for (Instruction *i : instructions)
     {
-        this->masterRelationshipAddObject("method_instructions", i);
+        master->add("method_instructions", i);
     }
 
-    Relationship *r = this->masterRelationshipGet("method_instructions");
+    Relationship *r = master->get("method_instructions");
 
     r->forEach([&](Object *o1, Object *o2) {
-        o1->masterRelationshipAddObject("next_instruction", o2);
+        o1->getMaster()->add("next_instruction", o2);
         return FOREACH_CONTINUE;
     });
 
-    this->current_instruction = instructions[0];
+    this->currentInstruction = instructions[0];
 }
 
 /**
@@ -77,21 +81,21 @@ Method::Method(std::string id, std::vector<Instruction *> &instructions) : Objec
  * @return next instruction.
  */
 instruction_result
-Method::execute_next()
+Method::step()
 {
-    if (!this->current_instruction)
+    if (!this->currentInstruction)
     {
         return INSTRUCTION_ERROR;
     }
 
-    this->current_instruction = this->current_instruction->execute();
+    this->currentInstruction = this->currentInstruction->execute();
 
     if (!ERROR_LOG_IS_EMPTY)
     {
         return INSTRUCTION_ERROR;
     }
 
-    if (this->current_instruction == nullptr)
+    if (this->currentInstruction == nullptr)
     {
         return INSTRUCTION_FINISHED;
     }
@@ -105,17 +109,17 @@ Method::execute_next()
  * @param o
  */
 void
-Method::push_stack(Value *v)
+Method::push(Value *v)
 {
-    auto *thread_relationship = this->slaveRelationshipGet("Thread");
+    auto *threadRelationship = this->getSlave()->get("Thread");
 
-    if (!thread_relationship)
+    if (!threadRelationship)
     {
         ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
         return;
     }
 
-    auto *t = (Thread *)thread_relationship->front();
+    auto *t = (Thread *)threadRelationship->front();
     t->pushStack(v);
 }
 
@@ -125,18 +129,18 @@ Method::push_stack(Value *v)
  * @return value.
  */
 Value *
-Method::pop_stack()
+Method::pop()
 {
-    auto *thread_relationship = this->slaveRelationshipGet("Thread");
+    auto *threadRelationship = this->getSlave()->get("Thread");
 
-    if (!thread_relationship)
+    if (!threadRelationship)
     {
         ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
 
         return (Value *) ORM::getFirst(OBJECT_TYPE_NULL);
     }
 
-    auto *t = (Thread *)thread_relationship->front();
+    auto *t = (Thread *)threadRelationship->front();
 
     return t->popStack();
 }
@@ -166,14 +170,17 @@ Method::getObjectType()
 void
 Method::clear()
 {
-    this->current_instruction = (Instruction *) this->masterRelationshipFront("method_instructions");
-    this->masterRelationshipsClearObjects("method_vars");
+    MasterRelationships *master = this->getMaster();
+
+    this->currentInstruction = (Instruction *) master->front("method_instructions");
+    master->clearObjects("method_vars");
 }
 
 void
-Method::add_var(Var *v)
+Method::addVar(Var *v)
 {
-    Relationship *r = this->masterRelationshipGet("method_vars");
+    MasterRelationships *master = this->getMaster();
+    Relationship *r = master->get("method_vars");
 
     Var *v2 = (Var *)r->find(v->getId());
 
@@ -183,13 +190,13 @@ Method::add_var(Var *v)
         return;
     }
 
-    this->masterRelationshipAddObject("method_vars", v);
+    master->add("method_vars", v);
 }
 
 Var *
-Method::get_var(std::wstring id)
+Method::getVar(std::wstring id)
 {
-    Relationship *r = this->masterRelationshipGet("method_vars");
+    Relationship *r = this->getMaster()->get("method_vars");
 
     using convert_type = std::codecvt_utf8<wchar_t>;
     std::wstring_convert<convert_type, wchar_t> converter;

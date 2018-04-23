@@ -173,14 +173,14 @@ instruction_test_create1()
     Method *foo = Method::create("foo", instructions);
     ASSERT_OK;
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_FINISHED);
     ASSERT_OK;
-    ASSERT_NOT_NULL(foo->get_var(L"int_name"));
-    foo->get_var(L"int_name")->get()->println();
+    ASSERT_NOT_NULL(foo->getVar(L"int_name"));
+    foo->getVar(L"int_name")->get()->println();
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT]);
     ASSERT_NOT_NULL(ORM::select(OBJECT_TYPE_VARIABLE, "int_name"));
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
     Instruction *next = i->execute();
     ASSERT_NULL(next);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
@@ -212,25 +212,25 @@ instruction_test_create2()
     Method *foo = Method::create("foo", instructions);
     ASSERT_OK;
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT]);
     ASSERT_NOT_NULL(ORM::select(OBJECT_TYPE_VARIABLE, "int_name"));
-    ASSERT_NOT_NULL(foo->get_var(L"int_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"int_name"));
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT] + DataType::SIZE[OBJECT_TYPE_FLOAT]);
     ASSERT_NOT_NULL(ORM::select(OBJECT_TYPE_VARIABLE, "float_name"));
-    ASSERT_NOT_NULL(foo->get_var(L"float_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"float_name"));
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_FINISHED);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT] + DataType::SIZE[OBJECT_TYPE_FLOAT]);
     ASSERT_NOT_NULL(ORM::select(OBJECT_TYPE_VARIABLE, "collection_name"));
-    ASSERT_NOT_NULL(foo->get_var(L"collection_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"collection_name"));
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
     Instruction *next = i->execute();
     ASSERT_EQUALS(next, f);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);

@@ -22,6 +22,7 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <VariableBundle/Primitive/Primitive.h>
 #include <MethodBundle/Method.h>
@@ -49,12 +50,12 @@ PopAndStoreInstruction::execute()
     }
 
     auto *m = this->getMethod();
-    auto *data2 = m->pop_stack();
+    auto *data2 = m->pop();
 
-    Value *data = (Value *) m->get_var(this->arg[0]);
+    Value *data = (Value *) m->getVar(this->arg[0]);
     *data = *data2;
 
-    return (Instruction *) this->masterRelationshipGet("next_instruction")->front();
+    return (Instruction *) this->getMaster()->get("next_instruction")->front();
 }
 
 /**
@@ -89,7 +90,7 @@ PopAndStoreInstruction::validate()
         return false;
     }
 
-    auto *data2 = (Primitive *) m->pop_stack();
+    auto *data2 = (Primitive *) m->pop();
 
     if (!data2)
     {
@@ -97,7 +98,7 @@ PopAndStoreInstruction::validate()
         return false;
     }
 
-    Primitive *data = (Primitive *) m->get_var(this->arg[0]);
+    Primitive *data = (Primitive *) m->getVar(this->arg[0]);
 
     if (!data)
     {

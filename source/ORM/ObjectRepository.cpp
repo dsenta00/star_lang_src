@@ -21,8 +21,10 @@
  */
 
 #include <algorithm>
-#include "ORM/ObjectRepository.h"
-#include "ORM/Object.h"
+#include <ORM/ObjectRepository.h>
+#include <ORM/Object.h>
+#include <ORM/MasterRelationships.h>
+#include <ORM/SlaveRelationships.h>
 
 /**
  * Find object.
@@ -99,8 +101,9 @@ void
 ObjectRepository::remove(Object *o)
 {
     o->setMarked(true);
-    o->masterRelationshipsClearObjects();
-    o->slaveRelationshipNotifyDestroyed();
+
+    o->getMaster()->clearObjects();
+    o->getSlave()->notifyDestroyed();
 }
 
 /**
@@ -115,7 +118,7 @@ ObjectRepository::changeId(Object *o, std::string &newId)
     if (this->objectMap.find(o->getId()) == this->objectMap.end())
     {
         /*
-         * ID doesn't exist, create it and add Object.
+         * ID doesn't exist, create it and init Object.
          */
         o->setId(newId);
         this->add(o);

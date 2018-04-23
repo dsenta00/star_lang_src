@@ -23,6 +23,7 @@
 #include <ORM/ORM.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <MemoryBundle/Memory.h>
 #include <MemoryBundle/MemoryChunk.h>
 #include <MemoryBundle/VirtualMemory.h>
@@ -67,8 +68,10 @@ next_power_of_2(uint32_t number)
  */
 VirtualMemory::VirtualMemory(uint32_t initCapacity) : Object::Object("MAIN")
 {
-    this->masterRelationshipAdd("memoryChunkRelationship", ONE_TO_MANY);
-    this->memoryChunkRelationship = this->masterRelationshipGet("memoryChunkRelationship");
+    MasterRelationships *master = this->getMaster();
+
+    master->init("memoryChunkRelationship", ONE_TO_MANY);
+    this->memoryChunkRelationship = master->get("memoryChunkRelationship");
 
     this->allocatedTotal = 0;
     this->maxAllocatedBytes = 0;
@@ -117,7 +120,7 @@ VirtualMemory::addMemoryChunk(uint32_t capacity)
     }
 
     MemoryChunk *chunk = MemoryChunk::create(maxAllocatedBytes);
-    this->masterRelationshipAddObject("memoryChunkRelationship", chunk);
+    this->getMaster()->add("memoryChunkRelationship", chunk);
 
     return chunk;
 }
@@ -176,7 +179,7 @@ VirtualMemory::addChunkAndAlloc(uint32_t size)
      * New chunk is not allocated.
      * Remove previously allocated chunk and defragment all Memory.
      */
-    this->masterRelationshipRemoveObject("memoryChunkRelationship", chunk);
+    this->getMaster()->remove("memoryChunkRelationship", chunk);
 
     for (Object *o : *this->memoryChunkRelationship)
     {

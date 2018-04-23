@@ -21,6 +21,8 @@
  */
 
 #include <ORM/ORM.h>
+#include <ORM/MasterRelationships.h>
+#include <ORM/Relationship.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <MemoryBundle/Memory.h>
 #include <MemoryBundle/VirtualMemory.h>
@@ -224,8 +226,10 @@ String::operator=(const void *data)
     {
         Memory *newMem = this->vm->alloc(strSize);
 
-        Object::masterRelationshipRemoveObject("primitive_data_memory", (Object *) mem);
-        Object::masterRelationshipAddObject("primitive_data_memory", (Object *) newMem);
+        MasterRelationships *master = this->getMaster();
+
+        master->remove("primitive_data_memory", mem);
+        master->add("primitive_data_memory", newMem);
 
         this->vm->free(mem);
         mem = newMem;
@@ -342,8 +346,10 @@ String::operator+=(Value &data)
              * newMem is different than mem,
              * switch relations.
              */
-            Object::masterRelationshipRemoveObject("primitive_data_memory", (Object *) mem);
-            Object::masterRelationshipAddObject("primitive_data_memory", (Object *) newMem);
+            MasterRelationships *master = this->getMaster();
+
+            master->remove("primitive_data_memory", mem);
+            master->add("primitive_data_memory", newMem);
 
             mem = newMem;
         }

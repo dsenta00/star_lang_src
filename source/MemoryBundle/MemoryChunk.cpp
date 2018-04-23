@@ -22,6 +22,8 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/SlaveRelationships.h>
+#include <ORM/MasterRelationships.h>
 #include <MemoryBundle/MemoryChunk.h>
 #include <MemoryBundle/Memory.h>
 #include <cstring>
@@ -72,11 +74,11 @@ MemoryChunk::isParentOf(Memory *mem)
         return false;
     }
 
-    Relationship *r = mem->slaveRelationshipGet("reservedMemory");
+    Relationship *r = mem->getSlave()->get("reservedMemory");
 
     if (!r)
     {
-        r = mem->slaveRelationshipGet("freeMemory");
+        r = mem->getSlave()->get("freeMemory");
     }
 
     if (!r)
@@ -397,7 +399,7 @@ MemoryChunk::defragmentation()
     /*
      * Real defragmentation part.
      */
-    auto reservedMemory = masterRelationshipGet("reservedMemory");
+    auto reservedMemory = this->getMaster()->get("reservedMemory");
 
     reservedMemory->forEach([&](Object *o1, Object *o2) {
         auto *m1 = (Memory *) o1;

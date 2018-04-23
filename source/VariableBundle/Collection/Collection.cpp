@@ -22,6 +22,7 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <MemoryBundle/VirtualMemory.h>
 #include <VariableBundle/Value.h>
@@ -45,7 +46,7 @@
  */
 Collection::Collection(Collection *c) : Value::Value()
 {
-    this->masterRelationshipAdd("Collection", ONE_TO_MANY);
+    this->getMaster()->init("Collection", ONE_TO_MANY);
 
     if (c == nullptr)
     {
@@ -155,7 +156,7 @@ Collection::toString()
 void
 Collection::clear()
 {
-    Relationship *r = this->masterRelationshipGet("Collection");
+    Relationship *r = this->getMaster()->get("Collection");
 
     while (!r->empty())
     {
@@ -190,7 +191,7 @@ Collection::removeData(Value *o)
     }
 
     this->data_cache.erase(o->getId());
-    this->masterRelationshipRemoveObject("Collection", o);
+    this->getMaster()->remove("Collection", o);
 }
 
 /**
@@ -240,7 +241,7 @@ Collection::insertData(std::string index, Value *o)
         o = newData;
     }
 
-    this->masterRelationshipAddObject("Collection", o);
+    this->getMaster()->add("Collection", o);
     this->data_cache[index] = o;
 }
 

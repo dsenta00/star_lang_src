@@ -24,42 +24,24 @@
 
 #include <ORM/FwDecl.h>
 #include <ORM/eRelationshipType.h>
-#include <ORM/eObjectType.h>
-#include <ORM/MasterRelationships.h>
-#include <ORM/SlaveRelationships.h>
-#include <cstdint>
-#include <map>
 #include <memory>
-#include <vector>
-#include <string>
+#include <map>
 
-using MasterRelationshipsPtr = std::unique_ptr<MasterRelationships>;
-using SlaveRelationshipsPtr = std::unique_ptr<SlaveRelationships>;
+using RelationshipPtr = std::shared_ptr<Relationship>;
 
-/**
- * The object class.
- * Each object can have relationship with another object.
- * Usage is to extend data as object base class.
- */
-class Object {
+class Relationships {
 public:
-    explicit Object(uint64_t id);
-    explicit Object(std::string id);
+    explicit Relationships(Object *self);
 
-    std::string getId();
-    void setId(std::string newId);
+    Relationship *get(std::string relationshipName);
+    void init(std::string relationshipName, eRelationshipType type);
+    Object *front(std::string relationshipName);
+    Object *back(std::string relationshipName);
+    bool hasRelations();
 
-    virtual eObjectType getObjectType() = 0;
-
-    bool getMarked();
-    void setMarked(bool marked);
-
-    MasterRelationships *getMaster();
-    SlaveRelationships *getSlave();
+    virtual void add(std::string relationshipName, Object *o) = 0;
+    virtual void remove(std::string relationshipName, Object *o) = 0;
 protected:
-    bool marked;
-    std::string id;
-
-    MasterRelationshipsPtr masterRelationshipsPtr;
-    SlaveRelationshipsPtr slaveRelationshipsPtr;
+    Object *self;
+    std::map<std::string, RelationshipPtr> relationships;
 };

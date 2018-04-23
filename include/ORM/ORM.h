@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "ObjectRepository.h"
-#include "eObjectType.h"
+#include <ORM/ObjectRepository.h>
+#include <ORM/eObjectType.h>
 #include <string>
 #include <functional>
 

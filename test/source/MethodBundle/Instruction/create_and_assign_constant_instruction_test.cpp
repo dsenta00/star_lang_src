@@ -186,15 +186,15 @@ instruction_test_create1()
     Method *foo = Method::create("foo", instructions);
     ASSERT_OK;
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_FINISHED);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT]);
     auto *data = (Int *)ORM::select(OBJECT_TYPE_INT, "int_name");
     ASSERT_NOT_NULL(data);
     ASSERT_EQUALS(data->getObjectType(), OBJECT_TYPE_INT);
-    ASSERT_NOT_NULL(foo->get_var(L"int_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"int_name"));
     ASSERT_EQUALS(data->toInt(), 3);
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
     Instruction *next = i->execute();
     ASSERT_NULL(next);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
@@ -226,33 +226,33 @@ instruction_test_create2()
     Method *foo = Method::create("foo", instructions);
     ASSERT_OK;
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT]);
     auto *int_name = (Int *)ORM::select(OBJECT_TYPE_INT, "int_name");
     ASSERT_NOT_NULL(int_name);
-    ASSERT_NOT_NULL(foo->get_var(L"int_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"int_name"));
     ASSERT_EQUALS(int_name->toInt(), 3);
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_OK);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_OK);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT] + DataType::SIZE[OBJECT_TYPE_FLOAT]);
     auto *float_name = (Float *)ORM::select(OBJECT_TYPE_FLOAT, "float_name");
     ASSERT_NOT_NULL(float_name);
-    ASSERT_NOT_NULL(foo->get_var(L"float_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"float_name"));
     ASSERT_EQUALS(float_name->toFloat(), 4.2);
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_FINISHED);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_FINISHED);
     ASSERT_OK;
     ASSERT_VIRTUAL_MEMORY(*vm, DataType::SIZE[OBJECT_TYPE_INT] + DataType::SIZE[OBJECT_TYPE_FLOAT]);
     auto *collection_name = (Collection *)ORM::select(OBJECT_TYPE_COLLECTION, "collection_name");
     ASSERT_NOT_NULL(collection_name);
-    ASSERT_NOT_NULL(foo->get_var(L"collection_name"));
+    ASSERT_NOT_NULL(foo->getVar(L"collection_name"));
     auto *collection_data = (Primitive *)(*collection_name)[0];
     ASSERT_NOT_NULL(collection_data);
     ASSERT_EQUALS(collection_data->toFloat(), 14.2);
 
-    ASSERT_EQUALS(foo->execute_next(), INSTRUCTION_ERROR);
+    ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
     Instruction *next = i->execute();
     ASSERT_EQUALS(next, f);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);

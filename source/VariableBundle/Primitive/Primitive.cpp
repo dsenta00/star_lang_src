@@ -22,6 +22,7 @@
 
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <MemoryBundle/Memory.h>
 #include <MemoryBundle/VirtualMemory.h>
@@ -42,7 +43,9 @@
  */
 Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
 {
-    this->masterRelationshipAdd("primitive_data_memory", ONE_TO_MANY);
+    MasterRelationships *master = this->getMaster();
+    master->init("primitive_data_memory", ONE_TO_MANY);
+
     this->vm = (VirtualMemory *) ORM::getFirst(OBJECT_TYPE_VIRTUAL_MEMORY);
 
     if (type >= OBJECT_TYPE_NULL)
@@ -61,7 +64,7 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
             return;
         }
 
-        Object::masterRelationshipAddObject("primitive_data_memory", (Object *) mem);
+        master->add("primitive_data_memory", (Object *) mem);
     }
     else
     {
@@ -77,7 +80,7 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
             return;
         }
 
-        Object::masterRelationshipAddObject("primitive_data_memory", (Object *) mem);
+        master->add("primitive_data_memory", (Object *) mem);
         memcpy(mem->getPointer<void *>(), value, size);
     }
 }
@@ -89,7 +92,8 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
  */
 Primitive::Primitive(Primitive &data) : Value::Value()
 {
-    this->masterRelationshipAdd("primitive_data_memory", ONE_TO_MANY);
+    MasterRelationships *master = this->getMaster();
+    master->init("primitive_data_memory", ONE_TO_MANY);
 
     Memory *data_mem = data.getMemory();
 
@@ -108,10 +112,12 @@ Primitive::Primitive(Primitive &data) : Value::Value()
     this->vm = data.vm;
 
     Memory *mem = this->vm->alloc(data_mem->getSize());
+
     memcpy(mem->getPointer<void *>(),
            data_mem->getPointer<void *>(),
            data_mem->getSize());
-    this->masterRelationshipAddObject("primitive_data_memory", (Object *) mem);
+
+    master->add("primitive_data_memory", (Object *) mem);
 }
 
 /**
@@ -123,6 +129,7 @@ uintptr_t
 Primitive::getAddress()
 {
     Memory *mem = this->getMemory();
+
     return (mem != nullptr) ? (uintptr_t) mem->getPointer<void *>() : 0;
 }
 
@@ -134,7 +141,7 @@ Primitive::getAddress()
 Memory *
 Primitive::getMemory()
 {
-    return (Memory *) this->masterRelationshipGet("primitive_data_memory")->front();
+    return (Memory *) this->getMaster()->front("primitive_data_memory");
 }
 
 /**

@@ -20,88 +20,77 @@
  * THE SOFTWARE.
  */
 
+#include <ORM/Object.h>
 #include <ORM/Relationship.h>
+#include <ORM/Relationships.h>
 #include <ORM/SlaveRelationships.h>
 #include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
-#include <MethodBundle/Instruction/Instruction.h>
-#include <MethodBundle/Method.h>
-#include <regex>
+
+SlaveRelationships::SlaveRelationships(Object *self) : Relationships(self)
+{}
 
 /**
- * An abstract instruction constructor.
+ * Add object to slave relationship.
  *
- * @param op
- * @param arg
+ * @param relationshipName
+ * @param o
  */
-Instruction::Instruction(eOpCode op, std::vector<std::wstring> &arg) : Object::Object(op)
+void
+SlaveRelationships::add(std::string relationshipName, Object *o)
 {
-    this->validated = false;
-    this->op = op;
-    this->arg = std::move(arg);
-
-    MasterRelationships *master = this->getMaster();
-
-    master->init("next_instruction", ONE_TO_ONE);
-    master->init("branch", ONE_TO_ONE);
-}
-
-/**
- * Get op_code.
- *
- * @return
- */
-eOpCode &
-Instruction::getOpCode()
-{
-    return this->op;
-}
-
-/**
- * Get method where instruction is.
- *
- * @return
- */
-Method *
-Instruction::getMethod()
-{
-    auto *r = this->getSlave()->get("method_instructions");
+    Relationship *r = this->get(std::move(relationshipName));
 
     if (!r)
     {
-        ERROR_LOG_ADD(ERROR_INSTRUCTION_NO_METHOD);
-        return nullptr;
+        ERROR_LOG_ADD(ERROR_ENTITY_UNKNOWN_RELATIONSHIP);
+        return;
     }
 
-    auto *m = (Method *) r->front();
+    r->addObject(o);
+}
 
-    if (!m)
+void
+SlaveRelationships::remove(std::string relationshipName, Object *o)
+{
+    Relationship *r = this->get(std::move(relationshipName));
+
+    if (!r)
     {
-        ERROR_LOG_ADD(ERROR_INSTRUCTION_NO_METHOD);
+        return;
     }
 
-    return m;
+    r->removeObject(o);
+
+    if (!this->hasRelations())
+    {
+        this->self->setMarked(true);
+        this->self->getMaster()->clearObjects();
+    }
 }
 
 /**
- * Check if object name is valid.
- *
- * @param sample
- * @return
+ * Notify through slave relationship that this object is being destroyed.
  */
-bool
-Instruction::objectNameIsValid(std::wstring &sample)
+void
+SlaveRelationships::notifyDestroyed()
 {
-    return !sample.empty() &&
-           sample != L"Collection" &&
-            DataType::getFromToken(sample) == OBJECT_TYPE_NULL;
+    for (auto &slaveRelationship : this->relationships)
+    {
+        Relationship *r = slaveRelationship.second.get();
+
+        while (!r->empty())
+        {
+            /*
+             * Tell master Object to remove this Object.
+             */
+            Object *e = r->front();
+            e->getMaster()->remove(r->getName(), self);
+        }
+    }
 }
 
-/**
- * @inherit
- */
-eObjectType
-Instruction::getObjectType()
+SlaveRelationships::~SlaveRelationships()
 {
-    return OBJECT_TYPE_INSTRUCTION;
+    this->notifyDestroyed();
 }

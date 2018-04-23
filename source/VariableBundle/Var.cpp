@@ -21,6 +21,7 @@
  */
 
 #include <ORM/ORM.h>
+#include <ORM/MasterRelationships.h>
 #include <VariableBundle/Value.h>
 #include <VariableBundle/Var.h>
 #include <VariableBundle/Primitive/Primitive.h>
@@ -33,14 +34,16 @@
  */
 Var::Var(std::string id, Value *v) : Object::Object(std::move(id))
 {
-    this->masterRelationshipAdd("val", ONE_TO_ONE);
+    MasterRelationships *master = this->getMaster();
+
+    master->init("val", ONE_TO_ONE);
 
     if (v == nullptr)
     {
         v = dynamic_cast<Value *>(ORM::getFirst(OBJECT_TYPE_NULL));
     }
 
-    this->masterRelationshipAddObject("val", v);
+    master->add("val", v);
 }
 
 /**
@@ -63,7 +66,7 @@ Var::create(std::string id, Value *container)
 Value *
 Var::get()
 {
-    return dynamic_cast<Value *>(this->masterRelationshipBack("val"));
+    return dynamic_cast<Value *>(this->getMaster()->front("val"));
 }
 
 /**
@@ -106,20 +109,22 @@ Var::set(Value *v)
     bool v1Create = (v1->getObjectType() != v2->getObjectType()) && !v2->isReference();
     bool v1EqV2 = !v2->isReference();
 
+    MasterRelationships *master = this->getMaster();
+
     if (v1Remove)
     {
-        this->masterRelationshipRemoveObject("val", v1);
+        master->remove("val", v1);
     }
 
     if (v1RefV2)
     {
-        this->masterRelationshipAddObject("val", v2);
+        master->add("val", v2);
     }
 
     if (v1Create)
     {
         v1 = Primitive::create(v2->getObjectType());
-        this->masterRelationshipAddObject("val", v1);
+        master->add("val", v1);
     }
 
     if (v1EqV2)

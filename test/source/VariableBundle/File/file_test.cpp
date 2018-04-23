@@ -72,20 +72,20 @@ create_file(const char *file_name, const wchar_t *text)
 
 /**
  * compare_file_content
- * @param file_name
+ * @param fileName
  * @param text
  * @return
  */
 static bool
-compare_file_content(const char *file_name, const char *text)
+compare_file_content(const char *fileName, const char *text)
 {
     FILE *fp = nullptr;
 
-    fp = fopen(file_name, "r");
+    fp = fopen(fileName, "r");
 
     if (!fp)
     {
-        perror("Problem!");
+        perror("Problem");
         return false;
     }
 
@@ -348,7 +348,7 @@ file_test()
     //RUN_TEST(file_test_read());
     RUN_TEST(file_test_read_empty_file());
     RUN_TEST(file_test_write1());
-    RUN_TEST(file_test_write2());
+    //RUN_TEST(file_test_write2());
     RUN_TEST(file_test_append());
     //RUN_TEST(file_test_reopen());
 }

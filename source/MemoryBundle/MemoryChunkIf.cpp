@@ -21,6 +21,7 @@
  */
 
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <MemoryBundle/Memory.h>
 #include <MemoryBundle/MemoryChunkIf.h>
 
@@ -29,8 +30,10 @@
  */
 MemoryChunkIf::MemoryChunkIf() : Object::Object("chunk")
 {
-    Object::masterRelationshipAdd("freeMemory", ONE_TO_MANY);
-    Object::masterRelationshipAdd("reservedMemory", ONE_TO_MANY);
+    MasterRelationships *master = this->getMaster();
+
+    master->init("freeMemory", ONE_TO_MANY);
+    master->init("reservedMemory", ONE_TO_MANY);
 }
 
 /**
@@ -43,7 +46,8 @@ void
 MemoryChunkIf::freeMemoryAdd(uintptr_t address, uint32_t size)
 {
     Memory *mem = Memory::create(address, size);
-    this->masterRelationshipAddObject("freeMemory", mem);
+
+    this->getMaster()->add("freeMemory", mem);
 }
 
 /**
@@ -53,7 +57,7 @@ MemoryChunkIf::freeMemoryAdd(uintptr_t address, uint32_t size)
 void
 MemoryChunkIf::freeMemoryRemove(Memory *mem)
 {
-    this->masterRelationshipRemoveObject("freeMemory", mem);
+    this->getMaster()->remove("freeMemory", mem);
 }
 
 /**
@@ -65,7 +69,7 @@ MemoryChunkIf::freeMemoryRemove(Memory *mem)
 Memory *
 MemoryChunkIf::freeMemoryFind(std::function<bool(Memory *)> foo)
 {
-    auto freeMemory = this->masterRelationshipGet("freeMemory");
+    auto freeMemory = this->getMaster()->get("freeMemory");
 
     return (Memory *) freeMemory->find([&](Object *e) {
         auto *m = (Memory *) e;
@@ -81,7 +85,7 @@ MemoryChunkIf::freeMemoryFind(std::function<bool(Memory *)> foo)
 Memory *
 MemoryChunkIf::freeMemoryFront()
 {
-    auto freeMemory = this->masterRelationshipGet("freeMemory");
+    auto freeMemory = this->getMaster()->get("freeMemory");
 
     return (Memory *) freeMemory->front();
 }
@@ -94,7 +98,7 @@ MemoryChunkIf::freeMemoryFront()
 uint32_t
 MemoryChunkIf::freeMemoryCount()
 {
-    auto freeMemory = this->masterRelationshipGet("freeMemory");
+    auto freeMemory = this->getMaster()->get("freeMemory");
 
     return static_cast<uint32_t>(freeMemory->size());
 }
@@ -118,7 +122,7 @@ MemoryChunkIf::freeMemoryDeleteAll()
 void
 MemoryChunkIf::freeMemoryUnion()
 {
-    auto freeMemory = masterRelationshipGet("freeMemory");
+    auto freeMemory = this->getMaster()->get("freeMemory");
 
     freeMemory->sort([&](Object *e1, Object *e2) {
         auto *m1 = (Memory *) e1;
@@ -152,7 +156,8 @@ Memory *
 MemoryChunkIf::reservedMemoryAdd(uintptr_t address, uint32_t size)
 {
     Memory *mem = Memory::create(address, size);
-    this->masterRelationshipAddObject("reservedMemory", (Object *) mem);
+
+    this->getMaster()->add("reservedMemory", (Object *) mem);
 
     return mem;
 }
@@ -164,7 +169,7 @@ MemoryChunkIf::reservedMemoryAdd(uintptr_t address, uint32_t size)
 void
 MemoryChunkIf::reservedMemoryRemove(Memory *mem)
 {
-    this->masterRelationshipRemoveObject("reservedMemory", mem);
+    this->getMaster()->remove("reservedMemory", mem);
 }
 
 /**
@@ -175,7 +180,7 @@ MemoryChunkIf::reservedMemoryRemove(Memory *mem)
 Memory *
 MemoryChunkIf::reservedMemoryFront()
 {
-    auto reservedMemory = masterRelationshipGet("reservedMemory");
+    auto reservedMemory = this->getMaster()->get("reservedMemory");
 
     return (Memory *) reservedMemory->front();
 }
@@ -188,7 +193,7 @@ MemoryChunkIf::reservedMemoryFront()
 Memory *
 MemoryChunkIf::reservedMemoryBack()
 {
-    auto reservedMemory = masterRelationshipGet("reservedMemory");
+    auto reservedMemory = this->getMaster()->get("reservedMemory");
 
     return (Memory *) reservedMemory->back();
 }
@@ -200,7 +205,7 @@ MemoryChunkIf::reservedMemoryBack()
 uint32_t
 MemoryChunkIf::reservedMemoryCount()
 {
-    auto reservedMemory = masterRelationshipGet("reservedMemory");
+    auto reservedMemory = this->getMaster()->get("reservedMemory");
 
     return static_cast<uint32_t>(reservedMemory->size());
 }
@@ -211,7 +216,7 @@ MemoryChunkIf::reservedMemoryCount()
 void
 MemoryChunkIf::reservedMemorySort()
 {
-    auto reservedMemory = masterRelationshipGet("reservedMemory");
+    auto reservedMemory = this->getMaster()->get("reservedMemory");
 
     reservedMemory->sort([&](Object *e1, Object *e2) {
         auto m1 = (Memory *) e1;

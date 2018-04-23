@@ -22,44 +22,15 @@
 
 #pragma once
 
-#include <ORM/FwDecl.h>
-#include <ORM/eRelationshipType.h>
-#include <ORM/eObjectType.h>
-#include <ORM/MasterRelationships.h>
-#include <ORM/SlaveRelationships.h>
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <vector>
-#include <string>
+#include <ORM/Relationships.h>
 
-using MasterRelationshipsPtr = std::unique_ptr<MasterRelationships>;
-using SlaveRelationshipsPtr = std::unique_ptr<SlaveRelationships>;
-
-/**
- * The object class.
- * Each object can have relationship with another object.
- * Usage is to extend data as object base class.
- */
-class Object {
+class SlaveRelationships : public Relationships {
 public:
-    explicit Object(uint64_t id);
-    explicit Object(std::string id);
+    explicit SlaveRelationships(Object *self);
 
-    std::string getId();
-    void setId(std::string newId);
+    void add(std::string relationshipName, Object *o) override ;
+    void remove(std::string relationshipName, Object *o) override ;
+    void notifyDestroyed();
 
-    virtual eObjectType getObjectType() = 0;
-
-    bool getMarked();
-    void setMarked(bool marked);
-
-    MasterRelationships *getMaster();
-    SlaveRelationships *getSlave();
-protected:
-    bool marked;
-    std::string id;
-
-    MasterRelationshipsPtr masterRelationshipsPtr;
-    SlaveRelationshipsPtr slaveRelationshipsPtr;
+    ~SlaveRelationships();
 };

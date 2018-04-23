@@ -77,7 +77,7 @@ public:
 
     std::wstring getString() override;
 
-    ~Collection() override;
+    ~Collection();
 
     /*
      * Don't call this Method on purpose!

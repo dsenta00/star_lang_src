@@ -41,15 +41,15 @@ public:
     static Method *create(std::string id, std::vector<Instruction *> &instructions);
 
     eObjectType getObjectType() override;
-    instruction_result execute_next();
+    instruction_result step();
 
-    void push_stack(Value *v);
-    Value *pop_stack();
+    void push(Value *v);
+    Value *pop();
 
-    void add_var(Var *v);
-    Var *get_var(std::wstring id);
+    void addVar(Var *v);
+    Var *getVar(std::wstring id);
 
     void clear();
 protected:
-    Instruction *current_instruction;
+    Instruction *currentInstruction;
 };

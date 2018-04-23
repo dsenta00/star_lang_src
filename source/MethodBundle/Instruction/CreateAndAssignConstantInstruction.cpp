@@ -23,6 +23,7 @@
 #include <ErrorBundle/ErrorLog.h>
 #include <ORM/ORM.h>
 #include <ORM/Relationship.h>
+#include <ORM/MasterRelationships.h>
 #include <VariableBundle/Primitive/Primitive.h>
 #include <VariableBundle/Collection/Collection.h>
 #include <VariableBundle/Var.h>
@@ -95,9 +96,9 @@ CreateAndAssignConstantInstruction::execute()
     }
 
     auto *m = this->getMethod();
-    m->add_var(data);
+    m->addVar(data);
 
-    return (Instruction *) this->masterRelationshipGet("next_instruction")->front();
+    return (Instruction *) this->getMaster()->get("next_instruction")->front();
 }
 
 /**

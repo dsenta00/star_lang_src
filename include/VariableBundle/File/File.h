@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "fw_decl.h"
-#include "ORM/Object.h"
-#include "FileMode.h"
+#include <fw_decl.h>
+#include <ORM/Object.h>
+#include <VariableBundle/File/FileMode.h>
 #include <VariableBundle/Value.h>
 
 /**
@@ -77,7 +77,7 @@ public:
     bool scan() override;
 
     std::wstring getString() override;
-    ~File() override;
+    ~File();
 protected:
     void readIntoBuffer();
     void writeFromBuffer();
