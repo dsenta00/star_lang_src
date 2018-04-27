@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,5 +37,6 @@ typedef enum {
     OBJECT_TYPE_VIRTUAL_MEMORY,
     OBJECT_TYPE_METHOD,
     OBJECT_TYPE_FILE,
-    OBJECT_TYPE_THREAD
+    OBJECT_TYPE_THREAD,
+    OBJECT_TYPE_CONSTANTS
 } eObjectType;

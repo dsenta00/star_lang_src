@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -45,11 +45,6 @@ CreateInstruction::CreateInstruction(std::vector<std::wstring> &arg) : Instructi
 Instruction *
 CreateInstruction::execute()
 {
-    if (!this->validate())
-    {
-        return nullptr;
-    }
-
     auto &name_w = this->arg[0];
     auto &type = this->arg[1];
     Var *data = nullptr;
@@ -62,6 +57,7 @@ CreateInstruction::execute()
     {
         data = Var::create(name, Collection::create());
     }
+    /* TODO add for a Method or Clazz */
     else
     {
         data = Var::create(name, Primitive::create(DataType::getFromToken(type)));
@@ -75,7 +71,7 @@ CreateInstruction::execute()
     auto *m = this->getMethod();
     m->addVar(data);
 
-    return dynamic_cast<Instruction *>(this->getMaster()->get("next_instruction")->front());
+    return this->getNext();
 }
 
 /**
@@ -97,11 +93,6 @@ CreateInstruction::create(std::wstring name, std::wstring type)
 bool
 CreateInstruction::validate()
 {
-    if (this->validated)
-    {
-        return true;
-    }
-
     auto *m = this->getMethod();
 
     if (!m)
@@ -124,5 +115,6 @@ CreateInstruction::validate()
     }
 
     this->validated = true;
+
     return true;
 }

@@ -22,4 +22,14 @@
 
 #pragma once
 
-void primitive_data_test();
+#include <MethodBundle/Instruction/Instruction.h>
+
+/**
+ * OP_CODE_PUSH_CONST <const_no>
+ */
+class PushConstantInstruction : public Instruction {
+public:
+    explicit PushConstantInstruction(std::vector<std::wstring> &arg);
+    static PushConstantInstruction *create(std::vector<std::wstring> &arg);
+    Instruction *execute() override;
+};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,17 +24,18 @@
 #include <ORM/Relationship.h>
 #include <ORM/MasterRelationships.h>
 #include <ErrorBundle/ErrorLog.h>
+#include <VariableBundle/Var.h>
 #include <VariableBundle/Primitive/Primitive.h>
 #include <MethodBundle/Method.h>
-#include <MethodBundle/Instruction/PopAndStoreInstruction.h>
+#include <MethodBundle/Instruction/AssignInstruction.h>
 #include <codecvt>
 #include <locale>
 
 /**
  * @inherit
  */
-PopAndStoreInstruction::PopAndStoreInstruction(std::vector<std::wstring> &arg)
-    : Instruction(OP_CODE_POP_AND_STORE, arg)
+AssignInstruction::AssignInstruction(std::vector<std::wstring> &arg)
+    : Instruction(OP_CODE_ASSIGN, arg)
 {
 }
 
@@ -42,33 +43,28 @@ PopAndStoreInstruction::PopAndStoreInstruction(std::vector<std::wstring> &arg)
  * @inherit
  */
 Instruction *
-PopAndStoreInstruction::execute()
+AssignInstruction::execute()
 {
-    if (!this->validate())
-    {
-        return nullptr;
-    }
-
     auto *m = this->getMethod();
     auto *data2 = m->pop();
 
-    Value *data = (Value *) m->getVar(this->arg[0]);
-    *data = *data2;
+    Var *var = m->getVar(this->arg[0]);
+    var->set(data2);
 
-    return (Instruction *) this->getMaster()->get("next_instruction")->front();
+    return this->getNext();
 }
 
 /**
  * @inherit
  */
-PopAndStoreInstruction *
-PopAndStoreInstruction::create(std::wstring name)
+AssignInstruction *
+AssignInstruction::create(std::wstring name)
 {
     std::vector<std::wstring> arg;
     arg.emplace_back(name);
 
-    return dynamic_cast<PopAndStoreInstruction *>(ORM::create(
-        new PopAndStoreInstruction(arg)
+    return dynamic_cast<AssignInstruction *>(ORM::create(
+        new AssignInstruction(arg)
     ));
 }
 
@@ -76,13 +72,8 @@ PopAndStoreInstruction::create(std::wstring name)
  * @inherit
  */
 bool
-PopAndStoreInstruction::validate()
+AssignInstruction::validate()
 {
-    if (this->validated)
-    {
-        return true;
-    }
-
     auto *m = this->getMethod();
 
     if (!m)
@@ -90,19 +81,21 @@ PopAndStoreInstruction::validate()
         return false;
     }
 
-    auto *data2 = (Primitive *) m->pop();
+    auto *data2 = m->pop();
 
     if (!data2)
     {
         ERROR_LOG_ADD(ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
+
         return false;
     }
 
-    Primitive *data = (Primitive *) m->getVar(this->arg[0]);
+    auto *data = m->getVar(this->arg[0]);
 
     if (!data)
     {
         ERROR_LOG_ADD(ERROR_INSTRUCTION_OBJECT_DOES_NOT_EXIST);
+
         return false;
     }
 

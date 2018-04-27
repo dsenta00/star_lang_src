@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Duje Senta
+# Copyright 2018 Duje Senta
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -52,7 +52,7 @@ set(INCLUDE_FILES
         include/ORM/FwDecl.h
         test/include/ORM/orm_test.h
         include/ORM/Relationship.h
-        include/ORM/eRelationshipType.h)
+        include/ORM/eRelationshipType.h source/MethodBundle/Instruction/PushConstantInstruction.cpp include/MethodBundle/Instruction/PushConstantInstruction.h)
 
 set(SOURCE_FILES
         source/VariableBundle/Collection/Collection.cpp
@@ -72,7 +72,7 @@ set(SOURCE_FILES
         source/ORM/ObjectRepository.cpp
         source/ORM/ORM.cpp
         test/source/ORM/orm_test.cpp
-        source/ORM/Relationship.cpp)
+        source/ORM/Relationship.cpp source/MethodBundle/Instruction/PushConstantInstruction.cpp include/MethodBundle/Instruction/PushConstantInstruction.h)
 
 ###################################################################
 # Application Tests
@@ -89,7 +89,7 @@ set(TEST_FILES
         test/source/MemoryBundle/virtual_memory_test.cpp
         test/include/MemoryBundle/virtual_memory_test.h
         test/test.cpp
-        test/test.h source/VariableBundle/File/File.cpp include/VariableBundle/File/File.h test/source/VariableBundle/File/file_test.cpp test/include/VariableBundle/File/file_test.h source/VariableBundle/File/FileMode.cpp include/VariableBundle/File/FileMode.h test/source/MethodBundle/Instruction/create_instruction_test.cpp test/include/MethodBundle/Instruction/create_instruction_test.h include/MethodBundle/Instruction/OpCode.h source/MethodBundle/Instruction/CreateInstruction.cpp include/MethodBundle/Instruction/CreateInstruction.h source/MethodBundle/Instruction/CreateAndAssignConstantInstruction.cpp include/MethodBundle/Instruction/CreateAndAssignConstantInstruction.h source/MethodBundle/Instruction/CreateAndAssignObjectInstruction.cpp include/MethodBundle/Instruction/CreateAndAssignObjectInstruction.h source/MethodBundle/Instruction/PopAndStoreInstruction.cpp include/MethodBundle/Instruction/PopAndStoreInstruction.h test/source/MethodBundle/Instruction/create_and_assign_constant_instruction_test.cpp test/include/MethodBundle/Instruction/create_and_assign_constant_instruction_test.h source/VariableBundle/Primitive/Int.cpp include/VariableBundle/Primitive/Int.h source/VariableBundle/Primitive/String.cpp include/VariableBundle/Primitive/String.h source/VariableBundle/Primitive/Float.cpp include/VariableBundle/Primitive/Float.h source/VariableBundle/Primitive/Char.cpp include/VariableBundle/Primitive/Char.h source/VariableBundle/Primitive/Bool.cpp include/VariableBundle/Primitive/Bool.h test/source/VariableBundle/Primitive/data_type_test.cpp test/include/VariableBundle/Primitive/data_type_test.h include/ORM/eObjectType.h source/VariableBundle/Value.cpp include/VariableBundle/Value.h source/VariableBundle/Null/Null.cpp include/VariableBundle/Null/Null.h source/VariableBundle/Var.cpp include/VariableBundle/Var.h source/ThreadBundle/Thread.cpp include/ThreadBundle/Thread.h source/InterpreterBundle/Interpreter.cpp include/InterpreterBundle/Interpreter.h include/ErrorBundle/eErrorStatus.h source/ORM/Relationships.cpp include/ORM/Relationships.h source/ORM/MasterRelationships.cpp include/ORM/MasterRelationships.h source/ORM/SlaveRelationships.cpp include/ORM/SlaveRelationships.h)
+        test/test.h source/VariableBundle/File/File.cpp include/VariableBundle/File/File.h test/source/VariableBundle/File/file_test.cpp test/include/VariableBundle/File/file_test.h source/VariableBundle/File/FileMode.cpp include/VariableBundle/File/FileMode.h test/source/MethodBundle/Instruction/create_instruction_test.cpp test/include/MethodBundle/Instruction/create_instruction_test.h include/MethodBundle/Instruction/OpCode.h source/MethodBundle/Instruction/CreateInstruction.cpp include/MethodBundle/Instruction/CreateInstruction.h source/MethodBundle/Instruction/AssignInstruction.cpp include/MethodBundle/Instruction/AssignInstruction.h test/include/MethodBundle/Instruction/create_and_assign_constant_instruction_test.h source/VariableBundle/Primitive/Int.cpp include/VariableBundle/Primitive/Int.h source/VariableBundle/Primitive/String.cpp include/VariableBundle/Primitive/String.h source/VariableBundle/Primitive/Float.cpp include/VariableBundle/Primitive/Float.h source/VariableBundle/Primitive/Char.cpp include/VariableBundle/Primitive/Char.h source/VariableBundle/Primitive/Bool.cpp include/VariableBundle/Primitive/Bool.h test/source/VariableBundle/Primitive/data_type_test.cpp test/include/VariableBundle/Primitive/data_type_test.h include/ORM/eObjectType.h source/VariableBundle/Value.cpp include/VariableBundle/Value.h source/VariableBundle/Null/Null.cpp include/VariableBundle/Null/Null.h source/VariableBundle/Var.cpp include/VariableBundle/Var.h source/ThreadBundle/Thread.cpp include/ThreadBundle/Thread.h source/InterpreterBundle/Interpreter.cpp include/InterpreterBundle/Interpreter.h include/ErrorBundle/eErrorStatus.h source/ORM/Relationships.cpp include/ORM/Relationships.h source/ORM/MasterRelationships.cpp include/ORM/MasterRelationships.h source/ORM/SlaveRelationships.cpp include/ORM/SlaveRelationships.h source/MethodBundle/Instruction/PushConstantInstruction.cpp include/MethodBundle/Instruction/PushConstantInstruction.h source/ConstantBundle/Constants.cpp include/ConstantBundle/Constants.h)
 
 add_executable(runUnitTest
         ${INCLUDE_FILES}

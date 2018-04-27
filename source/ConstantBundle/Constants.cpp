@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,17 +20,62 @@
  * THE SOFTWARE.
  */
 
-#pragma once
 
-#include "Instruction.h"
+#include <ConstantBundle/Constants.h>
+#include <VariableBundle/Value.h>
+#include <ORM/ORM.h>
+#include <ErrorBundle/ErrorLog.h>
 
 /**
- * OP_CODE_CREATE_AND_ASSIGN_OBJECT <name> <obj_name>
+ * The constructor.
  */
-class CreateAndAssignObjectInstruction : public Instruction {
-public:
-    explicit CreateAndAssignObjectInstruction(std::vector<std::wstring> &arg);
-    static CreateAndAssignObjectInstruction *create(std::wstring name, std::wstring obj_name);
-    Instruction *execute() override;
-    bool validate() override;
-};
+Constants::Constants() : Object::Object(0)
+{
+    this->getMaster()->init("Constants", ONE_TO_MANY);
+}
+
+/**
+ * Add value.
+ *
+ * @param val
+ */
+void
+Constants::add(Value *val)
+{
+    this->getMaster()->add("Constants", val);
+    this->values.push_back(val);
+}
+
+/**
+ * Get value.
+ *
+ * @param i
+ * @return
+ */
+Value *
+Constants::get(uint32_t i)
+{
+    if (i < this->values.size())
+    {
+        return this->values[i];
+    }
+
+    ERROR_LOG_ADD(ERROR_CONSTANT_UNDEFINED);
+    return (Value *)ORM::getFirst(OBJECT_TYPE_NULL);
+}
+
+/**
+ * Create constants.
+ * @return
+ */
+Constants *
+Constants::create()
+{
+    return (Constants *)ORM::create(new Constants());
+}
+
+eObjectType
+Constants::getObjectType()
+{
+    return OBJECT_TYPE_CONSTANTS;
+}

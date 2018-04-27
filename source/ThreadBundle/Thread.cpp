@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,6 +25,7 @@
 #include <ErrorBundle/ErrorLog.h>
 #include <MethodBundle/Method.h>
 #include <ThreadBundle/Thread.h>
+#include <InterpreterBundle/Interpreter.h>
 #include <thread>
 
 Thread::Thread(uint64_t id, Method *m) : Object(id)
@@ -152,4 +153,10 @@ eObjectType
 Thread::getObjectType()
 {
     return OBJECT_TYPE_THREAD;
+}
+
+Interpreter *
+Thread::getInterpreter()
+{
+    return (Interpreter *)this->getSlave()->front("InterpreterThreads");
 }

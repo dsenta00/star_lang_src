@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,6 +31,8 @@
 #include <ThreadBundle/Thread.h>
 #include <locale>
 #include <codecvt>
+#include <VariableBundle/Primitive/String.h>
+#include <iostream>
 
 /**
  * The constructor.
@@ -38,8 +40,10 @@
  * @param id
  * @param instructions
  */
-Method::Method(std::string id, std::vector<Instruction *> &instructions) : Object::Object(std::move(id))
+Method::Method(std::string id, std::vector<Instruction *> &instructions) : Value::Value()
 {
+    this->setId(id);
+
     MasterRelationships *master = this->getMaster();
 
     /*
@@ -57,6 +61,7 @@ Method::Method(std::string id, std::vector<Instruction *> &instructions) : Objec
     if (instructions.empty())
     {
         this->currentInstruction = nullptr;
+
         return;
     }
 
@@ -65,10 +70,9 @@ Method::Method(std::string id, std::vector<Instruction *> &instructions) : Objec
         master->add("method_instructions", i);
     }
 
-    Relationship *r = master->get("method_instructions");
-
-    r->forEach([&](Object *o1, Object *o2) {
+    master->get("method_instructions")->forEach([&](Object *o1, Object *o2) {
         o1->getMaster()->add("next_instruction", o2);
+
         return FOREACH_CONTINUE;
     });
 
@@ -88,7 +92,7 @@ Method::step()
         return INSTRUCTION_ERROR;
     }
 
-    this->currentInstruction = this->currentInstruction->execute();
+    this->currentInstruction = this->currentInstruction->executeIt();
 
     if (!ERROR_LOG_IS_EMPTY)
     {
@@ -111,16 +115,14 @@ Method::step()
 void
 Method::push(Value *v)
 {
-    auto *threadRelationship = this->getSlave()->get("Thread");
+    Thread *thread = this->getThread();
 
-    if (!threadRelationship)
+    if (!thread)
     {
-        ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
         return;
     }
 
-    auto *t = (Thread *)threadRelationship->front();
-    t->pushStack(v);
+    thread->pushStack(v);
 }
 
 /**
@@ -131,18 +133,14 @@ Method::push(Value *v)
 Value *
 Method::pop()
 {
-    auto *threadRelationship = this->getSlave()->get("Thread");
+    Thread *thread = this->getThread();
 
-    if (!threadRelationship)
+    if (!thread)
     {
-        ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
-
         return (Value *) ORM::getFirst(OBJECT_TYPE_NULL);
     }
 
-    auto *t = (Thread *)threadRelationship->front();
-
-    return t->popStack();
+    return thread->popStack();
 }
 
 /**
@@ -182,7 +180,7 @@ Method::addVar(Var *v)
     MasterRelationships *master = this->getMaster();
     Relationship *r = master->get("method_vars");
 
-    Var *v2 = (Var *)r->find(v->getId());
+    Var *v2 = (Var *) r->find(v->getId());
 
     if (v2)
     {
@@ -202,5 +200,320 @@ Method::getVar(std::wstring id)
     std::wstring_convert<convert_type, wchar_t> converter;
     std::string name = converter.to_bytes(id);
 
-    return (Var *)r->find(name);
+    return (Var *) r->find(name);
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::toBool()
+{
+    return true;
+}
+
+/**
+ * @inherit
+ */
+wchar_t
+Method::toChar()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+int32_t
+Method::toInt()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+double
+Method::toFloat()
+{
+    return 0;
+}
+
+/**
+ * @inherit
+ */
+String &
+Method::toString()
+{
+    return *String::create(this->getId().c_str());
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::isReference()
+{
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator=(const void *data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator&=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator|=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator^=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator+=(Value &var)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator-=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator*=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator/=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator%=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator++()
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator--()
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator==(Value &data)
+{
+    if (data.getObjectType() != OBJECT_TYPE_METHOD)
+    {
+        return false;
+    }
+
+    return data.getId() == this->getId();
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator!=(Value &data)
+{
+    if (data.getObjectType() != OBJECT_TYPE_METHOD)
+    {
+        return true;
+    }
+
+    return data.getId() != this->getId();
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator>(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator<(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator>=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::operator<=(Value &data)
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::print()
+{
+    std::cout << this->getId();
+
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::println()
+{
+    std::cout << this->getId() << std::endl;
+
+    return true;
+}
+
+/**
+ * @inherit
+ */
+bool
+Method::scan()
+{
+    ERROR_LOG_ADD(ERROR_METHOD_INVALID_OPERATION);
+
+    return false;
+}
+
+/**
+ * @inherit
+ */
+std::wstring
+Method::getString()
+{
+    return std::wstring(this->getId().begin(), this->getId().end());
+}
+
+Thread *
+Method::getThread()
+{
+    auto *threadRelationship = this->getSlave()->get("Thread");
+
+    if (!threadRelationship)
+    {
+        ERROR_LOG_ADD(ERROR_METHOD_NOT_PART_OF_THREAD);
+
+        return nullptr;
+    }
+
+    return (Thread *)threadRelationship->front();
 }

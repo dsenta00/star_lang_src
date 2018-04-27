@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,23 +23,28 @@
 #include <ORM/ORM.h>
 #include <ErrorBundle/ErrorLog.h>
 #include <InterpreterBundle/Interpreter.h>
+#include <ConstantBundle/Constants.h>
 
 Interpreter::Interpreter(uint64_t id, std::string fname) : Object(id)
 {
-    //TOOO: do something here
+    MasterRelationships *master = this->getMaster();
+
+    master->init("InterpreterThreads", ONE_TO_MANY);
+    master->init("InterpreterConstants", ONE_TO_ONE);
+    master->add("InterpreterConstants", Constants::create());
 }
 
 void
 Interpreter::addThread(Method *m)
 {
-    auto id = Interpreter::next_id++;
-
-    Thread *t = Thread::create(id, m);
+    auto id = Interpreter::nextId++;
+    Thread *thread = Thread::create(id, m);
+    this->getMaster()->add("InterpreterThreads", thread);
 
     Interpreter::threads[id] = std::thread([&]() {
-        t->run();
+        thread->run();
 
-        if (errorLogIsEmpty())
+        if (ERROR_LOG_IS_EMPTY)
         {
             Interpreter::removeThread(id);
         }
@@ -48,7 +53,7 @@ Interpreter::addThread(Method *m)
             Interpreter::stop();
         }
 
-        ORM::destroy(t);
+        ORM::destroy(thread);
     });
 
     Interpreter::threads[id].join();
@@ -74,4 +79,10 @@ Interpreter::stop()
         //TOOO: do something here
         t.second.detach();
     }
+}
+
+Constants *
+Interpreter::getConstants()
+{
+    return (Constants *)this->getMaster()->front("InterpreterConstants");
 }

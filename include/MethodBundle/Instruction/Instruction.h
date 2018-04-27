@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,10 +36,9 @@ public:
     explicit Instruction(eOpCode op, std::vector<std::wstring> &arg);
 
     eObjectType getObjectType() override;
-
     eOpCode &getOpCode();
-    virtual Instruction *execute() = 0;
-    virtual bool validate() = 0;
+
+    Instruction *executeIt();
 protected:
     eOpCode op;
     std::vector<std::wstring> arg;
@@ -48,6 +47,10 @@ protected:
     /*
      * Helper methods
      */
+
+    Instruction *getNext();
     Method *getMethod();
     bool objectNameIsValid(std::wstring &sample);
+    virtual Instruction *execute() {};
+    virtual bool validate() {};
 };

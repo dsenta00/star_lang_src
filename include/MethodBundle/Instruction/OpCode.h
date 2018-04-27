@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,7 +24,6 @@
 
 typedef enum {
     OP_CODE_CREATE,
-    OP_CODE_CREATE_AND_ASSIGN_CONSTANT,
-    OP_CODE_CREATE_AND_ASSIGN_OBJECT,
-    OP_CODE_POP_AND_STORE
+    OP_CODE_ASSIGN,
+    OP_CODE_PUSH_CONSTANT
 } eOpCode;

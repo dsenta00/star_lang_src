@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "ORM/Object.h"
+#include <VariableBundle/Value.h>
 #include "VariableBundle/Primitive/DataType.h"
 #include "fw_decl.h"
 
@@ -35,7 +35,7 @@ typedef enum {
 /**
  * @brief The method class
  */
-class Method : public Object {
+class Method : public Value {
 public:
     Method(std::string id, std::vector<Instruction *> &instructions);
     static Method *create(std::string id, std::vector<Instruction *> &instructions);
@@ -50,6 +50,41 @@ public:
     Var *getVar(std::wstring id);
 
     void clear();
+
+    bool toBool() override ;
+    wchar_t toChar() override ;
+    int32_t toInt() override ;
+    double toFloat() override ;
+    String &toString() override ;
+
+    bool isReference() override ;
+
+    bool operator=(const void *data) override ;
+    bool operator=(Value &data) override ;
+    bool operator&=(Value &data) override ;
+    bool operator|=(Value &data) override ;
+    bool operator^=(Value &data) override ;
+    bool operator+=(Value &var) override ;
+    bool operator-=(Value &data) override ;
+    bool operator*=(Value &data) override ;
+    bool operator/=(Value &data) override ;
+    bool operator%=(Value &data) override ;
+    bool operator++() override ;
+    bool operator--() override ;
+    bool operator==(Value &data) override ;
+    bool operator!=(Value &data) override ;
+    bool operator>(Value &data) override ;
+    bool operator<(Value &data) override ;
+    bool operator>=(Value &data) override ;
+    bool operator<=(Value &data) override ;
+
+    bool print() override ;
+    bool println() override ;
+    bool scan() override ;
+    std::wstring getString() override ;
+
+    Thread *getThread();
+
 protected:
     Instruction *currentInstruction;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,12 +25,12 @@
 #include "Instruction.h"
 
 /**
- * OP_CODE_CREATE_AND_ASSIGN_CONSTANT <name> <type> <constant>
+ * OP_CODE_POP_AND_STORE <name>
  */
-class CreateAndAssignConstantInstruction : public Instruction {
+class AssignInstruction : Instruction {
 public:
-    explicit CreateAndAssignConstantInstruction(std::vector<std::wstring> &arg);
-    static CreateAndAssignConstantInstruction *create(std::wstring name, std::wstring type, std::wstring constant);
+    explicit AssignInstruction(std::vector<std::wstring> &arg);
+    static AssignInstruction *create(std::wstring name);
     Instruction *execute() override;
     bool validate() override;
 };

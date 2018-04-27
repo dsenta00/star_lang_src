@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,17 +20,54 @@
  * THE SOFTWARE.
  */
 
-#pragma once
-
-#include "Instruction.h"
+#include <MethodBundle/Instruction/PushConstantInstruction.h>
+#include <ORM/ORM.h>
+#include <MethodBundle/Method.h>
+#include <ThreadBundle/Thread.h>
+#include <InterpreterBundle/Interpreter.h>
 
 /**
- * OP_CODE_POP_AND_STORE <name>
+ * The constructor.
+ *
+ * @param arg
  */
-class PopAndStoreInstruction : Instruction {
-public:
-    explicit PopAndStoreInstruction(std::vector<std::wstring> &arg);
-    static PopAndStoreInstruction *create(std::wstring name);
-    Instruction *execute() override;
-    bool validate() override;
-};
+PushConstantInstruction::PushConstantInstruction(std::vector<std::wstring> &arg) : Instruction(OP_CODE_PUSH_CONSTANT, arg)
+{
+}
+
+/**
+ * Create PushConstantInstruction.
+ *
+ * @param arg
+ * @return
+ */
+PushConstantInstruction *
+PushConstantInstruction::create(std::vector<std::wstring> &arg)
+{
+    return (PushConstantInstruction *)ORM::create(new PushConstantInstruction(arg));
+}
+
+/**
+ * @inherit
+ */
+Instruction *
+PushConstantInstruction::execute()
+{
+    uint32_t constNo = 0;
+    wscanf(this->arg[0].c_str(), "%d", &constNo);
+
+    Value *val = this->getMethod()
+            ->getThread()
+            ->getInterpreter()
+            ->getConstants()
+            ->get(constNo);
+
+    if (!val)
+    {
+        return nullptr;
+    }
+
+    this->getMethod()->push(val);
+
+    return this->getNext();
+}

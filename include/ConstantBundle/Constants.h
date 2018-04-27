@@ -22,4 +22,21 @@
 
 #pragma once
 
-void primitive_data_test();
+#include <ORM/Object.h>
+#include <fw_decl.h>
+
+using Values = std::vector<Value *>;
+
+class Constants : public Object {
+public:
+    explicit Constants();
+
+    eObjectType getObjectType() override ;
+
+    void add(Value *val);
+    Value *get(uint32_t i);
+
+    static Constants *create();
+protected:
+    Values values;
+};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,17 +24,22 @@
 
 #include <ThreadBundle/Thread.h>
 #include <thread>
+#include <ConstantBundle/Constants.h>
 
 using CircularThreads = std::map<uint32_t, std::thread>;
 
 class Interpreter : Object {
 public:
     Interpreter(uint64_t id, std::string fname);
+
     void run();
+
     void addThread(Method *m);
     void removeThread(uint32_t id);
+
+    Constants *getConstants();
 protected:
     CircularThreads threads;
-    uint32_t next_id;
+    uint32_t nextId;
     void stop();
 };

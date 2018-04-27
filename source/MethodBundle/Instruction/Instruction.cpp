@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -104,4 +104,34 @@ eObjectType
 Instruction::getObjectType()
 {
     return OBJECT_TYPE_INSTRUCTION;
+}
+
+/**
+ * Execute command.
+ *
+ * @return
+ */
+Instruction *
+Instruction::executeIt()
+{
+    if (!this->validated)
+    {
+        if (!this->validate())
+        {
+            return nullptr;
+        }
+    }
+
+    this->execute();
+}
+
+/**
+ * Get next instruction.
+ *
+ * @return
+ */
+Instruction *
+Instruction::getNext()
+{
+    return (Instruction *) this->getMaster()->get("next_instruction")->front();
 }

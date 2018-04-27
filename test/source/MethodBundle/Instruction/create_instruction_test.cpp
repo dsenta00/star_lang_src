@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Duje Senta
+ * Copyright 2018 Duje Senta
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -43,19 +43,19 @@ instruction_test_create_negative()
     /* Without Method */
 
     i = CreateInstruction::create(L"", L"int");
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
     i = CreateInstruction::create(L"", L"");
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
 
     i = CreateInstruction::create(L"ante", L"konjo");
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_NO_METHOD);
     ORM_DESTROY(i);
     ERROR_LOG_CLEAR;
@@ -69,7 +69,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -79,7 +79,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -89,7 +89,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -99,7 +99,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -109,7 +109,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -119,7 +119,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -129,7 +129,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -139,7 +139,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_INSTRUCTION_INVALID_OBJECT_NAME);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -149,7 +149,7 @@ instruction_test_create_negative()
     instructions.clear();
     instructions.push_back(i);
     foo = Method::create("foo", instructions);
-    i->execute();
+    i->executeIt();
     ASSERT_ERROR(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
     ORM_DESTROY(i);
     ORM_DESTROY(foo);
@@ -181,7 +181,7 @@ instruction_test_create1()
     ASSERT_NOT_NULL(ORM::select(OBJECT_TYPE_VARIABLE, "int_name"));
 
     ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
-    Instruction *next = i->execute();
+    Instruction *next = i->executeIt();
     ASSERT_NULL(next);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
     ERROR_LOG_CLEAR;
@@ -231,7 +231,7 @@ instruction_test_create2()
     ASSERT_NOT_NULL(foo->getVar(L"collection_name"));
 
     ASSERT_EQUALS(foo->step(), INSTRUCTION_ERROR);
-    Instruction *next = i->execute();
+    Instruction *next = i->executeIt();
     ASSERT_EQUALS(next, f);
     ASSERT_ERROR(ERROR_METHOD_ADD_OBJECTS_OF_SAME_NAME);
     ERROR_LOG_CLEAR;
