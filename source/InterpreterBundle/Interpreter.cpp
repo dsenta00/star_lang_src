@@ -25,7 +25,7 @@
 #include <InterpreterBundle/Interpreter.h>
 #include <ConstantBundle/Constants.h>
 
-Interpreter::Interpreter(uint64_t id, std::string fname) : Object(id)
+Interpreter::Interpreter(uint64_t id) : Object(id)
 {
     MasterRelationships *master = this->getMaster();
 
@@ -37,45 +37,45 @@ Interpreter::Interpreter(uint64_t id, std::string fname) : Object(id)
 void
 Interpreter::addThread(Method *m)
 {
-    auto id = Interpreter::nextId++;
+    auto id = this->nextId++;
     Thread *thread = Thread::create(id, m);
     this->getMaster()->add("InterpreterThreads", thread);
 
-    Interpreter::threads[id] = std::thread([&]() {
+    this->threads[id] = std::thread([&]() {
         thread->run();
 
         if (ERROR_LOG_IS_EMPTY)
         {
-            Interpreter::removeThread(id);
+            this->removeThread(id);
         }
         else
         {
-            Interpreter::stop();
+            this->stop();
         }
 
         ORM::destroy(thread);
     });
 
-    Interpreter::threads[id].join();
+    this->threads[id].join();
 }
 
 void
 Interpreter::run()
 {
-    while (!Interpreter::threads.empty())
+    while (!this->threads.empty())
     {}
 }
 
 void
 Interpreter::removeThread(uint32_t id)
 {
-    Interpreter::threads.erase(id);
+    this->threads.erase(id);
 }
 
 void
 Interpreter::stop()
 {
-    for (auto &t : Interpreter::threads) {
+    for (auto &t : this->threads) {
         //TOOO: do something here
         t.second.detach();
     }

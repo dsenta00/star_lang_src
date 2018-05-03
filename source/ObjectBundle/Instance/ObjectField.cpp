@@ -20,40 +20,36 @@
  * THE SOFTWARE.
  */
 
-#pragma once
+#include <ORM/Object.h>
+#include <VariableBundle/Value.h>
+#include "ObjectBundle/Instance/ObjectField.h"
+#include <utility>
+#include <ORM/ORM.h>
 
-#include "ORM/Object.h"
-#include "ForwardDeclarations.h"
-#include <cstdint>
-#include <functional>
+ObjectField::ObjectField(std::string id, eVisibility visibility, Value *value) : Object(std::move(id))
+{
+    Relationships *master = this->getMaster();
 
-#define CHUNK_MINIMUM_CAPACITY (32768)
-#define CHUNK_MAXIMUM_CAPACITY (134217728)
+    master->init("Field", ONE_TO_ONE);
 
-/**
- * Virtual memory object.
- */
-class VirtualMemory : public Object {
-public:
-    explicit VirtualMemory(uint32_t initCapacity = CHUNK_MINIMUM_CAPACITY);
+    if (value == nullptr)
+    {
+        value = (Value *)ORM::getFirst(OBJECT_TYPE_NULL);
+    }
 
-    eObjectType getObjectType() override;
+    master->add("Field", value);
 
-    Memory *alloc(uint32_t size);
-    Memory *realloc(Memory *mem, uint32_t newSize);
-    void free(Memory *mem);
-    uint32_t getAllocatedTotal();
+    this->visibility = visibility;
+}
 
-    static VirtualMemory *create(uint32_t initCapacity = CHUNK_MINIMUM_CAPACITY);
-protected:
-    Memory *addChunkAndAlloc(uint32_t size);
-    Memory *solveDefragmentationAndAlloc(uint32_t size);
-    MemoryChunk *findMemoryChunk(std::function<bool(MemoryChunk *)> func);
-    MemoryChunk *addMemoryChunk(uint32_t capacity);
-    Memory *reserve(uint32_t size);
-    Memory *reserveFromChunk(MemoryChunk *chunk, uint32_t size);
+eVisibility
+ObjectField::getVisiblity()
+{
+    return this->visibility;
+}
 
-    uint32_t allocatedTotal;
-    uint32_t maxAllocatedBytes;
-    Relationship *memoryChunkRelationship;
-};
+Value *
+ObjectField::getValue()
+{
+    return (Value *) this->getMaster()->front("Field");
+}

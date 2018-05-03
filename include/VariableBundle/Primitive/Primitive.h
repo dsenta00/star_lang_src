@@ -24,7 +24,7 @@
 
 #include "ORM/Object.h"
 #include "DataType.h"
-#include "fw_decl.h"
+#include "ForwardDeclarations.h"
 #include <string>
 #include <VariableBundle/Value.h>
 
@@ -45,7 +45,7 @@ public:
     Memory *getMemory();
     uintptr_t getAddress();
 
+    VirtualMemory *getVirtualMemory();
+
     static bool isPrimitive(Value *data);
-protected:
-    VirtualMemory *vm;
 };

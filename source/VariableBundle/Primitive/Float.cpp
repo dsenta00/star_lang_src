@@ -97,6 +97,7 @@ Float::toBool()
     if (!mem)
     {
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_NULL_DATA);
+
         return value;
     }
 
@@ -580,6 +581,7 @@ Float::println()
     if (print())
     {
         std::cout << std::endl;
+
         return true;
     }
 
@@ -598,6 +600,7 @@ Float::scan()
     if (!mem)
     {
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_NULL_DATA);
+
         return false;
     }
 

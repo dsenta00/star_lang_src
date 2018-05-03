@@ -30,7 +30,7 @@ using CircularThreads = std::map<uint32_t, std::thread>;
 
 class Interpreter : Object {
 public:
-    Interpreter(uint64_t id, std::string fname);
+    Interpreter(uint64_t id);
 
     void run();
 

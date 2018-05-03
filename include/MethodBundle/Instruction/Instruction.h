@@ -24,7 +24,7 @@
 
 #include "ORM/Object.h"
 #include "ORM/FwDecl.h"
-#include "fw_decl.h"
+#include "ForwardDeclarations.h"
 #include "VariableBundle/Primitive/DataType.h"
 #include "OpCode.h"
 
@@ -51,6 +51,11 @@ protected:
     Instruction *getNext();
     Method *getMethod();
     bool objectNameIsValid(std::wstring &sample);
+
+    /*
+     * Virtual methods.
+     */
+
     virtual Instruction *execute() {};
     virtual bool validate() {};
 };

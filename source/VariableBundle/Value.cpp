@@ -25,6 +25,18 @@
 /**
  * The constructor.
  */
-Value::Value() : Object("Value")
+Value::Value(bool constant) : Object("Value")
 {
+    this->constant = constant;
+}
+
+/**
+ * Is constant value.
+ *
+ * @return
+ */
+bool
+Value::isConstant()
+{
+    return this->constant;
 }

@@ -58,8 +58,7 @@ Bool::Bool(Bool &data) : Primitive(data)
  *
  * @param value
  */
-Bool::
-Bool(bool value) : Primitive(OBJECT_TYPE_BOOL, &value)
+Bool::Bool(bool value) : Primitive(OBJECT_TYPE_BOOL, &value)
 {
 }
 
@@ -622,7 +621,7 @@ Bool::getObjectType()
 bool
 Bool::parse(std::wstring str)
 {
-    std::for_each(str.begin(), str.end(), [&](wchar_t &c) { c = std::tolower(c); });
+    std::for_each(str.begin(), str.end(), [&](wchar_t &c) { c = (wchar_t)std::tolower(c); });
 
     return str == L"true";
 }

@@ -46,8 +46,6 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
     MasterRelationships *master = this->getMaster();
     master->init("primitive_data_memory", ONE_TO_MANY);
 
-    this->vm = (VirtualMemory *) ORM::getFirst(OBJECT_TYPE_VIRTUAL_MEMORY);
-
     if (type >= OBJECT_TYPE_NULL)
     {
         ERROR_LOG_ADD(ERROR_PRIMITIVE_DATA_INVALID_DATA_TYPE);
@@ -56,7 +54,7 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
 
     if ((value == nullptr) || ((type == OBJECT_TYPE_STRING) && (wcslen((const wchar_t *)value) == 0)))
     {
-        Memory *mem = this->vm->alloc(DataType::SIZE[type]);
+        Memory *mem = this->getVirtualMemory()->alloc(DataType::SIZE[type]);
 
         if (!mem)
         {
@@ -72,7 +70,7 @@ Primitive::Primitive(eObjectType type, const void *value) : Value::Value()
                         (uint32_t) (wcslen((const wchar_t *) value) + 1) * sizeof(wchar_t) :
                         DataType::SIZE[type];
 
-        Memory *mem = vm->alloc(size);
+        Memory *mem = this->getVirtualMemory()->alloc(size);
 
         if (!mem)
         {
@@ -109,9 +107,7 @@ Primitive::Primitive(Primitive &data) : Value::Value()
         return;
     }
 
-    this->vm = data.vm;
-
-    Memory *mem = this->vm->alloc(data_mem->getSize());
+    Memory *mem = this->getVirtualMemory()->alloc(data_mem->getSize());
 
     memcpy(mem->getPointer<void *>(),
            data_mem->getPointer<void *>(),
@@ -211,4 +207,15 @@ bool
 Primitive::isPrimitive(Value *data)
 {
     return data->getObjectType() < OBJECT_TYPE_NULL;
+}
+
+/**
+ * Get virtual memory.
+ *
+ * @return
+ */
+VirtualMemory *
+Primitive::getVirtualMemory()
+{
+    return (VirtualMemory *) ORM::getFirst(OBJECT_TYPE_VIRTUAL_MEMORY);
 }

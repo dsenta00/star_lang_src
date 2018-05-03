@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <fw_decl.h>
+#include <ForwardDeclarations.h>
 #include <ORM/Object.h>
 #include <VariableBundle/File/FileMode.h>
 #include <VariableBundle/Value.h>

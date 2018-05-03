@@ -96,7 +96,7 @@ DataType::detect(std::wstring sample)
     {
         return OBJECT_TYPE_BOOL;
     }
-    else if (std::regex_match(sample_temp, std::wregex(L"Null")))
+    else if (std::regex_match(sample_temp, std::wregex(L"null")))
     {
         return OBJECT_TYPE_NULL;
     }

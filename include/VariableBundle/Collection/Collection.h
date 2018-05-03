@@ -24,7 +24,7 @@
 
 #include <VariableBundle/Value.h>
 #include <VariableBundle/Primitive/DataType.h>
-#include "fw_decl.h"
+#include "ForwardDeclarations.h"
 #include <string>
 
 /**

@@ -23,7 +23,7 @@
 #pragma once
 
 #include <ORM/Object.h>
-#include <fw_decl.h>
+#include <ForwardDeclarations.h>
 
 /**
  * The value object.
@@ -31,7 +31,9 @@
  */
 class Value : public Object {
 public:
-    explicit Value();
+    explicit Value(bool constant = false);
+
+    bool isConstant();
 
     virtual bool toBool() = 0;
     virtual wchar_t toChar() = 0;
@@ -64,4 +66,6 @@ public:
     virtual bool println() = 0;
     virtual bool scan() = 0;
     virtual std::wstring getString() = 0;
+protected:
+    bool constant;
 };

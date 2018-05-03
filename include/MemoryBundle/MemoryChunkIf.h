@@ -23,7 +23,7 @@
 #pragma once
 
 #include "ORM/Object.h"
-#include "fw_decl.h"
+#include "ForwardDeclarations.h"
 #include <cstdint>
 #include <cstdlib>
 #include <functional>

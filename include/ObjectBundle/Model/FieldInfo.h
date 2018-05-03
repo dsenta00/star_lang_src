@@ -22,4 +22,18 @@
 
 #pragma once
 
-void create_and_assign_constant_instruction_test();
+#include <ObjectBundle/Visibility.h>
+#include <ORM/Object.h>
+#include <VariableBundle/Value.h>
+
+class FieldInfo : Object {
+public:
+    explicit FieldInfo(std::string name, eVisibility visibility, std::wstring value);
+
+    std::string getName();
+    eVisibility getVisibility();
+    Value *generateValue();
+protected:
+    eVisibility visibility;
+    std::wstring value;
+};

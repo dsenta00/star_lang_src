@@ -27,7 +27,6 @@
 #include "include/MemoryBundle/virtual_memory_test.h"
 #include "include/VariableBundle/file/file_test.h"
 #include "include/MethodBundle/Instruction/create_instruction_test.h"
-#include "include/MethodBundle/Instruction/create_and_assign_constant_instruction_test.h"
 #include "include/VariableBundle/Primitive/data_type_test.h"
 #include "include/VariableBundle/Primitive/primitive_data_test.h"
 #include <cstdio>
@@ -52,7 +51,6 @@ void run_tests()
     RUN_TEST_SECTION(collection_test);
     RUN_TEST_SECTION(file_test);
     RUN_TEST_SECTION(create_instruction_test);
-    //RUN_TEST_SECTION(create_and_assign_constant_instruction_test);
 
     printf("TESTS ARE OK!\n");
 }

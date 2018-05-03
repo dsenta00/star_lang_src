@@ -224,14 +224,14 @@ String::operator=(const void *data)
 
     if (mem->getSize() < strSize)
     {
-        Memory *newMem = this->vm->alloc(strSize);
+        Memory *newMem = this->getVirtualMemory()->alloc(strSize);
 
         MasterRelationships *master = this->getMaster();
 
         master->remove("primitive_data_memory", mem);
         master->add("primitive_data_memory", newMem);
 
-        this->vm->free(mem);
+        this->getVirtualMemory()->free(mem);
         mem = newMem;
     }
 
@@ -332,7 +332,7 @@ String::operator+=(Value &data)
 
     if (mem->getSize() < requestSize)
     {
-        Memory *newMem = vm->realloc(mem, requestSize);
+        Memory *newMem = this->getVirtualMemory()->realloc(mem, requestSize);
 
         if (newMem->getSize() != requestSize)
         {
